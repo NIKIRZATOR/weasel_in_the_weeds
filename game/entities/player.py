@@ -20,6 +20,10 @@ from settings import (
     PLAYER_HITBOX_OFFSET_X,
     PLAYER_HITBOX_OFFSET_Y,
     PLAYER_HITBOX_WIDTH,
+    PLAYER_INTERACTION_HEIGHT,
+    PLAYER_INTERACTION_OFFSET_X,
+    PLAYER_INTERACTION_OFFSET_Y,
+    PLAYER_INTERACTION_WIDTH,
     PLAYER_MAX_HEALTH,
     PLAYER_MAX_STAMINA,
     PLAYER_RUN_SPEED,
@@ -44,6 +48,10 @@ class Player(Entity):
             hitbox_height=PLAYER_HITBOX_HEIGHT,
             hitbox_offset_x=PLAYER_HITBOX_OFFSET_X,
             hitbox_offset_y=PLAYER_HITBOX_OFFSET_Y,
+            interaction_width=PLAYER_INTERACTION_WIDTH,
+            interaction_height=PLAYER_INTERACTION_HEIGHT,
+            interaction_offset_x=PLAYER_INTERACTION_OFFSET_X,
+            interaction_offset_y=PLAYER_INTERACTION_OFFSET_Y,
         )
         self.spawn_position = Vector2(
             x if spawn_x is None else spawn_x,

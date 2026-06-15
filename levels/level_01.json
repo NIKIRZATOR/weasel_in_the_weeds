@@ -78,6 +78,23 @@
       "type": "player_spawn",
       "x": 2,
       "y": 2
+    },
+    {
+      "type": "solid_object",
+      "name": "Stone Block",
+      "x": 4,
+      "y": 6,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "interactable_object",
+      "name": "Training Chest",
+      "x": 6,
+      "y": 6,
+      "width": 1,
+      "height": 1,
+      "solid": false
     }
   ]
 }
