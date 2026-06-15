@@ -5,13 +5,22 @@ import pygame
 BASE_DIR = Path(__file__).resolve().parent
 LEVELS_DIR = BASE_DIR / "levels"
 ASSETS_DIR = BASE_DIR / "assets"
+CHARACTERS_DIR = ASSETS_DIR / "characters"
 TILES_DIR = ASSETS_DIR / "tiles"
+PLAYER_ASSETS_DIR = CHARACTERS_DIR / "player"
+PLAYER_IDLE_SPRITE = PLAYER_ASSETS_DIR / "idle.png"
 
 # Размеры экрана
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 TILE_SIZE = 64
 PLAYER_SIZE = 64
+PLAYER_HITBOX_WIDTH = 45
+PLAYER_HITBOX_HEIGHT = 45
+PLAYER_HITBOX_OFFSET_X = 12
+PLAYER_HITBOX_OFFSET_Y = 20
+SHOW_HITBOXES = True
+SHOW_INTERACTION_ZONES = False
 
 # Цвета (RGB)
 COLORS = {
@@ -27,6 +36,8 @@ COLORS = {
     'STAMINA_BG': (50, 50, 0),
     'WHITE': (255, 255, 255),
     'BLACK': (0, 0, 0),
+    'HITBOX': (64, 224, 208),
+    'INTERACTION_ZONE': (0, 255, 255),
 }
 
 # Параметры игрока
