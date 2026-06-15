@@ -8,8 +8,12 @@ from settings import *
 class Player(Entity):
     """Класс игрока с анимациями и состояниями"""
     
-    def __init__(self, x, y):
+    def __init__(self, x, y, spawn_x=None, spawn_y=None):
         super().__init__(x, y, PLAYER_SIZE, PLAYER_SIZE)
+        self.spawn_position = Vector2(
+            x if spawn_x is None else spawn_x,
+            y if spawn_y is None else spawn_y,
+        )
         
         # Характеристики
         self.health = PLAYER_MAX_HEALTH
@@ -197,7 +201,7 @@ class Player(Entity):
     def respawn(self):
         self.health = PLAYER_MAX_HEALTH
         self.stamina = PLAYER_MAX_STAMINA
-        self.position = Vector2(TILE_SIZE * 2, TILE_SIZE * 2)
+        self.position = Vector2(self.spawn_position.x, self.spawn_position.y)
         self.is_jumping = False
         self.is_attacking = False
         self.jump_offset = 0

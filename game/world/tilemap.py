@@ -11,12 +11,12 @@ class TileMap:
         3: 'path'
     }
     
-    def __init__(self, ground_layer, obstacle_layer):
+    def __init__(self, ground_layer, obstacle_layer, tile_size=TILE_SIZE):
         self.ground_layer = ground_layer
         self.obstacle_layer = obstacle_layer
         self.width = len(ground_layer[0])
         self.height = len(ground_layer)
-        self.tile_size = TILE_SIZE
+        self.tile_size = tile_size
     
     def get_tile_type(self, x, y):
         """Возвращает тип тайла на позиции"""

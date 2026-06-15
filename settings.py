@@ -1,10 +1,17 @@
+from pathlib import Path
+
 import pygame
+
+BASE_DIR = Path(__file__).resolve().parent
+LEVELS_DIR = BASE_DIR / "levels"
+ASSETS_DIR = BASE_DIR / "assets"
+TILES_DIR = ASSETS_DIR / "tiles"
 
 # Размеры экрана
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 TILE_SIZE = 64
-PLAYER_SIZE = 32
+PLAYER_SIZE = 64
 
 # Цвета (RGB)
 COLORS = {
