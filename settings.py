@@ -1,0 +1,45 @@
+import pygame
+
+# Размеры экрана
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+TILE_SIZE = 64
+PLAYER_SIZE = 32
+
+# Цвета (RGB)
+COLORS = {
+    'GRASS': (34, 139, 34),
+    'WALL': (139, 69, 19),
+    'WATER': (65, 105, 225),
+    'PATH': (210, 180, 140),
+    'STONE': (128, 128, 128),
+    'PLAYER': (255, 0, 0),
+    'HEALTH': (255, 0, 0),
+    'HEALTH_BG': (100, 0, 0),
+    'STAMINA': (255, 255, 0),
+    'STAMINA_BG': (50, 50, 0),
+    'WHITE': (255, 255, 255),
+    'BLACK': (0, 0, 0),
+}
+
+# Параметры игрока
+PLAYER_MAX_HEALTH = 100
+PLAYER_MAX_STAMINA = 100
+PLAYER_SPEED = 200
+PLAYER_RUN_SPEED = 350
+STAMINA_REGEN = 50
+STAMINA_RUN_COST = 80
+STAMINA_JUMP_COST = 20
+ATTACK_COST = 10
+HEALTH_REGEN = 10
+COLOR_PLAYER = (123, 123, 123)
+
+# Анимации
+JUMP_DURATION = 0.3
+ATTACK_DURATION = 0.2
+ATTACK_COOLDOWN = 0.4
+HURT_DURATION = 0.2
+
+# Физика
+GRAVITY = 0
+JUMP_HEIGHT = 40
