@@ -38,3 +38,5 @@ pip-wheel-metadata/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+dev_log.txt

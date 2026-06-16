@@ -3,13 +3,14 @@ import pygame
 from game.core.camera import Camera
 from game.core.vector import Vector2
 from game.entities.player import Player
+from game.items import create_item_stack
 from game.objects import create_world_object
 from game.scenes.base import Scene
 from game.ui.hud import HUD
 from game.world.collision import CollisionSystem
 from game.world.level import load_level
 from game.world.tilemap import TileMap
-from settings import COLORS, SCREEN_WIDTH
+from settings import COLORS, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 class GameScene(Scene):
@@ -60,6 +61,11 @@ class GameScene(Scene):
 
         self.app.set_scene(PauseMenuScene(self.app, self))
 
+    def open_inventory(self):
+        from game.scenes.inventory_scene import InventoryScene
+
+        self.app.set_scene(InventoryScene(self.app, self))
+
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.QUIT:
@@ -67,10 +73,14 @@ class GameScene(Scene):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.open_pause_menu()
+                elif event.key == pygame.K_i:
+                    self.open_inventory()
                 elif event.key == pygame.K_e:
                     self.try_interact()
                 elif event.key == pygame.K_f:
                     self.player.attack()
+                elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4):
+                    self.player.select_hotbar_slot(event.key - pygame.K_1)
                 elif event.key == pygame.K_SPACE and not self.player.is_jumping:
                     keys = pygame.key.get_pressed()
                     dx = 0
@@ -89,6 +99,46 @@ class GameScene(Scene):
 
     def check_collision(self, x, y, entity, ignore_jump=False):
         return self.collision_system.check_collision(x, y, entity, ignore_jump)
+
+    def try_pickup_object(self, pickable_object):
+        properties = pickable_object.properties or {}
+        item_id = properties.get("item_id") or pickable_object.name
+        quantity = int(properties.get("quantity", 1))
+        coins = int(properties.get("coins", 0))
+
+        item_stack = None
+        if item_id is not None:
+            item_stack = create_item_stack(item_id, quantity)
+            if item_stack is None and coins <= 0:
+                self.last_interaction_message = f"Неизвестный предмет: {item_id}"
+                self.last_interaction_timer = 1.5
+                return False
+
+        currency_amount = coins
+        if item_stack is not None and item_stack.kind.value == "currency":
+            currency_amount += item_stack.quantity
+
+        if not self.player.pickup_item(item_stack=item_stack, coins=coins):
+            self.last_interaction_message = "Инвентарь переполнен"
+            self.last_interaction_timer = 1.5
+            return False
+
+        pickable_object.is_picked = True
+        pickable_object.is_active = True
+        pickable_object.color = COLORS["PICKABLE_PICKED"]
+
+        if item_stack is not None and item_stack.kind.value == "currency":
+            self.last_interaction_message = f"Подобрано: {currency_amount} монет"
+        elif item_stack is not None and coins > 0:
+            self.last_interaction_message = f"Подобрано: {item_stack.name} x{item_stack.quantity} + {coins} монет"
+        elif item_stack is not None:
+            self.last_interaction_message = f"Подобрано: {item_stack.name} x{item_stack.quantity}"
+        elif coins > 0:
+            self.last_interaction_message = f"Подобрано: {coins} монет"
+        else:
+            self.last_interaction_message = f"Подобрано: {pickable_object.name}"
+        self.last_interaction_timer = 1.5
+        return True
 
     def try_interact(self):
         target = self._find_interaction_target()

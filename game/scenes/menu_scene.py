@@ -23,7 +23,6 @@ class MenuScene(Scene):
         labels = [
             ("Новая игра", self.start_game, False),
             ("Продолжить игру", None, True),
-            #("Выбрать сохранение", None, True),
             ("Настройки", self.show_coming_soon, False),
             ("Об авторе", self.show_author, False),
             ("Выход", self.exit_game, False),

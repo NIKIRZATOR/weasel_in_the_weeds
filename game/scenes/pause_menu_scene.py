@@ -23,6 +23,7 @@ class PauseMenuScene(Scene):
         gap = 14
         labels = [
             ("Вернуться в игру", self.resume_game, False),
+            ("Инвентарь", self.open_inventory, False),
             ("Настройки", self.show_coming_soon, False),
             ("Выход в меню", self.exit_to_menu, False),
         ]
@@ -46,6 +47,11 @@ class PauseMenuScene(Scene):
 
     def resume_game(self):
         self.app.set_scene(self.game_scene)
+
+    def open_inventory(self):
+        from game.scenes.inventory_scene import InventoryScene
+
+        self.app.set_scene(InventoryScene(self.app, self.game_scene))
 
     def show_coming_soon(self):
         self.message = "Настройки пока недоступны"
