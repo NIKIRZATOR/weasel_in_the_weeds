@@ -45,6 +45,8 @@ COLORS = {
     'SOLID_OBJECT': (110, 110, 110),
     'INTERACTABLE_OBJECT': (255, 180, 70),
     'INTERACTABLE_ACTIVE': (255, 235, 120),
+    'PICKABLE_OBJECT': (90, 200, 255),
+    'PICKABLE_PICKED': (170, 230, 255),
 }
 
 # Параметры игрока

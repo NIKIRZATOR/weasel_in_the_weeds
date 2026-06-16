@@ -97,7 +97,11 @@ class GameScene(Scene):
             self.last_interaction_timer = 1.0
             return False
 
-        return target.interact(self.player, self)
+        result = target.interact(self.player, self)
+        if result and getattr(target, "is_picked", False):
+            self.world_objects = [obj for obj in self.world_objects if obj is not target]
+            self.collision_system.set_objects(self.world_objects)
+        return result
 
     def _find_interaction_target(self):
         player_zone = self.player.get_interaction_rect()

@@ -1,4 +1,5 @@
 from game.objects.interactable_object import InteractableObject
+from game.objects.pickable_object import PickableObject
 from game.objects.solid_object import SolidObject
 
 
@@ -31,6 +32,16 @@ def create_world_object(raw_object, tile_size):
             height,
             name=name,
             is_solid=is_solid,
+            properties=properties,
+        )
+
+    if object_type == "pickable_object":
+        return PickableObject(
+            x,
+            y,
+            width,
+            height,
+            name=name,
             properties=properties,
         )
 

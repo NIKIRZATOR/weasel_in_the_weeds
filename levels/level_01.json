@@ -95,6 +95,14 @@
       "width": 1,
       "height": 1,
       "solid": false
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 5,
+      "y": 7,
+      "width": 1,
+      "height": 1
     }
   ]
 }
