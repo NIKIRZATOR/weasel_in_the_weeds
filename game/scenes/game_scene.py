@@ -2,6 +2,7 @@ import pygame
 
 from game.core.camera import Camera
 from game.core.vector import Vector2
+from game.entities.enemy import MeleeEnemy, RangedEnemy
 from game.entities.player import Player
 from game.items import create_item_stack
 from game.objects import create_world_object
@@ -35,8 +36,9 @@ class GameScene(Scene):
             spawn_x=spawn_world_x,
             spawn_y=spawn_world_y,
         )
-        self.world_objects = self._load_world_objects()
+        self.world_objects, self.enemies = self._load_world_objects()
         self.collision_system.set_objects(self.world_objects)
+        self._player_attack_applied = False
 
         world_width = self.tilemap.width * self.tilemap.tile_size
         world_height = self.tilemap.height * self.tilemap.tile_size
@@ -50,11 +52,54 @@ class GameScene(Scene):
 
     def _load_world_objects(self):
         world_objects = []
+        enemies = []
         for raw_object in self.level.objects:
+            object_type = raw_object.get("type")
+            if object_type == "enemy_melee":
+                enemies.append(self._create_enemy(raw_object, MeleeEnemy))
+                continue
+            if object_type == "enemy_ranged":
+                enemies.append(self._create_enemy(raw_object, RangedEnemy))
+                continue
+
             world_object = create_world_object(raw_object, self.level.tile_size)
             if world_object is not None:
                 world_objects.append(world_object)
-        return world_objects
+        return world_objects, enemies
+
+    def _create_enemy(self, raw_object, enemy_class):
+        width = raw_object.get("width", 1) * self.level.tile_size
+        height = raw_object.get("height", 1) * self.level.tile_size
+        x = raw_object.get("x", 0) * self.level.tile_size
+        y = raw_object.get("y", 0) * self.level.tile_size
+        properties = raw_object.get("properties", {})
+
+        return enemy_class(
+            x,
+            y,
+            width,
+            height,
+            name=raw_object.get("name", enemy_class.__name__),
+            max_health=int(properties.get("health", raw_object.get("health", 20))),
+            speed=int(properties.get("speed", raw_object.get("speed", 80))),
+            damage=int(properties.get("damage", raw_object.get("damage", 4))),
+            **self._enemy_specific_kwargs(raw_object, enemy_class),
+        )
+
+    def _enemy_specific_kwargs(self, raw_object, enemy_class):
+        properties = raw_object.get("properties", {})
+        if enemy_class is MeleeEnemy:
+            return {
+                "melee_range": int(properties.get("melee_range", raw_object.get("melee_range", 44))),
+                "attack_cooldown": float(properties.get("attack_cooldown", raw_object.get("attack_cooldown", 1.0))),
+            }
+
+        return {
+            "preferred_distance": int(properties.get("preferred_distance", raw_object.get("preferred_distance", 180))),
+            "min_distance": int(properties.get("min_distance", raw_object.get("min_distance", 120))),
+            "attack_range": int(properties.get("attack_range", raw_object.get("attack_range", 260))),
+            "attack_cooldown": float(properties.get("attack_cooldown", raw_object.get("attack_cooldown", 1.4))),
+        }
 
     def open_pause_menu(self):
         from game.scenes.pause_menu_scene import PauseMenuScene
@@ -173,6 +218,8 @@ class GameScene(Scene):
     def update(self, dt):
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys, self)
+        self._update_enemies(dt)
+        self._apply_player_attack()
         self.camera.update(self.player)
         self.current_interaction_target = self._find_interaction_target()
         if self.last_interaction_timer > 0:
@@ -180,11 +227,54 @@ class GameScene(Scene):
             if self.last_interaction_timer == 0.0:
                 self.last_interaction_message = ""
 
+    def _update_enemies(self, dt):
+        alive_enemies = []
+        for enemy in self.enemies:
+            enemy.update(dt, self)
+            if not enemy.is_dead:
+                alive_enemies.append(enemy)
+        self.enemies = alive_enemies
+
+    def _apply_player_attack(self):
+        if self.player.is_attacking:
+            if self._player_attack_applied:
+                return
+
+            attack_rect = self._get_player_attack_rect()
+            if attack_rect is None:
+                return
+
+            damage = max(1, int(self.player.get_attack()))
+            for enemy in self.enemies:
+                if enemy.is_dead:
+                    continue
+                if _rects_intersect(attack_rect, enemy.get_hitbox_rect()):
+                    enemy.take_damage(damage)
+            self._player_attack_applied = True
+            return
+
+        self._player_attack_applied = False
+
+    def _get_player_attack_rect(self):
+        hitbox_x, hitbox_y, hitbox_w, hitbox_h = self.player.get_hitbox_rect()
+        range_size = 56
+        thickness = 42
+
+        if self.player.direction.x > 0:
+            return pygame.Rect(hitbox_x + hitbox_w, hitbox_y + hitbox_h / 2 - thickness / 2, range_size, thickness)
+        if self.player.direction.x < 0:
+            return pygame.Rect(hitbox_x - range_size, hitbox_y + hitbox_h / 2 - thickness / 2, range_size, thickness)
+        if self.player.direction.y > 0:
+            return pygame.Rect(hitbox_x + hitbox_w / 2 - thickness / 2, hitbox_y + hitbox_h, thickness, range_size)
+        return pygame.Rect(hitbox_x + hitbox_w / 2 - thickness / 2, hitbox_y - range_size, thickness, range_size)
+
     def draw(self):
         self.app.screen.fill(COLORS["BLACK"])
         self.tilemap.draw(self.app.screen, self.camera)
         for world_object in self.world_objects:
             world_object.draw(self.app.screen, self.camera)
+        for enemy in self.enemies:
+            enemy.draw(self.app.screen, self.camera)
         self.player.draw(self.app.screen, self.camera)
         self.hud.draw(self.app.screen, self.player)
         if self.current_interaction_target is not None:

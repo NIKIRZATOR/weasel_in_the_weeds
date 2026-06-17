@@ -151,6 +151,34 @@
       "y": 19,
       "width": 1,
       "height": 1
+    },
+    {
+      "type": "enemy_melee",
+      "name": "Goblin",
+      "x": 8,
+      "y": 8,
+      "width": 1,
+      "height": 1,
+      "health": 18,
+      "speed": 70,
+      "damage": 5,
+      "melee_range": 50,
+      "attack_cooldown": 1.0
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Archer",
+      "x": 14,
+      "y": 10,
+      "width": 1,
+      "height": 1,
+      "health": 14,
+      "speed": 60,
+      "damage": 4,
+      "preferred_distance": 180,
+      "min_distance": 120,
+      "attack_range": 260,
+      "attack_cooldown": 1.4
     }
   ]
 }
