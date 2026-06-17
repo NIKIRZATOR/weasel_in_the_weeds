@@ -135,6 +135,22 @@
       "y": 17,
       "width": 1,
       "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 4,
+      "y": 17,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 4,
+      "y": 19,
+      "width": 1,
+      "height": 1
     }
   ]
 }
