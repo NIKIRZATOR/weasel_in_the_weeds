@@ -1,5 +1,4 @@
 from game.core.vector import Vector2
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Camera:
     """Камера, следующая за игроком"""
@@ -9,18 +8,20 @@ class Camera:
         self.world_width = world_width
         self.world_height = world_height
     
-    def update(self, target):
+    def update(self, target, viewport_width, viewport_height):
         """Обновляет позицию камеры, следуя за реальной позицией цели"""
         # Получаем реальный центр игрока (без учета визуального прыжка)
         target_center = target.get_center()  # Используем get_center(), не get_visual_center()
         
         # Центрируем камеру на цели
-        target_x = target_center.x - SCREEN_WIDTH // 2
-        target_y = target_center.y - SCREEN_HEIGHT // 2
+        target_x = target_center.x - viewport_width // 2
+        target_y = target_center.y - viewport_height // 2
         
         # Ограничиваем камеру границами мира
-        self.position.x = max(0, min(target_x, self.world_width - SCREEN_WIDTH))
-        self.position.y = max(0, min(target_y, self.world_height - SCREEN_HEIGHT))
+        max_x = max(0, self.world_width - viewport_width)
+        max_y = max(0, self.world_height - viewport_height)
+        self.position.x = max(0, min(target_x, max_x))
+        self.position.y = max(0, min(target_y, max_y))
     
     def world_to_screen(self, world_pos):
         """Конвертирует мировые координаты в экранные"""

@@ -11,7 +11,7 @@ from game.ui.hud import HUD
 from game.world.collision import CollisionSystem
 from game.world.level import load_level
 from game.world.tilemap import TileMap
-from settings import COLORS, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings import COLORS
 
 
 class GameScene(Scene):
@@ -122,8 +122,6 @@ class GameScene(Scene):
                     self.open_inventory()
                 elif event.key == pygame.K_e:
                     self.try_interact()
-                elif event.key == pygame.K_f:
-                    self.player.attack()
                 elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4):
                     self.player.select_hotbar_slot(event.key - pygame.K_1)
                 elif event.key == pygame.K_SPACE and not self.player.is_jumping:
@@ -141,12 +139,15 @@ class GameScene(Scene):
 
                     if dx != 0 or dy != 0:
                         self.player.try_jump(Vector2(dx, dy), self)
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                target = self._mouse_world_position(event.pos)
+                self.player.attack_towards(target.x, target.y)
 
     def check_collision(self, x, y, entity, ignore_jump=False):
         if self.collision_system.check_collision(x, y, entity, ignore_jump):
             return True
 
-        if self._collides_with_enemies(x, y, entity):
+        if entity is self.player and self._collides_with_enemies(x, y, entity):
             return True
 
         return False
@@ -227,7 +228,8 @@ class GameScene(Scene):
         self._update_enemies(dt)
         self._resolve_player_enemy_overlaps()
         self._apply_player_attack()
-        self.camera.update(self.player)
+        screen_width, screen_height = self.app.get_screen_size()
+        self.camera.update(self.player, screen_width, screen_height)
         self.current_interaction_target = self._find_interaction_target()
         if self.last_interaction_timer > 0:
             self.last_interaction_timer = max(0.0, self.last_interaction_timer - dt)
@@ -300,8 +302,6 @@ class GameScene(Scene):
         if entity is self.player:
             if self._player_collides_with_enemy(x, y, ignored_enemy):
                 return False
-        elif self._collides_with_enemies(x, y, entity, ignored_enemy=ignored_enemy):
-            return False
         return True
 
     def _player_collides_with_enemy(self, x, y, ignored_enemy=None):
@@ -318,35 +318,33 @@ class GameScene(Scene):
             if self._player_attack_applied:
                 return
 
-            attack_rect = self._get_player_attack_rect()
-            if attack_rect is None:
-                return
-
             damage = max(1, int(self.player.get_attack()))
+            attack_origin, attack_end, attack_thickness = self._get_player_attack_segment()
             for enemy in self.enemies:
                 if enemy.is_dead:
                     continue
-                if _rects_intersect(attack_rect, enemy.get_hitbox_rect()):
+                if _segment_hits_rect(attack_origin, attack_end, attack_thickness, enemy.get_hitbox_rect()):
                     enemy.take_damage(damage)
             self._player_attack_applied = True
             return
 
         self._player_attack_applied = False
 
-    def _get_player_attack_rect(self):
-        hitbox_x, hitbox_y, hitbox_w, hitbox_h = self.player.get_hitbox_rect()
-        range_size = 56
-        thickness = 42
+    def _get_player_attack_segment(self):
+        center = self.player.get_center()
+        aim = self.player.aim_direction.normalize() if self.player.aim_direction.length() > 0 else Vector2(1, 0)
+        start = Vector2(center.x + aim.x * 12, center.y + aim.y * 12)
+        end = Vector2(start.x + aim.x * 40, start.y + aim.y * 40)
+        return start, end, 42
 
-        if self.player.direction.x > 0:
-            return pygame.Rect(hitbox_x + hitbox_w, hitbox_y + hitbox_h / 2 - thickness / 2, range_size, thickness)
-        if self.player.direction.x < 0:
-            return pygame.Rect(hitbox_x - range_size, hitbox_y + hitbox_h / 2 - thickness / 2, range_size, thickness)
-        if self.player.direction.y > 0:
-            return pygame.Rect(hitbox_x + hitbox_w / 2 - thickness / 2, hitbox_y + hitbox_h, thickness, range_size)
-        return pygame.Rect(hitbox_x + hitbox_w / 2 - thickness / 2, hitbox_y - range_size, thickness, range_size)
+    def _mouse_world_position(self, mouse_pos):
+        return Vector2(
+            mouse_pos[0] + self.camera.position.x,
+            mouse_pos[1] + self.camera.position.y,
+        )
 
     def draw(self):
+        screen_width, _ = self.app.get_screen_size()
         self.app.screen.fill(COLORS["BLACK"])
         self.tilemap.draw(self.app.screen, self.camera)
         for world_object in self.world_objects:
@@ -361,7 +359,7 @@ class GameScene(Scene):
             message = self.info_font.render(self.last_interaction_message, True, COLORS["WHITE"])
             self.app.screen.blit(
                 message,
-                message.get_rect(center=(SCREEN_WIDTH // 2, 24)),
+                message.get_rect(center=(screen_width // 2, 24)),
             )
 
     def _draw_interaction_prompt(self, world_object):
@@ -436,3 +434,24 @@ def _distance_squared(a, b):
     dx = a.x - b.x
     dy = a.y - b.y
     return dx * dx + dy * dy
+
+
+def _segment_hits_rect(start, end, thickness, rect):
+    rx, ry, rw, rh = rect
+    center = Vector2(rx + rw / 2, ry + rh / 2)
+    radius = max(rw, rh) / 2
+    return _distance_point_to_segment(center, start, end) <= radius + thickness / 2
+
+
+def _distance_point_to_segment(point, start, end):
+    dx = end.x - start.x
+    dy = end.y - start.y
+    length_sq = dx * dx + dy * dy
+    if length_sq == 0:
+        return ((point.x - start.x) ** 2 + (point.y - start.y) ** 2) ** 0.5
+
+    t = ((point.x - start.x) * dx + (point.y - start.y) * dy) / length_sq
+    t = max(0.0, min(1.0, t))
+    closest_x = start.x + t * dx
+    closest_y = start.y + t * dy
+    return ((point.x - closest_x) ** 2 + (point.y - closest_y) ** 2) ** 0.5

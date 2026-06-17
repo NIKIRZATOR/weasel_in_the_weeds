@@ -1,6 +1,6 @@
 import pygame
 
-from settings import COLORS, HOTBAR_SIZE, PLAYER_MAX_HEALTH, PLAYER_MAX_STAMINA, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings import COLORS, HOTBAR_SIZE, PLAYER_MAX_HEALTH, PLAYER_MAX_STAMINA
 
 
 class HUD:
@@ -43,15 +43,17 @@ class HUD:
         screen.blit(text, (x + width + 10, y - 2))
 
     def draw_coins(self, screen, player):
+        screen_width, _ = screen.get_size()
         text = self.font.render(f"Coins: {player.coins}", True, COLORS['GOLD'])
-        screen.blit(text, (SCREEN_WIDTH - text.get_width() - 16, 10))
+        screen.blit(text, (screen_width - text.get_width() - 16, 10))
 
     def draw_hotbar(self, screen, player):
+        screen_width, screen_height = screen.get_size()
         slot_size = 54
         gap = 8
         total_width = HOTBAR_SIZE * slot_size + (HOTBAR_SIZE - 1) * gap
-        start_x = (SCREEN_WIDTH - total_width) // 2
-        y = SCREEN_HEIGHT - slot_size - 12
+        start_x = (screen_width - total_width) // 2
+        y = screen_height - slot_size - 12
 
         for index in range(HOTBAR_SIZE):
             rect = pygame.Rect(start_x + index * (slot_size + gap), y, slot_size, slot_size)
@@ -76,9 +78,10 @@ class HUD:
                     screen.blit(qty_text, (rect.right - qty_text.get_width() - 4, rect.bottom - qty_text.get_height() - 2))
 
     def draw_controls(self, screen):
+        _, screen_height = screen.get_size()
         controls_text = "WASD - move | SHIFT - run | SPACE - jump | F - attack | E - interact | I - inventory"
         text = self.small_font.render(controls_text, True, (200, 200, 200))
-        screen.blit(text, (10, SCREEN_HEIGHT - 32))
+        screen.blit(text, (10, screen_height - 32))
 
     def draw(self, screen, player):
         self.draw_health_bar(screen, player)

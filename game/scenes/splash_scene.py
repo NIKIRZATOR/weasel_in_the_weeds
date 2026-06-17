@@ -1,7 +1,7 @@
 import pygame
 
 from game.scenes.base import Scene
-from settings import COLORS, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings import COLORS
 
 
 class SplashScene(Scene):
@@ -33,19 +33,20 @@ class SplashScene(Scene):
             self.app.set_scene(self.next_scene_factory())
 
     def draw(self):
+        screen_width, screen_height = self.app.get_screen_size()
         self.app.screen.fill(self.background)
 
         title = self.font.render(self.title, True, COLORS["WHITE"])
         self.app.screen.blit(
             title,
-            title.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)),
+            title.get_rect(center=(screen_width // 2, screen_height // 2 - 50)),
         )
 
         progress = min(1.0, self.elapsed / self.duration)
         bar_width = 420
         bar_height = 28
-        bar_x = (SCREEN_WIDTH - bar_width) // 2
-        bar_y = SCREEN_HEIGHT // 2
+        bar_x = (screen_width - bar_width) // 2
+        bar_y = screen_height // 2
 
         pygame.draw.rect(
             self.app.screen,
@@ -70,5 +71,5 @@ class SplashScene(Scene):
         percent = self.small_font.render(f"{int(progress * 100)}%", True, COLORS["WHITE"])
         self.app.screen.blit(
             percent,
-            percent.get_rect(center=(SCREEN_WIDTH // 2, bar_y + bar_height + 28)),
+            percent.get_rect(center=(screen_width // 2, bar_y + bar_height + 28)),
         )

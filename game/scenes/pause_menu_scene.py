@@ -1,7 +1,7 @@
 import pygame
 
 from game.scenes.base import Scene
-from settings import COLORS, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings import COLORS
 
 
 class PauseMenuScene(Scene):
@@ -14,9 +14,11 @@ class PauseMenuScene(Scene):
         self.buttons = []
         self.message = ""
         self.message_timer = 0.0
+        self._layout_size = None
         self._build_buttons()
 
     def _build_buttons(self):
+        screen_width, _ = self.app.get_screen_size()
         button_width = 320
         button_height = 48
         start_y = 240
@@ -24,14 +26,14 @@ class PauseMenuScene(Scene):
         labels = [
             ("Вернуться в игру", self.resume_game, False),
             ("Инвентарь", self.open_inventory, False),
-            ("Настройки", self.show_coming_soon, False),
+            ("Настройки", self.open_settings, False),
             ("Выход в меню", self.exit_to_menu, False),
         ]
 
         self.buttons = []
         for index, (label, action, disabled) in enumerate(labels):
             rect = pygame.Rect(
-                (SCREEN_WIDTH - button_width) // 2,
+                (screen_width - button_width) // 2,
                 start_y + index * (button_height + gap),
                 button_width,
                 button_height,
@@ -44,6 +46,11 @@ class PauseMenuScene(Scene):
                     "disabled": disabled,
                 }
             )
+        self._layout_size = self.app.get_screen_size()
+
+    def _ensure_layout(self):
+        if self._layout_size != self.app.get_screen_size():
+            self._build_buttons()
 
     def resume_game(self):
         self.app.set_scene(self.game_scene)
@@ -53,9 +60,10 @@ class PauseMenuScene(Scene):
 
         self.app.set_scene(InventoryScene(self.app, self.game_scene))
 
-    def show_coming_soon(self):
-        self.message = "Настройки пока недоступны"
-        self.message_timer = 2.0
+    def open_settings(self):
+        from game.scenes.settings_scene import SettingsScene
+
+        self.app.set_scene(SettingsScene(self.app, self, overlay_scene=self.game_scene))
 
     def exit_to_menu(self):
         from game.scenes.menu_scene import MenuScene
@@ -71,6 +79,7 @@ class PauseMenuScene(Scene):
         )
 
     def handle_events(self, events):
+        self._ensure_layout()
         mouse_pos = pygame.mouse.get_pos()
         for event in events:
             if event.type == pygame.QUIT:
@@ -90,14 +99,16 @@ class PauseMenuScene(Scene):
                 self.message = ""
 
     def draw(self):
+        self._ensure_layout()
+        screen_width, screen_height = self.app.get_screen_size()
         self.game_scene.draw()
 
-        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 150))
         self.app.screen.blit(overlay, (0, 0))
 
         title = self.title_font.render("Пауза", True, COLORS["WHITE"])
-        self.app.screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, 135)))
+        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, 135)))
 
         mouse_pos = pygame.mouse.get_pos()
         for button in self.buttons:
@@ -120,5 +131,5 @@ class PauseMenuScene(Scene):
             message = self.info_font.render(self.message, True, (255, 220, 120))
             self.app.screen.blit(
                 message,
-                message.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 105)),
+                message.get_rect(center=(screen_width // 2, screen_height - 105)),
             )

@@ -1,7 +1,7 @@
 import pygame
 
 from game.scenes.base import Scene
-from settings import COLORS, LEVELS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings import COLORS, LEVELS_DIR
 
 
 class MenuScene(Scene):
@@ -13,9 +13,11 @@ class MenuScene(Scene):
         self.message = ""
         self.message_timer = 0.0
         self.buttons = []
+        self._layout_size = None
         self._build_buttons()
 
     def _build_buttons(self):
+        screen_width, _ = self.app.get_screen_size()
         button_width = 300
         button_height = 48
         start_y = 210
@@ -23,7 +25,7 @@ class MenuScene(Scene):
         labels = [
             ("Новая игра", self.start_game, False),
             ("Продолжить игру", None, True),
-            ("Настройки", self.show_coming_soon, False),
+            ("Настройки", self.open_settings, False),
             ("Об авторе", self.show_author, False),
             ("Выход", self.exit_game, False),
         ]
@@ -31,7 +33,7 @@ class MenuScene(Scene):
         self.buttons = []
         for index, (label, action, disabled) in enumerate(labels):
             rect = pygame.Rect(
-                (SCREEN_WIDTH - button_width) // 2,
+                (screen_width - button_width) // 2,
                 start_y + index * (button_height + gap),
                 button_width,
                 button_height,
@@ -44,6 +46,11 @@ class MenuScene(Scene):
                     "disabled": disabled,
                 }
             )
+        self._layout_size = self.app.get_screen_size()
+
+    def _ensure_layout(self):
+        if self._layout_size != self.app.get_screen_size():
+            self._build_buttons()
 
     def set_message(self, text):
         self.message = text
@@ -61,8 +68,10 @@ class MenuScene(Scene):
             )
         )
 
-    def show_coming_soon(self):
-        self.set_message("Раздел в разработке")
+    def open_settings(self):
+        from game.scenes.settings_scene import SettingsScene
+
+        self.app.set_scene(SettingsScene(self.app, self))
 
     def show_author(self):
         self.set_message("Автор: проект Weales in the weeds")
@@ -71,6 +80,7 @@ class MenuScene(Scene):
         self.app.running = False
 
     def handle_events(self, events):
+        self._ensure_layout()
         mouse_pos = pygame.mouse.get_pos()
         for event in events:
             if event.type == pygame.QUIT:
@@ -92,10 +102,12 @@ class MenuScene(Scene):
                 self.message = ""
 
     def draw(self):
+        self._ensure_layout()
+        screen_width, screen_height = self.app.get_screen_size()
         self.app.screen.fill((18, 18, 26))
 
         title = self.title_font.render("Weales in the weeds", True, COLORS["WHITE"])
-        self.app.screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, 110)))
+        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, 110)))
 
         mouse_pos = pygame.mouse.get_pos()
         for button in self.buttons:
@@ -120,5 +132,5 @@ class MenuScene(Scene):
             message = self.info_font.render(self.message, True, (255, 220, 120))
             self.app.screen.blit(
                 message,
-                message.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 105)),
+                message.get_rect(center=(screen_width // 2, screen_height - 105)),
             )

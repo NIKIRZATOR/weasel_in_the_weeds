@@ -85,6 +85,7 @@ class Player(Entity):
         self.is_hurt = False
 
         self.direction = Vector2(1, 0)
+        self.aim_direction = Vector2(1, 0)
         self.facing_left = False
 
         self.jump_timer = Timer(JUMP_DURATION)
@@ -356,12 +357,23 @@ class Player(Entity):
         self.is_jumping = False
         self.jump_offset = 0
 
-    def attack(self):
+    def attack_towards(self, target_x, target_y):
         if self.attack_cooldown.is_active():
             return False
 
         if self.stamina < ATTACK_COST:
             return False
+
+        center = self.get_center()
+        aim = Vector2(target_x - center.x, target_y - center.y)
+        if aim.length() == 0:
+            aim = Vector2(1 if not self.facing_left else -1, 0)
+        else:
+            aim = aim.normalize()
+
+        self.aim_direction = aim
+        if aim.x != 0:
+            self.facing_left = aim.x < 0
 
         self.is_attacking = True
         self.attack_timer.start()
@@ -398,6 +410,7 @@ class Player(Entity):
         self.is_jumping = False
         self.is_attacking = False
         self.is_hurt = False
+        self.aim_direction = Vector2(1, 0)
         self.jump_offset = 0
         self.jump_timer.active = False
         self.attack_timer.active = False
@@ -478,27 +491,11 @@ class Player(Entity):
 
         center_x = screen_pos.x + self.width // 2
         center_y = screen_pos.y + self.height // 2
-
-        if self.direction.x > 0:
-            start_x = screen_pos.x + self.width
-            start_y = center_y
-            end_x = start_x + attack_offset
-            end_y = start_y
-        elif self.direction.x < 0:
-            start_x = screen_pos.x
-            start_y = center_y
-            end_x = start_x - attack_offset
-            end_y = start_y
-        elif self.direction.y > 0:
-            start_x = center_x
-            start_y = screen_pos.y + self.height
-            end_x = start_x
-            end_y = start_y + attack_offset
-        else:
-            start_x = center_x
-            start_y = screen_pos.y
-            end_x = start_x
-            end_y = start_y - attack_offset
+        aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(1, 0)
+        start_x = center_x + aim.x * 12
+        start_y = center_y + aim.y * 12
+        end_x = start_x + aim.x * attack_offset
+        end_y = start_y + aim.y * attack_offset
 
         pygame.draw.line(
             screen,
