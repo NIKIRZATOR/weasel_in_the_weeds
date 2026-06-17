@@ -96,12 +96,12 @@ class Entity:
                 screen,
                 COLORS["HITBOX"],
                 (
-                    hitbox_x - camera.position.x,
-                    hitbox_y - camera.position.y,
-                    hitbox_width,
-                    hitbox_height,
+                    (hitbox_x - camera.position.x) * camera.zoom,
+                    (hitbox_y - camera.position.y) * camera.zoom,
+                    hitbox_width * camera.zoom,
+                    hitbox_height * camera.zoom,
                 ),
-                2,
+                max(1, int(2 * camera.zoom)),
             )
 
         if SHOW_INTERACTION_ZONES:
@@ -110,10 +110,10 @@ class Entity:
                 screen,
                 COLORS["INTERACTION_ZONE"],
                 (
-                    zone_x - camera.position.x,
-                    zone_y - camera.position.y,
-                    zone_width,
-                    zone_height,
+                    (zone_x - camera.position.x) * camera.zoom,
+                    (zone_y - camera.position.y) * camera.zoom,
+                    zone_width * camera.zoom,
+                    zone_height * camera.zoom,
                 ),
-                1,
+                max(1, int(camera.zoom)),
             )

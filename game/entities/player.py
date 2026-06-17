@@ -63,8 +63,8 @@ class Player(Entity):
             y if spawn_y is None else spawn_y,
         )
         self.draw_scale = PLAYER_DRAW_SCALE
-        self.draw_width = int(self.width * self.draw_scale)
-        self.draw_height = int(self.height * self.draw_scale)
+        self.draw_width = max(1, int(self.width * self.draw_scale))
+        self.draw_height = max(1, int(self.height * self.draw_scale))
         self.sprite = load_image(PLAYER_IDLE_SPRITE, (self.draw_width, self.draw_height))
 
         self.base_stats = CharacterStats(
@@ -437,18 +437,22 @@ class Player(Entity):
     def draw(self, screen, camera):
         visual_pos = self.get_visual_position()
         screen_pos = Vector2(
-            visual_pos.x - camera.position.x,
-            visual_pos.y - camera.position.y,
+            (visual_pos.x - camera.position.x) * camera.zoom,
+            (visual_pos.y - camera.position.y) * camera.zoom,
         )
+        scaled_draw_width = self.draw_width * camera.zoom
+        scaled_draw_height = self.draw_height * camera.zoom
+        scaled_width = self.width * camera.zoom
+        scaled_height = self.height * camera.zoom
         draw_pos = Vector2(
-            screen_pos.x - (self.draw_width - self.width) / 2,
-            screen_pos.y - (self.draw_height - self.height) / 2,
+            screen_pos.x - (scaled_draw_width - scaled_width) / 2,
+            screen_pos.y - (scaled_draw_height - scaled_height) / 2,
         )
 
-        self._draw_body(screen, draw_pos)
+        self._draw_body(screen, draw_pos, scaled_draw_width, scaled_draw_height)
 
         if self.is_attacking:
-            self._draw_attack(screen, draw_pos)
+            self._draw_attack(screen, draw_pos, scaled_draw_width, scaled_draw_height, camera.zoom)
 
         self.draw_debug(screen, camera)
 
@@ -473,14 +477,14 @@ class Player(Entity):
 
         return Vector2(dx, dy)
 
-    def _draw_body(self, screen, screen_pos):
+    def _draw_body(self, screen, screen_pos, draw_width, draw_height):
         color = (255, 255, 255) if self.is_hurt else COLOR_PLAYER
 
         if self.sprite is None:
             pygame.draw.rect(
                 screen,
                 color,
-                (screen_pos.x, screen_pos.y, self.draw_width, self.draw_height),
+                (screen_pos.x, screen_pos.y, draw_width, draw_height),
             )
             return
 
@@ -491,17 +495,19 @@ class Player(Entity):
             sprite = sprite.copy()
             sprite.fill((255, 255, 255, 0), special_flags=pygame.BLEND_RGB_ADD)
 
+        if draw_width != self.draw_width or draw_height != self.draw_height:
+            sprite = pygame.transform.scale(sprite, (int(draw_width), int(draw_height)))
         screen.blit(sprite, (screen_pos.x, screen_pos.y))
 
-    def _draw_attack(self, screen, screen_pos):
-        attack_offset = 40
-        attack_height = 6
+    def _draw_attack(self, screen, screen_pos, draw_width, draw_height, zoom):
+        attack_offset = 20 * zoom
+        attack_height = max(1, int(3 * zoom))
 
-        center_x = screen_pos.x + self.draw_width // 2
-        center_y = screen_pos.y + self.draw_height // 2
+        center_x = screen_pos.x + draw_width / 2
+        center_y = screen_pos.y + draw_height / 2
         aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(1, 0)
-        start_x = center_x + aim.x * 12
-        start_y = center_y + aim.y * 12
+        start_x = center_x + aim.x * 6 * zoom
+        start_y = center_y + aim.y * 6 * zoom
         end_x = start_x + aim.x * attack_offset
         end_y = start_y + aim.y * attack_offset
 

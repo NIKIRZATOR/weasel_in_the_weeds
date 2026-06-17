@@ -60,30 +60,33 @@ class TileMap:
 
     def draw(self, screen, camera):
         start_x = max(0, int(camera.position.x // self.tile_size))
-        end_x = min(self.width, int((camera.position.x + screen.get_width()) // self.tile_size + 1))
+        end_x = min(self.width, int((camera.position.x + screen.get_width() / camera.zoom) // self.tile_size + 1))
         start_y = max(0, int(camera.position.y // self.tile_size))
-        end_y = min(self.height, int((camera.position.y + screen.get_height()) // self.tile_size + 1))
+        end_y = min(self.height, int((camera.position.y + screen.get_height() / camera.zoom) // self.tile_size + 1))
+        scaled_tile_size = max(1, int(self.tile_size * camera.zoom))
 
         for y in range(start_y, end_y):
             for x in range(start_x, end_x):
-                screen_x = x * self.tile_size - camera.position.x
-                screen_y = y * self.tile_size - camera.position.y
+                screen_x = int((x * self.tile_size - camera.position.x) * camera.zoom)
+                screen_y = int((y * self.tile_size - camera.position.y) * camera.zoom)
 
                 tile_gid = self.ground_layer[y][x]
                 tile_surface = self.tile_surfaces.get(tile_gid)
                 if tile_surface is not None:
+                    if camera.zoom != 1:
+                        tile_surface = pygame.transform.scale(tile_surface, (scaled_tile_size, scaled_tile_size))
                     screen.blit(tile_surface, (screen_x, screen_y))
                 else:
                     color = self.get_tile_color(tile_gid)
                     pygame.draw.rect(
                         screen,
                         color,
-                        (screen_x, screen_y, self.tile_size, self.tile_size),
+                        (screen_x, screen_y, scaled_tile_size, scaled_tile_size),
                     )
                     pygame.draw.rect(
                         screen,
                         COLORS["BLACK"],
-                        (screen_x, screen_y, self.tile_size, self.tile_size),
+                        (screen_x, screen_y, scaled_tile_size, scaled_tile_size),
                         1,
                     )
 
@@ -93,10 +96,10 @@ class TileMap:
                         screen,
                         COLORS["STONE"],
                         (
-                            screen_x + 10,
-                            screen_y + 20,
-                            self.tile_size - 20,
-                            self.tile_size - 30,
+                            screen_x + int(10 * camera.zoom),
+                            screen_y + int(20 * camera.zoom),
+                            max(1, scaled_tile_size - int(20 * camera.zoom)),
+                            max(1, scaled_tile_size - int(30 * camera.zoom)),
                         ),
                     )
 

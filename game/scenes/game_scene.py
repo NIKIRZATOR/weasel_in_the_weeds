@@ -91,14 +91,14 @@ class GameScene(Scene):
         properties = raw_object.get("properties", {})
         if enemy_class is MeleeEnemy:
             return {
-                "melee_range": int(properties.get("melee_range", raw_object.get("melee_range", 44))),
+                "melee_range": int(properties.get("melee_range", raw_object.get("melee_range", 22))),
                 "attack_cooldown": float(properties.get("attack_cooldown", raw_object.get("attack_cooldown", 1.0))),
             }
 
         return {
-            "preferred_distance": int(properties.get("preferred_distance", raw_object.get("preferred_distance", 180))),
-            "min_distance": int(properties.get("min_distance", raw_object.get("min_distance", 120))),
-            "attack_range": int(properties.get("attack_range", raw_object.get("attack_range", 260))),
+            "preferred_distance": int(properties.get("preferred_distance", raw_object.get("preferred_distance", 90))),
+            "min_distance": int(properties.get("min_distance", raw_object.get("min_distance", 60))),
+            "attack_range": int(properties.get("attack_range", raw_object.get("attack_range", 130))),
             "attack_cooldown": float(properties.get("attack_cooldown", raw_object.get("attack_cooldown", 1.4))),
         }
 
@@ -334,15 +334,12 @@ class GameScene(Scene):
     def _get_player_attack_segment(self):
         center = self.player.get_center()
         aim = self.player.aim_direction.normalize() if self.player.aim_direction.length() > 0 else Vector2(1, 0)
-        start = Vector2(center.x + aim.x * 12, center.y + aim.y * 12)
-        end = Vector2(start.x + aim.x * 40, start.y + aim.y * 40)
-        return start, end, 42
+        start = Vector2(center.x + aim.x * 6, center.y + aim.y * 6)
+        end = Vector2(start.x + aim.x * 20, start.y + aim.y * 20)
+        return start, end, 21
 
     def _mouse_world_position(self, mouse_pos):
-        return Vector2(
-            mouse_pos[0] + self.camera.position.x,
-            mouse_pos[1] + self.camera.position.y,
-        )
+        return self.camera.screen_to_world(mouse_pos[0], mouse_pos[1])
 
     def draw(self):
         screen_width, _ = self.app.get_screen_size()
@@ -370,13 +367,14 @@ class GameScene(Scene):
         bubble_width = prompt_text.get_width() + padding_x * 2
         bubble_height = prompt_text.get_height() + padding_y * 2
 
-        bubble_x = (
-            world_object.position.x
-            + world_object.width / 2
-            - bubble_width / 2
-            - self.camera.position.x
+        bubble_center = self.camera.world_to_screen(
+            Vector2(
+                world_object.position.x + world_object.width / 2,
+                world_object.position.y,
+            )
         )
-        bubble_y = world_object.position.y - bubble_height - 10 - self.camera.position.y
+        bubble_x = bubble_center.x - bubble_width / 2
+        bubble_y = bubble_center.y - bubble_height - 10
 
         bubble_rect = pygame.Rect(bubble_x, bubble_y, bubble_width, bubble_height)
         pygame.draw.rect(

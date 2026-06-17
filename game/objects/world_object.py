@@ -52,19 +52,22 @@ class WorldObject(Entity):
         return False
 
     def draw(self, screen, camera):
-        screen_x = self.position.x - camera.position.x
-        screen_y = self.position.y - camera.position.y
+        screen_x = (self.position.x - camera.position.x) * camera.zoom
+        screen_y = (self.position.y - camera.position.y) * camera.zoom
+        width = self.width * camera.zoom
+        height = self.height * camera.zoom
+        border_radius = max(2, int(6 * camera.zoom))
         pygame.draw.rect(
             screen,
             self.color,
-            (screen_x, screen_y, self.width, self.height),
-            border_radius=6,
+            (screen_x, screen_y, width, height),
+            border_radius=border_radius,
         )
         pygame.draw.rect(
             screen,
             COLORS["BLACK"],
-            (screen_x, screen_y, self.width, self.height),
-            width=2,
-            border_radius=6,
+            (screen_x, screen_y, width, height),
+            width=max(1, int(2 * camera.zoom)),
+            border_radius=border_radius,
         )
         self.draw_debug(screen, camera)

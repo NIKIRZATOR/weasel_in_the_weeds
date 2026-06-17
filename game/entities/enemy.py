@@ -34,8 +34,8 @@ class Enemy(Entity):
         self.attack_radius = None
         self.color = COLORS["UI_SLOT_SELECTED"] if color is None else color
         self.draw_scale = ENEMY_DRAW_SCALE
-        self.draw_width = int(self.width * self.draw_scale)
-        self.draw_height = int(self.height * self.draw_scale)
+        self.draw_width = max(1, int(self.width * self.draw_scale))
+        self.draw_height = max(1, int(self.height * self.draw_scale))
         self.facing_left = False
         self.is_dead = False
 
@@ -92,8 +92,14 @@ class Enemy(Entity):
     def _draw_health_bar(self, screen, camera):
         bar_width = self.draw_width
         bar_height = 6
-        x = self.position.x - camera.position.x - (self.draw_width - self.width) / 2
-        y = self.position.y - camera.position.y - (self.draw_height - self.height) / 2 - 12
+        scaled_draw_width = self.draw_width * camera.zoom
+        scaled_draw_height = self.draw_height * camera.zoom
+        scaled_width = self.width * camera.zoom
+        scaled_height = self.height * camera.zoom
+        x = (self.position.x - camera.position.x) * camera.zoom - (scaled_draw_width - scaled_width) / 2
+        y = (self.position.y - camera.position.y) * camera.zoom - (scaled_draw_height - scaled_height) / 2 - 12 * camera.zoom
+        bar_width = scaled_draw_width
+        bar_height = max(2, int(6 * camera.zoom))
         ratio = self.health / self.max_health if self.max_health > 0 else 0
 
         pygame.draw.rect(screen, (70, 20, 20), (x, y, bar_width, bar_height), border_radius=3)
@@ -101,15 +107,21 @@ class Enemy(Entity):
         pygame.draw.rect(screen, COLORS["BLACK"], (x, y, bar_width, bar_height), width=1, border_radius=3)
 
     def _draw_body(self, screen, camera):
-        x = self.position.x - camera.position.x - (self.draw_width - self.width) / 2
-        y = self.position.y - camera.position.y - (self.draw_height - self.height) / 2
-        pygame.draw.rect(screen, self.color, (x, y, self.draw_width, self.draw_height), border_radius=6)
-        pygame.draw.rect(screen, COLORS["BLACK"], (x, y, self.draw_width, self.draw_height), width=2, border_radius=6)
+        scaled_draw_width = self.draw_width * camera.zoom
+        scaled_draw_height = self.draw_height * camera.zoom
+        scaled_width = self.width * camera.zoom
+        scaled_height = self.height * camera.zoom
+        x = (self.position.x - camera.position.x) * camera.zoom - (scaled_draw_width - scaled_width) / 2
+        y = (self.position.y - camera.position.y) * camera.zoom - (scaled_draw_height - scaled_height) / 2
+        border_radius = max(2, int(6 * camera.zoom))
+        pygame.draw.rect(screen, self.color, (x, y, scaled_draw_width, scaled_draw_height), border_radius=border_radius)
+        pygame.draw.rect(screen, COLORS["BLACK"], (x, y, scaled_draw_width, scaled_draw_height), width=max(1, int(2 * camera.zoom)), border_radius=border_radius)
 
         dot_color = COLORS["BLACK"]
-        pygame.draw.circle(screen, dot_color, (int(x + self.draw_width * 0.32), int(y + self.draw_height * 0.34)), 3)
-        pygame.draw.circle(screen, dot_color, (int(x + self.draw_width * 0.68), int(y + self.draw_height * 0.34)), 3)
-        pygame.draw.circle(screen, dot_color, (int(x + self.draw_width * 0.5), int(y + self.draw_height * 0.68)), 3)
+        dot_radius = max(1, int(3 * camera.zoom))
+        pygame.draw.circle(screen, dot_color, (int(x + scaled_draw_width * 0.32), int(y + scaled_draw_height * 0.34)), dot_radius)
+        pygame.draw.circle(screen, dot_color, (int(x + scaled_draw_width * 0.68), int(y + scaled_draw_height * 0.34)), dot_radius)
+        pygame.draw.circle(screen, dot_color, (int(x + scaled_draw_width * 0.5), int(y + scaled_draw_height * 0.68)), dot_radius)
 
     def _draw_zone(self, screen, camera, radius, fill_color, border_color, alpha, border_width=2):
         hitbox_x, hitbox_y, hitbox_w, hitbox_h = self.get_hitbox_rect()
@@ -117,9 +129,11 @@ class Enemy(Entity):
         rect = pygame.Rect(
             int(hitbox_x - padding - camera.position.x),
             int(hitbox_y - padding - camera.position.y),
-            int(hitbox_w + padding * 2),
-            int(hitbox_h + padding * 2),
+            int((hitbox_w + padding * 2) * camera.zoom),
+            int((hitbox_h + padding * 2) * camera.zoom),
         )
+        rect.x = int((hitbox_x - padding - camera.position.x) * camera.zoom)
+        rect.y = int((hitbox_y - padding - camera.position.y) * camera.zoom)
         overlay = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
         border_radius = min(padding, rect.width // 2, rect.height // 2)
         pygame.draw.rect(
@@ -172,8 +186,8 @@ class MeleeEnemy(Enemy):
         max_health=20,
         speed=75,
         damage=6,
-        melee_range=50,
-        detection_radius=150,
+        melee_range=25,
+        detection_radius=75,
         attack_cooldown=1.0,
     ):
         super().__init__(
@@ -223,7 +237,7 @@ class RangedProjectile:
         direction = Vector2(target_x - x, target_y - y)
         self.direction = direction.normalize() if direction.length() > 0 else Vector2(0, 0)
         self.travelled_distance = 0.0
-        self.max_distance = 520.0
+        self.max_distance = 260.0
 
     def update(self, dt, game_scene):
         if self.is_dead:
@@ -261,11 +275,12 @@ class RangedProjectile:
         if self.is_dead:
             return
 
-        x = int(self.position.x - camera.position.x)
-        y = int(self.position.y - camera.position.y)
-        pygame.draw.circle(screen, (255, 190, 70), (x, y), self.radius)
-        pygame.draw.circle(screen, COLORS["BLACK"], (x, y), self.radius, width=1)
-        pygame.draw.circle(screen, (90, 20, 20), (x - 1, y - 1), max(1, self.radius // 2))
+        x = int((self.position.x - camera.position.x) * camera.zoom)
+        y = int((self.position.y - camera.position.y) * camera.zoom)
+        radius = max(1, int(self.radius * camera.zoom))
+        pygame.draw.circle(screen, (255, 190, 70), (x, y), radius)
+        pygame.draw.circle(screen, COLORS["BLACK"], (x, y), radius, width=1)
+        pygame.draw.circle(screen, (90, 20, 20), (x - 1, y - 1), max(1, radius // 2))
 
 
 class RangedEnemy(Enemy):
@@ -279,12 +294,12 @@ class RangedEnemy(Enemy):
         max_health=14,
         speed=60,
         damage=4,
-        preferred_distance=180,
-        min_distance=120,
-        attack_range=260,
-        detection_radius=280,
-        projectile_speed=260,
-        projectile_radius=5,
+        preferred_distance=90,
+        min_distance=60,
+        attack_range=130,
+        detection_radius=140,
+        projectile_speed=130,
+        projectile_radius=3,
         attack_cooldown=1.4,
     ):
         super().__init__(
