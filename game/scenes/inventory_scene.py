@@ -88,7 +88,6 @@ class InventoryScene(Scene):
             if stack is None:
                 self.selected_slot = None
                 return
-            self.selected_slot = slot
             self.drag_source = slot
             self.drag_start_pos = mouse_pos
             return

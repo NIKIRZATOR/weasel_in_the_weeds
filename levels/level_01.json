@@ -162,7 +162,7 @@
       "health": 18,
       "speed": 70,
       "damage": 5,
-      "melee_range": 50,
+      "melee_range": 20,
       "attack_cooldown": 1.0
     },
     {

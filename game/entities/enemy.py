@@ -109,16 +109,29 @@ class Enemy(Entity):
         pygame.draw.circle(screen, dot_color, (int(x + self.width * 0.5), int(y + self.height * 0.68)), 3)
 
     def _draw_zone(self, screen, camera, radius, fill_color, border_color, alpha, border_width=2):
-        center = self.get_center()
+        hitbox_x, hitbox_y, hitbox_w, hitbox_h = self.get_hitbox_rect()
+        padding = int(radius)
         rect = pygame.Rect(
-            int(center.x - radius - camera.position.x),
-            int(center.y - radius - camera.position.y),
-            int(radius * 2),
-            int(radius * 2),
+            int(hitbox_x - padding - camera.position.x),
+            int(hitbox_y - padding - camera.position.y),
+            int(hitbox_w + padding * 2),
+            int(hitbox_h + padding * 2),
         )
         overlay = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
-        pygame.draw.ellipse(overlay, (*fill_color, alpha), overlay.get_rect())
-        pygame.draw.ellipse(overlay, border_color, overlay.get_rect(), width=border_width)
+        border_radius = min(padding, rect.width // 2, rect.height // 2)
+        pygame.draw.rect(
+            overlay,
+            (*fill_color, alpha),
+            overlay.get_rect(),
+            border_radius=border_radius,
+        )
+        pygame.draw.rect(
+            overlay,
+            border_color,
+            overlay.get_rect(),
+            width=border_width,
+            border_radius=border_radius,
+        )
         screen.blit(overlay, rect.topleft)
 
     def _draw_detection_zone(self, screen, camera):
@@ -183,8 +196,7 @@ class MeleeEnemy(Enemy):
 
         player = game_scene.player
         player_center = player.get_center()
-        enemy_center = self.get_center()
-        distance = (player_center - enemy_center).length()
+        distance = _rect_distance(self.get_hitbox_rect(), player.get_hitbox_rect())
 
         if distance > self.detection_radius:
             return
@@ -215,8 +227,16 @@ class RangedProjectile:
             return
 
         step = self.direction * (self.speed * dt)
-        self.position.x += step.x
-        self.position.y += step.y
+        next_x = self.position.x + step.x
+        next_y = self.position.y + step.y
+        probe = _ProjectileProbe(self.radius)
+
+        if game_scene.collision_system.check_collision(next_x - self.radius, next_y - self.radius, probe):
+            self.is_dead = True
+            return
+
+        self.position.x = next_x
+        self.position.y = next_y
         self.travelled_distance += step.length()
 
         player = game_scene.player
@@ -292,8 +312,7 @@ class RangedEnemy(Enemy):
 
         player = game_scene.player
         player_center = player.get_center()
-        enemy_center = self.get_center()
-        distance = (player_center - enemy_center).length()
+        distance = _rect_distance(self.get_hitbox_rect(), player.get_hitbox_rect())
 
         if distance > self.detection_radius:
             self._update_projectiles(dt, game_scene)
@@ -347,3 +366,20 @@ def _rects_intersect(rect_a, rect_b):
     ax, ay, aw, ah = rect_a
     bx, by, bw, bh = rect_b
     return ax < bx + bw and ax + aw > bx and ay < by + bh and ay + ah > by
+
+
+def _rect_distance(rect_a, rect_b):
+    ax, ay, aw, ah = rect_a
+    bx, by, bw, bh = rect_b
+
+    dx = max(bx - (ax + aw), ax - (bx + bw), 0)
+    dy = max(by - (ay + ah), ay - (by + bh), 0)
+    return (dx * dx + dy * dy) ** 0.5
+
+
+class _ProjectileProbe:
+    def __init__(self, radius):
+        self.radius = radius * 2
+
+    def get_hitbox_at(self, x, y):
+        return (x, y, self.radius, self.radius)

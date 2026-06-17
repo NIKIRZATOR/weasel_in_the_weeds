@@ -143,7 +143,13 @@ class GameScene(Scene):
                         self.player.try_jump(Vector2(dx, dy), self)
 
     def check_collision(self, x, y, entity, ignore_jump=False):
-        return self.collision_system.check_collision(x, y, entity, ignore_jump)
+        if self.collision_system.check_collision(x, y, entity, ignore_jump):
+            return True
+
+        if self._collides_with_enemies(x, y, entity):
+            return True
+
+        return False
 
     def try_pickup_object(self, pickable_object):
         properties = pickable_object.properties or {}
@@ -219,6 +225,7 @@ class GameScene(Scene):
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys, self)
         self._update_enemies(dt)
+        self._resolve_player_enemy_overlaps()
         self._apply_player_attack()
         self.camera.update(self.player)
         self.current_interaction_target = self._find_interaction_target()
@@ -234,6 +241,77 @@ class GameScene(Scene):
             if not enemy.is_dead:
                 alive_enemies.append(enemy)
         self.enemies = alive_enemies
+
+    def _collides_with_enemies(self, x, y, entity, ignored_enemy=None):
+        hitbox = entity.get_hitbox_at(x, y)
+        for enemy in self.enemies:
+            if enemy is entity or enemy is ignored_enemy or enemy.is_dead:
+                continue
+            if _rects_intersect(hitbox, enemy.get_hitbox_rect()):
+                return True
+        return False
+
+    def _resolve_player_enemy_overlaps(self):
+        for enemy in self.enemies:
+            if enemy.is_dead:
+                continue
+
+            overlap = _get_rect_overlap(self.player.get_hitbox_rect(), enemy.get_hitbox_rect())
+            if overlap is None:
+                continue
+
+            push_x, push_y = overlap
+            self._separate_player_and_enemy(enemy, push_x, push_y)
+
+    def _separate_player_and_enemy(self, enemy, push_x, push_y):
+        player_dx = -push_x * 0.65
+        player_dy = -push_y * 0.65
+        enemy_dx = push_x * 0.35
+        enemy_dy = push_y * 0.35
+
+        player_moved = self._try_move_entity(self.player, player_dx, player_dy)
+        enemy_moved = self._try_move_entity(enemy, enemy_dx, enemy_dy, ignored_enemy=enemy)
+
+        if player_moved or enemy_moved:
+            return
+
+        if self._try_move_entity(self.player, -push_x, -push_y):
+            return
+
+        self._try_move_entity(enemy, push_x, push_y, ignored_enemy=enemy)
+
+    def _try_move_entity(self, entity, dx, dy, ignored_enemy=None):
+        moved = False
+        if abs(dx) > 0:
+            next_x = entity.position.x + dx
+            if self._can_place_entity(entity, next_x, entity.position.y, ignored_enemy):
+                entity.position.x = next_x
+                moved = True
+        if abs(dy) > 0:
+            next_y = entity.position.y + dy
+            if self._can_place_entity(entity, entity.position.x, next_y, ignored_enemy):
+                entity.position.y = next_y
+                moved = True
+        return moved
+
+    def _can_place_entity(self, entity, x, y, ignored_enemy=None):
+        if self.collision_system.check_collision(x, y, entity):
+            return False
+        if entity is self.player:
+            if self._player_collides_with_enemy(x, y, ignored_enemy):
+                return False
+        elif self._collides_with_enemies(x, y, entity, ignored_enemy=ignored_enemy):
+            return False
+        return True
+
+    def _player_collides_with_enemy(self, x, y, ignored_enemy=None):
+        hitbox = self.player.get_hitbox_at(x, y)
+        for enemy in self.enemies:
+            if enemy is ignored_enemy or enemy.is_dead:
+                continue
+            if _rects_intersect(hitbox, enemy.get_hitbox_rect()):
+                return True
+        return False
 
     def _apply_player_attack(self):
         if self.player.is_attacking:
@@ -330,6 +408,28 @@ def _rects_intersect(rect_a, rect_b):
         and ay < by + bh
         and ay + ah > by
     )
+
+
+def _get_rect_overlap(rect_a, rect_b):
+    ax, ay, aw, ah = rect_a
+    bx, by, bw, bh = rect_b
+    if not _rects_intersect(rect_a, rect_b):
+        return None
+
+    center_ax = ax + aw / 2
+    center_ay = ay + ah / 2
+    center_bx = bx + bw / 2
+    center_by = by + bh / 2
+
+    overlap_x = min(ax + aw, bx + bw) - max(ax, bx)
+    overlap_y = min(ay + ah, by + bh) - max(ay, by)
+
+    if overlap_x <= overlap_y:
+        direction_x = 1 if center_bx >= center_ax else -1
+        return (overlap_x * direction_x, 0)
+
+    direction_y = 1 if center_by >= center_ay else -1
+    return (0, overlap_y * direction_y)
 
 
 def _distance_squared(a, b):
