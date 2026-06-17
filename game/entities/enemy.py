@@ -5,7 +5,7 @@ import pygame
 from game.core.timer import Timer
 from game.core.vector import Vector2
 from game.entities.entity import Entity
-from settings import COLORS, SHOW_INTERACTION_ZONES
+from settings import COLORS, ENEMY_DRAW_SCALE, SHOW_INTERACTION_ZONES
 
 
 class Enemy(Entity):
@@ -33,6 +33,9 @@ class Enemy(Entity):
         self.detection_radius = max(self.width, int(detection_radius))
         self.attack_radius = None
         self.color = COLORS["UI_SLOT_SELECTED"] if color is None else color
+        self.draw_scale = ENEMY_DRAW_SCALE
+        self.draw_width = int(self.width * self.draw_scale)
+        self.draw_height = int(self.height * self.draw_scale)
         self.facing_left = False
         self.is_dead = False
 
@@ -87,10 +90,10 @@ class Enemy(Entity):
                 self.position.y = new_y
 
     def _draw_health_bar(self, screen, camera):
-        bar_width = self.width
+        bar_width = self.draw_width
         bar_height = 6
-        x = self.position.x - camera.position.x
-        y = self.position.y - camera.position.y - 12
+        x = self.position.x - camera.position.x - (self.draw_width - self.width) / 2
+        y = self.position.y - camera.position.y - (self.draw_height - self.height) / 2 - 12
         ratio = self.health / self.max_health if self.max_health > 0 else 0
 
         pygame.draw.rect(screen, (70, 20, 20), (x, y, bar_width, bar_height), border_radius=3)
@@ -98,15 +101,15 @@ class Enemy(Entity):
         pygame.draw.rect(screen, COLORS["BLACK"], (x, y, bar_width, bar_height), width=1, border_radius=3)
 
     def _draw_body(self, screen, camera):
-        x = self.position.x - camera.position.x
-        y = self.position.y - camera.position.y
-        pygame.draw.rect(screen, self.color, (x, y, self.width, self.height), border_radius=6)
-        pygame.draw.rect(screen, COLORS["BLACK"], (x, y, self.width, self.height), width=2, border_radius=6)
+        x = self.position.x - camera.position.x - (self.draw_width - self.width) / 2
+        y = self.position.y - camera.position.y - (self.draw_height - self.height) / 2
+        pygame.draw.rect(screen, self.color, (x, y, self.draw_width, self.draw_height), border_radius=6)
+        pygame.draw.rect(screen, COLORS["BLACK"], (x, y, self.draw_width, self.draw_height), width=2, border_radius=6)
 
         dot_color = COLORS["BLACK"]
-        pygame.draw.circle(screen, dot_color, (int(x + self.width * 0.32), int(y + self.height * 0.34)), 3)
-        pygame.draw.circle(screen, dot_color, (int(x + self.width * 0.68), int(y + self.height * 0.34)), 3)
-        pygame.draw.circle(screen, dot_color, (int(x + self.width * 0.5), int(y + self.height * 0.68)), 3)
+        pygame.draw.circle(screen, dot_color, (int(x + self.draw_width * 0.32), int(y + self.draw_height * 0.34)), 3)
+        pygame.draw.circle(screen, dot_color, (int(x + self.draw_width * 0.68), int(y + self.draw_height * 0.34)), 3)
+        pygame.draw.circle(screen, dot_color, (int(x + self.draw_width * 0.5), int(y + self.draw_height * 0.68)), 3)
 
     def _draw_zone(self, screen, camera, radius, fill_color, border_color, alpha, border_width=2):
         hitbox_x, hitbox_y, hitbox_w, hitbox_h = self.get_hitbox_rect()

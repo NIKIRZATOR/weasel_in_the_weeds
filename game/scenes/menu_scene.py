@@ -60,10 +60,14 @@ class MenuScene(Scene):
         from game.scenes.game_scene import GameScene
         from game.scenes.splash_scene import SplashScene
 
+        level_path = LEVELS_DIR.parent / "test.tmx"
+        if not level_path.exists():
+            level_path = LEVELS_DIR / "level_01.json"
+
         self.app.set_scene(
             SplashScene(
                 self.app,
-                lambda: GameScene(self.app, LEVELS_DIR / "level_01.json"),
+                lambda: GameScene(self.app, level_path),
                 title="Новая игра...",
             )
         )

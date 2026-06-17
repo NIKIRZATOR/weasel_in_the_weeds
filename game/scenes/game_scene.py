@@ -24,6 +24,7 @@ class GameScene(Scene):
             self.level.ground_layer,
             self.level.obstacle_layer,
             tile_size=self.level.tile_size,
+            tileset_image_path=self.level.tileset_image_path,
         )
         self.collision_system = CollisionSystem(self.tilemap)
 

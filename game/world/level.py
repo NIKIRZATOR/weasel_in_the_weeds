@@ -2,6 +2,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+from game.world.tmx_loader import load_tmx_level_data
+
 
 @dataclass
 class LevelData:
@@ -11,6 +13,7 @@ class LevelData:
     ground_layer: list[list[int]]
     obstacle_layer: list[list[int]]
     objects: list[dict]
+    tileset_image_path: str | None = None
 
     @property
     def width(self) -> int:
@@ -37,7 +40,10 @@ def _validate_layer(name: str, layer: list[list[int]]) -> tuple[int, int]:
 
 def load_level(level_path: str | Path) -> LevelData:
     path = Path(level_path)
-    raw_level = json.loads(path.read_text(encoding="utf-8"))
+    if path.suffix.lower() == ".tmx":
+        raw_level = load_tmx_level_data(path)
+    else:
+        raw_level = json.loads(path.read_text(encoding="utf-8"))
 
     layers = raw_level["layers"]
     ground_layer = layers["ground"]
@@ -58,4 +64,5 @@ def load_level(level_path: str | Path) -> LevelData:
         ground_layer=ground_layer,
         obstacle_layer=obstacle_layer,
         objects=raw_level.get("objects", []),
+        tileset_image_path=raw_level.get("tileset_image_path"),
     )

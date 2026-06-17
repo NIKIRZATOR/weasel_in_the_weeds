@@ -19,6 +19,7 @@ from settings import (
     JUMP_DURATION,
     JUMP_HEIGHT,
     PLAYER_IDLE_SPRITE,
+    PLAYER_DRAW_SCALE,
     PLAYER_HITBOX_HEIGHT,
     PLAYER_HITBOX_OFFSET_X,
     PLAYER_HITBOX_OFFSET_Y,
@@ -61,7 +62,10 @@ class Player(Entity):
             x if spawn_x is None else spawn_x,
             y if spawn_y is None else spawn_y,
         )
-        self.sprite = load_image(PLAYER_IDLE_SPRITE, (self.width, self.height))
+        self.draw_scale = PLAYER_DRAW_SCALE
+        self.draw_width = int(self.width * self.draw_scale)
+        self.draw_height = int(self.height * self.draw_scale)
+        self.sprite = load_image(PLAYER_IDLE_SPRITE, (self.draw_width, self.draw_height))
 
         self.base_stats = CharacterStats(
             max_health=PLAYER_MAX_HEALTH,
@@ -436,11 +440,15 @@ class Player(Entity):
             visual_pos.x - camera.position.x,
             visual_pos.y - camera.position.y,
         )
+        draw_pos = Vector2(
+            screen_pos.x - (self.draw_width - self.width) / 2,
+            screen_pos.y - (self.draw_height - self.height) / 2,
+        )
 
-        self._draw_body(screen, screen_pos)
+        self._draw_body(screen, draw_pos)
 
         if self.is_attacking:
-            self._draw_attack(screen, screen_pos)
+            self._draw_attack(screen, draw_pos)
 
         self.draw_debug(screen, camera)
 
@@ -472,7 +480,7 @@ class Player(Entity):
             pygame.draw.rect(
                 screen,
                 color,
-                (screen_pos.x, screen_pos.y, self.width, self.height),
+                (screen_pos.x, screen_pos.y, self.draw_width, self.draw_height),
             )
             return
 
@@ -489,8 +497,8 @@ class Player(Entity):
         attack_offset = 40
         attack_height = 6
 
-        center_x = screen_pos.x + self.width // 2
-        center_y = screen_pos.y + self.height // 2
+        center_x = screen_pos.x + self.draw_width // 2
+        center_y = screen_pos.y + self.draw_height // 2
         aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(1, 0)
         start_x = center_x + aim.x * 12
         start_y = center_y + aim.y * 12
