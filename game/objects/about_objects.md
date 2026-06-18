@@ -181,6 +181,7 @@ JSON:
 - предмет должен существовать в `game/items/catalog.py`;
 - валюта из `ItemKind.CURRENCY` автоматически добавляется в монеты игрока.
 
+<<<<<<< HEAD
 ## CheckpointObject
 
 Файл: `checkpoint_object.py`
@@ -214,6 +215,8 @@ JSON:
 
 - `activation_radius_tiles` - радиус автоактивации в тайлах. По умолчанию `1`.
 
+=======
+>>>>>>> bf7df0f3e55c0d7195234addd954122251958496
 ## LevelTransition
 
 Файл: `level_transition.py`

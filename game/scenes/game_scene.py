@@ -255,12 +255,15 @@ class GameScene(Scene):
             if self.last_interaction_timer == 0.0:
                 self.last_interaction_message = ""
 
+<<<<<<< HEAD
     def _update_checkpoints(self):
         for world_object in self.world_objects:
             if not getattr(world_object, "is_checkpoint", False):
                 continue
             world_object.activate(self.player, self)
 
+=======
+>>>>>>> bf7df0f3e55c0d7195234addd954122251958496
     def _check_level_transitions(self):
         player_hitbox = self.player.get_hitbox_rect()
         for world_object in self.world_objects:
