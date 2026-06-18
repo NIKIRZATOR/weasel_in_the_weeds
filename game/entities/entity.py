@@ -21,6 +21,9 @@ class Entity:
         interaction_height=None,
         interaction_offset_x=None,
         interaction_offset_y=None,
+        collision_circle_radius=None,
+        collision_circle_offset_x=None,
+        collision_circle_offset_y=None,
     ):
         self.position = Vector2(x, y)
         self.width = width
@@ -45,6 +48,17 @@ class Entity:
             if interaction_offset_y is None
             else interaction_offset_y
         )
+        self.collision_circle_radius = collision_circle_radius
+        self.collision_circle_offset_x = (
+            self.hitbox_offset_x + self.hitbox_width / 2
+            if collision_circle_offset_x is None
+            else collision_circle_offset_x
+        )
+        self.collision_circle_offset_y = (
+            self.hitbox_offset_y + self.hitbox_height / 2
+            if collision_circle_offset_y is None
+            else collision_circle_offset_y
+        )
         self.velocity = Vector2(0, 0)
 
     def get_rect(self):
@@ -62,6 +76,21 @@ class Entity:
 
     def get_hitbox_rect(self):
         return self.get_hitbox_at(self.position.x, self.position.y)
+
+    def has_collision_circle(self):
+        return self.collision_circle_radius is not None
+
+    def get_collision_circle_at(self, x, y):
+        if self.collision_circle_radius is None:
+            return None
+        return (
+            x + self.collision_circle_offset_x,
+            y + self.collision_circle_offset_y,
+            self.collision_circle_radius,
+        )
+
+    def get_collision_circle(self):
+        return self.get_collision_circle_at(self.position.x, self.position.y)
 
     def get_interaction_at(self, x, y):
         """Возвращает зону взаимодействия сущности в указанной позиции."""
@@ -91,18 +120,28 @@ class Entity:
 
     def draw_debug(self, screen, camera):
         if SHOW_HITBOXES:
-            hitbox_x, hitbox_y, hitbox_width, hitbox_height = self.get_hitbox_rect()
-            pygame.draw.rect(
-                screen,
-                COLORS["HITBOX"],
-                (
-                    hitbox_x - camera.position.x,
-                    hitbox_y - camera.position.y,
-                    hitbox_width,
-                    hitbox_height,
-                ),
-                2,
-            )
+            if self.has_collision_circle():
+                center_x, center_y, radius = self.get_collision_circle()
+                pygame.draw.circle(
+                    screen,
+                    COLORS["HITBOX"],
+                    (int(center_x - camera.position.x), int(center_y - camera.position.y)),
+                    int(radius),
+                    2,
+                )
+            else:
+                hitbox_x, hitbox_y, hitbox_width, hitbox_height = self.get_hitbox_rect()
+                pygame.draw.rect(
+                    screen,
+                    COLORS["HITBOX"],
+                    (
+                        hitbox_x - camera.position.x,
+                        hitbox_y - camera.position.y,
+                        hitbox_width,
+                        hitbox_height,
+                    ),
+                    2,
+                )
 
         if SHOW_INTERACTION_ZONES:
             zone_x, zone_y, zone_width, zone_height = self.get_interaction_rect()
