@@ -179,6 +179,24 @@
       "min_distance": 120,
       "attack_range": 260,
       "attack_cooldown": 1.4
+    },
+    {
+      "type": "level_transition",
+      "name": "To Forest Edge",
+      "x": 18,
+      "y": 27,
+      "width": 1,
+      "height": 3,
+      "properties": {
+        "target_level": "level_02.json",
+        "target_spawn": {
+          "x": 2,
+          "y": 2
+        },
+        "required_coins": 2,
+        "set_flags": ["entered_forest_edge"],
+        "blocked_message": "The path is blocked."
+      }
     }
   ]
 }

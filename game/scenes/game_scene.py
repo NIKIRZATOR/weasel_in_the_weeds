@@ -11,12 +11,16 @@ from game.ui.hud import HUD
 from game.world.collision import CollisionSystem
 from game.world.level import load_level
 from game.world.tilemap import TileMap
-from settings import COLORS
+from settings import COLORS, LEVELS_DIR
+
+
+TRANSITION_FADE_DURATION = 0.45
 
 
 class GameScene(Scene):
-    def __init__(self, app, level_path):
+    def __init__(self, app, level_path, player=None, target_spawn=None):
         self.app = app
+        self.level_path = level_path
         self.level = load_level(level_path)
         pygame.display.set_caption(f"Weales in the weeds RPG - {self.level.name}")
 
@@ -27,18 +31,25 @@ class GameScene(Scene):
         )
         self.collision_system = CollisionSystem(self.tilemap)
 
-        spawn_x, spawn_y = self.level.player_spawn
+        spawn_x, spawn_y = target_spawn if target_spawn is not None else self.level.player_spawn
         spawn_world_x = self.level.tile_size * spawn_x
         spawn_world_y = self.level.tile_size * spawn_y
-        self.player = Player(
-            spawn_world_x,
-            spawn_world_y,
-            spawn_x=spawn_world_x,
-            spawn_y=spawn_world_y,
-        )
+        if player is None:
+            self.player = Player(
+                spawn_world_x,
+                spawn_world_y,
+                spawn_x=spawn_world_x,
+                spawn_y=spawn_world_y,
+            )
+        else:
+            self.player = player
+            self.player.move_to_spawn(spawn_world_x, spawn_world_y)
         self.world_objects, self.enemies = self._load_world_objects()
         self.collision_system.set_objects(self.world_objects)
         self._player_attack_applied = False
+        self.transition_target_level = None
+        self.transition_target_spawn = None
+        self.transition_timer = 0.0
 
         world_width = self.tilemap.width * self.tilemap.tile_size
         world_height = self.tilemap.height * self.tilemap.tile_size
@@ -115,6 +126,8 @@ class GameScene(Scene):
         for event in events:
             if event.type == pygame.QUIT:
                 self.app.running = False
+            elif self.transition_target_level is not None:
+                continue
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.open_pause_menu()
@@ -223,11 +236,16 @@ class GameScene(Scene):
         return min(candidates, key=lambda obj: _distance_squared(player_center, obj.get_center()))
 
     def update(self, dt):
+        if self.transition_target_level is not None:
+            self._update_level_transition(dt)
+            return
+
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys, self)
         self._update_enemies(dt)
         self._resolve_player_enemy_overlaps()
         self._apply_player_attack()
+        self._check_level_transitions()
         screen_width, screen_height = self.app.get_screen_size()
         self.camera.update(self.player, screen_width, screen_height)
         self.current_interaction_target = self._find_interaction_target()
@@ -235,6 +253,57 @@ class GameScene(Scene):
             self.last_interaction_timer = max(0.0, self.last_interaction_timer - dt)
             if self.last_interaction_timer == 0.0:
                 self.last_interaction_message = ""
+
+    def _check_level_transitions(self):
+        player_hitbox = self.player.get_hitbox_rect()
+        for world_object in self.world_objects:
+            if not getattr(world_object, "is_transition", False):
+                continue
+            if not _rects_intersect(player_hitbox, world_object.get_hitbox_rect()):
+                continue
+            if not world_object.can_activate(self.player):
+                self.last_interaction_message = world_object.get_block_message()
+                self.last_interaction_timer = 1.0
+                return
+
+            target_level = world_object.get_target_level()
+            if not target_level:
+                self.last_interaction_message = "Transition target is missing."
+                self.last_interaction_timer = 1.0
+                return
+
+            self.transition_target_level = LEVELS_DIR / target_level
+            self.transition_target_spawn = world_object.get_target_spawn()
+            self.transition_timer = 0.0
+            for flag in world_object.get_flags_to_set():
+                self.player.set_flag(flag)
+            return
+
+    def _update_level_transition(self, dt):
+        self.transition_timer += dt
+        screen_width, screen_height = self.app.get_screen_size()
+        self.camera.update(self.player, screen_width, screen_height)
+        if self.transition_timer < TRANSITION_FADE_DURATION:
+            return
+
+        from game.scenes.splash_scene import SplashScene
+
+        target_level = self.transition_target_level
+        target_spawn = self.transition_target_spawn
+        self.app.set_scene(
+            SplashScene(
+                self.app,
+                lambda: GameScene(
+                    self.app,
+                    target_level,
+                    player=self.player,
+                    target_spawn=target_spawn,
+                ),
+                title="Loading area...",
+                duration=0.8,
+                background=(10, 10, 16),
+            )
+        )
 
     def _update_enemies(self, dt):
         alive_enemies = []
@@ -361,6 +430,17 @@ class GameScene(Scene):
                 message,
                 message.get_rect(center=(screen_width // 2, 24)),
             )
+        self._draw_transition_overlay()
+
+    def _draw_transition_overlay(self):
+        if self.transition_target_level is None:
+            return
+
+        progress = min(1.0, self.transition_timer / TRANSITION_FADE_DURATION)
+        screen_width, screen_height = self.app.get_screen_size()
+        overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, int(255 * progress)))
+        self.app.screen.blit(overlay, (0, 0))
 
     def _draw_interaction_prompt(self, world_object):
         prompt_text = self.interaction_font.render("E", True, COLORS["WHITE"])

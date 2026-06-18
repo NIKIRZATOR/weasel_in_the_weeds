@@ -1,4 +1,5 @@
 from game.objects.interactable_object import InteractableObject
+from game.objects.level_transition import LevelTransition
 from game.objects.pickable_object import PickableObject
 from game.objects.solid_object import SolidObject
 
@@ -37,6 +38,16 @@ def create_world_object(raw_object, tile_size):
 
     if object_type == "pickable_object":
         return PickableObject(
+            x,
+            y,
+            width,
+            height,
+            name=name,
+            properties=properties,
+        )
+
+    if object_type == "level_transition":
+        return LevelTransition(
             x,
             y,
             width,
