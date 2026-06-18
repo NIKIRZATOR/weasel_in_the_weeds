@@ -1,3 +1,4 @@
+from game.objects.checkpoint_object import CheckpointObject
 from game.objects.factory import create_world_object
 from game.objects.interactable_object import InteractableObject
 from game.objects.level_transition import LevelTransition
@@ -9,6 +10,7 @@ __all__ = [
     "WorldObject",
     "SolidObject",
     "InteractableObject",
+    "CheckpointObject",
     "LevelTransition",
     "PickableObject",
     "create_world_object",

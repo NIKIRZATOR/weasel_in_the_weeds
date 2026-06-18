@@ -88,6 +88,17 @@
       "height": 1
     },
     {
+      "type": "checkpoint_object",
+      "name": "Meadow Stone",
+      "x": 9,
+      "y": 2,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "activation_radius_tiles": 1
+      }
+    },
+    {
       "type": "interactable_object",
       "name": "Training Chest",
       "x": 6,

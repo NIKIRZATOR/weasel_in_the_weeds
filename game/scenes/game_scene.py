@@ -242,6 +242,7 @@ class GameScene(Scene):
 
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys, self)
+        self._update_checkpoints()
         self._update_enemies(dt)
         self._resolve_player_enemy_overlaps()
         self._apply_player_attack()
@@ -253,6 +254,12 @@ class GameScene(Scene):
             self.last_interaction_timer = max(0.0, self.last_interaction_timer - dt)
             if self.last_interaction_timer == 0.0:
                 self.last_interaction_message = ""
+
+    def _update_checkpoints(self):
+        for world_object in self.world_objects:
+            if not getattr(world_object, "is_checkpoint", False):
+                continue
+            world_object.activate(self.player, self)
 
     def _check_level_transitions(self):
         player_hitbox = self.player.get_hitbox_rect()

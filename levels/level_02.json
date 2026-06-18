@@ -50,6 +50,14 @@
       "y": 2
     },
     {
+      "type": "checkpoint_object",
+      "name": "Meadow Stone",
+      "x": 9,
+      "y": 2,
+      "width": 1,
+      "height": 1
+    },
+    {
       "type": "pickable_object",
       "name": "stick",
       "x": 7,
