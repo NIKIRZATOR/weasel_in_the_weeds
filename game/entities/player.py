@@ -75,6 +75,7 @@ class Player(Entity):
         self.hotbar_slots: list[ItemStack | None] = [None] * HOTBAR_SIZE
         self.coins = 0
         self.selected_hotbar_index = 0
+        self.story_flags = set()
 
         self.health = self.get_max_health()
         self.stamina = self.get_max_stamina()
@@ -197,6 +198,24 @@ class Player(Entity):
             return False
         self.coins -= int(quantity)
         return True
+
+    def set_flag(self, flag):
+        if not flag:
+            return False
+        self.story_flags.add(str(flag))
+        return True
+
+    def unset_flag(self, flag):
+        if not flag:
+            return False
+        self.story_flags.discard(str(flag))
+        return True
+
+    def has_flag(self, flag):
+        return str(flag) in self.story_flags
+
+    def has_flags(self, flags):
+        return all(self.has_flag(flag) for flag in flags)
 
     def equip_inventory_slot(self, inventory_index, equip_slot):
         if not isinstance(equip_slot, EquipSlot):
@@ -415,6 +434,18 @@ class Player(Entity):
         self.jump_timer.active = False
         self.attack_timer.active = False
         self.attack_cooldown.active = False
+        self.hurt_timer.active = False
+
+    def move_to_spawn(self, spawn_x, spawn_y):
+        self.spawn_position = Vector2(spawn_x, spawn_y)
+        self.position = Vector2(spawn_x, spawn_y)
+        self.is_running = False
+        self.is_jumping = False
+        self.is_attacking = False
+        self.is_hurt = False
+        self.jump_offset = 0
+        self.jump_timer.active = False
+        self.attack_timer.active = False
         self.hurt_timer.active = False
 
     def get_visual_position(self):
