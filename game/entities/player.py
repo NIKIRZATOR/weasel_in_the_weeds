@@ -436,12 +436,9 @@ class Player(Entity):
         self.attack_cooldown.active = False
         self.hurt_timer.active = False
 
-<<<<<<< HEAD
     def set_respawn_point(self, spawn_x, spawn_y):
         self.spawn_position = Vector2(spawn_x, spawn_y)
 
-=======
->>>>>>> bf7df0f3e55c0d7195234addd954122251958496
     def move_to_spawn(self, spawn_x, spawn_y):
         self.spawn_position = Vector2(spawn_x, spawn_y)
         self.position = Vector2(spawn_x, spawn_y)

@@ -47,7 +47,6 @@ def create_world_object(raw_object, tile_size):
             properties=properties,
         )
 
-<<<<<<< HEAD
     if object_type == "checkpoint_object":
         return CheckpointObject(
             x,
@@ -57,9 +56,6 @@ def create_world_object(raw_object, tile_size):
             name=name,
             properties=properties,
         )
-
-=======
->>>>>>> bf7df0f3e55c0d7195234addd954122251958496
     if object_type == "level_transition":
         return LevelTransition(
             x,

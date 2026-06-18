@@ -10,10 +10,7 @@ __all__ = [
     "WorldObject",
     "SolidObject",
     "InteractableObject",
-<<<<<<< HEAD
     "CheckpointObject",
-=======
->>>>>>> bf7df0f3e55c0d7195234addd954122251958496
     "LevelTransition",
     "PickableObject",
     "create_world_object",
