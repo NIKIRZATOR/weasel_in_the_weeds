@@ -13,6 +13,8 @@ from settings import COLORS, SHOW_INTERACTION_ZONES
 
 
 class Enemy(Entity):
+    HIDDEN_REVEAL_RADIUS = 42.0
+
     def __init__(
         self,
         x,
@@ -97,7 +99,7 @@ class Enemy(Entity):
         player_center = player.get_center()
         distance_to_player = _point_distance(self.get_center(), player_center)
 
-        if distance_to_player <= self.detection_radius:
+        if self._can_detect_player(player, distance_to_player):
             self._start_chase(player_center)
             return
 
@@ -120,6 +122,13 @@ class Enemy(Entity):
         previous_position = Vector2(self.position.x, self.position.y)
         self._update_patrol_move(dt, game_scene)
         self._update_stuck_state(dt, previous_position, game_scene)
+
+    def _can_detect_player(self, player, distance_to_player):
+        if distance_to_player > self.detection_radius:
+            return False
+        if not getattr(player, "is_hidden", False):
+            return True
+        return distance_to_player <= self.HIDDEN_REVEAL_RADIUS
 
     def _start_chase(self, player_center):
         direction = Vector2(player_center.x - self.get_center().x, player_center.y - self.get_center().y)

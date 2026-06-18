@@ -1,4 +1,5 @@
 from game.objects.checkpoint_object import CheckpointObject
+from game.objects.grass_hide_zone import GrassHideZone
 from game.objects.interactable_object import InteractableObject
 from game.objects.level_transition import LevelTransition
 from game.objects.pickable_object import PickableObject
@@ -49,6 +50,15 @@ def create_world_object(raw_object, tile_size):
 
     if object_type == "checkpoint_object":
         return CheckpointObject(
+            x,
+            y,
+            width,
+            height,
+            name=name,
+            properties=properties,
+        )
+    if object_type == "grass_hide_zone":
+        return GrassHideZone(
             x,
             y,
             width,

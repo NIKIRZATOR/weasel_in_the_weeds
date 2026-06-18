@@ -84,6 +84,7 @@ class Player(Entity):
         self.is_jumping = False
         self.is_attacking = False
         self.is_hurt = False
+        self.is_hidden = False
 
         self.direction = Vector2(1, 0)
         self.aim_direction = Vector2(1, 0)
@@ -429,6 +430,7 @@ class Player(Entity):
         self.is_jumping = False
         self.is_attacking = False
         self.is_hurt = False
+        self.is_hidden = False
         self.aim_direction = Vector2(1, 0)
         self.jump_offset = 0
         self.jump_timer.active = False
@@ -446,6 +448,7 @@ class Player(Entity):
         self.is_jumping = False
         self.is_attacking = False
         self.is_hurt = False
+        self.is_hidden = False
         self.jump_offset = 0
         self.jump_timer.active = False
         self.attack_timer.active = False
@@ -503,16 +506,17 @@ class Player(Entity):
         color = (255, 255, 255) if self.is_hurt else COLOR_PLAYER
 
         if self.sprite is None:
-            pygame.draw.rect(
-                screen,
-                color,
-                (screen_pos.x, screen_pos.y, self.width, self.height),
-            )
+            body_color = (160, 160, 160) if self.is_hidden else color
+            pygame.draw.rect(screen, body_color, (screen_pos.x, screen_pos.y, self.width, self.height))
             return
 
         sprite = self.sprite
         if self.facing_left:
             sprite = pygame.transform.flip(sprite, True, False)
+        if self.is_hidden:
+            sprite = sprite.copy()
+            sprite.fill((90, 90, 90, 0), special_flags=pygame.BLEND_RGB_SUB)
+            sprite.fill((35, 35, 35, 0), special_flags=pygame.BLEND_RGB_ADD)
         if self.is_hurt:
             sprite = sprite.copy()
             sprite.fill((255, 255, 255, 0), special_flags=pygame.BLEND_RGB_ADD)

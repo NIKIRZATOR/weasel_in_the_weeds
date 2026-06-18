@@ -242,6 +242,7 @@ class GameScene(Scene):
 
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys, self)
+        self._update_grass_hide_zones()
         self._update_checkpoints()
         self._update_enemies(dt)
         self._resolve_player_enemy_overlaps()
@@ -260,6 +261,18 @@ class GameScene(Scene):
             if not getattr(world_object, "is_checkpoint", False):
                 continue
             world_object.activate(self.player, self)
+
+    def _update_grass_hide_zones(self):
+        player_hitbox = self.player.get_hitbox_rect()
+        self.player.is_hidden = False
+        for world_object in self.world_objects:
+            if not getattr(world_object, "is_grass_hide_zone", False):
+                continue
+            if not world_object.can_hide(self.player):
+                continue
+            if _rects_intersect(player_hitbox, world_object.get_hitbox_rect()):
+                self.player.is_hidden = True
+                return
 
     def _check_level_transitions(self):
         player_hitbox = self.player.get_hitbox_rect()

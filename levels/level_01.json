@@ -99,6 +99,17 @@
       }
     },
     {
+      "type": "grass_hide_zone",
+      "name": "Tall Grass",
+      "x": 3,
+      "y": 4,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "concealment": true
+      }
+    },
+    {
       "type": "interactable_object",
       "name": "Training Chest",
       "x": 6,
