@@ -58,6 +58,18 @@
       "height": 1
     },
     {
+      "type": "npc_object",
+      "name": "Hermit Mouse",
+      "x": 5,
+      "y": 3,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "health": 35,
+        "dialogue_file": "test_dialog.json"
+      }
+    },
+    {
       "type": "pickable_object",
       "name": "stick",
       "x": 7,

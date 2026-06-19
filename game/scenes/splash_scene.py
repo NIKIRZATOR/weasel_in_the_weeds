@@ -10,7 +10,7 @@ class SplashScene(Scene):
         app,
         next_scene_factory,
         title="Загрузка...",
-        duration=2.0,
+        duration=1.0,
         background=(15, 15, 25),
     ):
         self.app = app

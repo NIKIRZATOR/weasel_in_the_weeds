@@ -31,6 +31,24 @@ ITEM_DEFINITIONS: dict[str, ItemDefinition] = {
         price=1,
         description="A simple stick.",
     ),
+    "small_backpack": ItemDefinition(
+        id="small_backpack",
+        name="Small Backpack",
+        kind=ItemKind.QUEST,
+        stackable=False,
+        max_stack=1,
+        price=0,
+        description="A small travel backpack from the hermit.",
+    ),
+    "map": ItemDefinition(
+        id="map",
+        name="Map",
+        kind=ItemKind.QUEST,
+        stackable=False,
+        max_stack=1,
+        price=0,
+        description="A magical map that remembers opened places.",
+    ),
 }
 
 

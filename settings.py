@@ -4,6 +4,7 @@ import pygame
 
 BASE_DIR = Path(__file__).resolve().parent
 LEVELS_DIR = BASE_DIR / "levels"
+DIALOGUES_DIR = BASE_DIR / "dialogues"
 ASSETS_DIR = BASE_DIR / "assets"
 CHARACTERS_DIR = ASSETS_DIR / "characters"
 TILES_DIR = ASSETS_DIR / "tiles"

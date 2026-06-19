@@ -1,0 +1,65 @@
+{
+  "id": "hermit_mouse",
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "speaker": "npc",
+      "text": "Easy there, traveler. The grass is friendly, but the forest is not.",
+      "choices": [
+        {
+          "text": "Who are you?",
+          "next": "who_are_you"
+        },
+        {
+          "text": "I need to cross the forest.",
+          "next": "need_crossing"
+        },
+        {
+          "text": "I should go.",
+          "next": null
+        }
+      ]
+    },
+    "who_are_you": {
+      "speaker": "player",
+      "text": "Who are you, and why are you waiting out here?",
+      "next": "mouse_intro"
+    },
+    "mouse_intro": {
+      "speaker": "npc",
+      "text": "A mouse with an old sword and older mistakes. I keep watch so smaller paws can pass alive.",
+      "next": "need_crossing"
+    },
+    "need_crossing": {
+      "speaker": "player",
+      "text": "I am looking for my family. If the trail goes through the forest, I have to follow it.",
+      "next": "forest_warning"
+    },
+    "forest_warning": {
+      "speaker": "npc",
+      "text": "Then listen closely. Do not fight every shadow. Hide when the grass allows it, and spend your strength only when it matters.",
+      "next": "gift_offer"
+    },
+    "gift_offer": {
+      "speaker": "npc",
+      "text": "Take this little pack and this map. The pack will carry what your paws cannot, and the map will remember places you forget.",
+      "next": "gift_result"
+    },
+    "gift_result": {
+      "speaker": "player",
+      "text": "Thank you. I will come back if I find anything about the forest.",
+      "rewards": {
+        "items": [
+          "small_backpack",
+          "map"
+        ],
+        "coins": 3,
+        "flags": [
+          "met_mouse_hermit",
+          "has_map"
+        ]
+      },
+      "next": null
+    }
+  }
+}
