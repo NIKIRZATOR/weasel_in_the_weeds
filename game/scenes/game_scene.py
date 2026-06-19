@@ -15,6 +15,8 @@ from settings import COLORS, LEVELS_DIR
 
 
 TRANSITION_FADE_DURATION = 0.45
+DAMAGE_NUMBER_DURATION = 0.75
+DAMAGE_NUMBER_RISE_SPEED = 52
 
 
 class GameScene(Scene):
@@ -50,6 +52,7 @@ class GameScene(Scene):
         self.transition_target_level = None
         self.transition_target_spawn = None
         self.transition_timer = 0.0
+        self.damage_numbers = []
 
         world_width = self.tilemap.width * self.tilemap.tile_size
         world_height = self.tilemap.height * self.tilemap.tile_size
@@ -241,6 +244,7 @@ class GameScene(Scene):
         self._update_enemies(dt)
         self._resolve_player_enemy_overlaps()
         self._apply_player_attack()
+        self._update_damage_numbers(dt)
         self._check_level_transitions()
         screen_width, screen_height = self.app.get_screen_size()
         self.camera.update(self.player, screen_width, screen_height)
@@ -407,11 +411,30 @@ class GameScene(Scene):
                 if enemy.is_dead:
                     continue
                 if _segment_hits_rect(attack_origin, attack_end, attack_thickness, enemy.get_hitbox_rect()):
-                    enemy.take_damage(damage)
+                    if enemy.take_damage(damage):
+                        self._spawn_damage_number(enemy, damage)
             self._player_attack_applied = True
             return
 
         self._player_attack_applied = False
+
+    def _spawn_damage_number(self, enemy, damage):
+        center = enemy.get_center()
+        self.damage_numbers.append(
+            DamageNumber(
+                text=str(damage),
+                x=center.x,
+                y=enemy.position.y - 8,
+            )
+        )
+
+    def _update_damage_numbers(self, dt):
+        alive_numbers = []
+        for damage_number in self.damage_numbers:
+            damage_number.update(dt)
+            if not damage_number.is_dead:
+                alive_numbers.append(damage_number)
+        self.damage_numbers = alive_numbers
 
     def _get_player_attack_segment(self):
         center = self.player.get_center()
@@ -447,6 +470,7 @@ class GameScene(Scene):
             world_object.draw(self.app.screen, self.camera)
         for enemy in self.enemies:
             enemy.draw(self.app.screen, self.camera)
+        self._draw_damage_numbers()
         self.player.draw(self.app.screen, self.camera)
         self.hud.draw(self.app.screen, self.player)
         if self.current_interaction_target is not None:
@@ -458,6 +482,10 @@ class GameScene(Scene):
                 message.get_rect(center=(screen_width // 2, 24)),
             )
         self._draw_transition_overlay()
+
+    def _draw_damage_numbers(self):
+        for damage_number in self.damage_numbers:
+            damage_number.draw(self.app.screen, self.camera, self.info_font)
 
     def _draw_transition_overlay(self):
         if self.transition_target_level is None:
@@ -562,3 +590,34 @@ def _distance_point_to_segment(point, start, end):
     closest_x = start.x + t * dx
     closest_y = start.y + t * dy
     return ((point.x - closest_x) ** 2 + (point.y - closest_y) ** 2) ** 0.5
+
+
+class DamageNumber:
+    def __init__(self, text, x, y):
+        self.text = text
+        self.position = Vector2(x, y)
+        self.age = 0.0
+        self.duration = DAMAGE_NUMBER_DURATION
+        self.is_dead = False
+
+    def update(self, dt):
+        self.age += dt
+        self.position.y -= DAMAGE_NUMBER_RISE_SPEED * dt
+        if self.age >= self.duration:
+            self.is_dead = True
+
+    def draw(self, screen, camera, font):
+        progress = min(1.0, self.age / self.duration)
+        alpha = int(255 * (1.0 - progress))
+        scale_offset = -8 * progress
+        text_surface = font.render(self.text, True, (255, 235, 120))
+        outline_surface = font.render(self.text, True, COLORS["BLACK"])
+        text_surface.set_alpha(alpha)
+        outline_surface.set_alpha(alpha)
+
+        x = self.position.x - camera.position.x
+        y = self.position.y - camera.position.y + scale_offset
+        rect = text_surface.get_rect(center=(x, y))
+        for offset_x, offset_y in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            screen.blit(outline_surface, rect.move(offset_x, offset_y))
+        screen.blit(text_surface, rect)
