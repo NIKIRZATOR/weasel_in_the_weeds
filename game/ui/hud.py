@@ -79,7 +79,7 @@ class HUD:
 
     def draw_controls(self, screen):
         _, screen_height = screen.get_size()
-        controls_text = "WASD - move | SHIFT - run | SPACE - jump | F - attack | E - interact | I - inventory"
+        controls_text = "WASD - move | SHIFT - run | SPACE - jump | ALT - dash | LMB - attack | E - interact | I - inventory"
         text = self.small_font.render(controls_text, True, (200, 200, 200))
         screen.blit(text, (10, screen_height - 32))
 

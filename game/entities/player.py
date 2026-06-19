@@ -13,6 +13,9 @@ from settings import (
     ATTACK_COST,
     ATTACK_DURATION,
     COLOR_PLAYER,
+    DASH_COOLDOWN,
+    DASH_DISTANCE,
+    DASH_DURATION,
     HEALTH_REGEN,
     HOTBAR_SIZE,
     HURT_DURATION,
@@ -34,6 +37,7 @@ from settings import (
     PLAYER_SIZE,
     PLAYER_SPEED,
     STAMINA_JUMP_COST,
+    STAMINA_DASH_COST,
     STAMINA_REGEN,
     STAMINA_RUN_COST,
 )
@@ -82,6 +86,7 @@ class Player(Entity):
 
         self.is_running = False
         self.is_jumping = False
+        self.is_dashing = False
         self.is_attacking = False
         self.is_hurt = False
         self.is_hidden = False
@@ -91,6 +96,8 @@ class Player(Entity):
         self.facing_left = False
 
         self.jump_timer = Timer(JUMP_DURATION)
+        self.dash_timer = Timer(DASH_DURATION)
+        self.dash_cooldown = Timer(DASH_COOLDOWN)
         self.attack_timer = Timer(ATTACK_DURATION)
         self.attack_cooldown = Timer(ATTACK_COOLDOWN)
         self.hurt_timer = Timer(HURT_DURATION)
@@ -99,6 +106,8 @@ class Player(Entity):
         self.jump_end_pos = Vector2()
         self.jump_offset = 0
         self.jump_distance = self.width * 1.5
+        self.dash_direction = Vector2()
+        self.dash_speed = DASH_DISTANCE / DASH_DURATION if DASH_DURATION > 0 else 0
 
         self.current_speed = self.get_effective_stats().speed
 
@@ -291,7 +300,9 @@ class Player(Entity):
 
         self.update_timers(dt)
 
-        if not self.is_jumping and not self.is_hurt:
+        if self.is_dashing:
+            self.update_dash(dt, world)
+        elif not self.is_jumping and not self.is_hurt:
             self.handle_movement(dt, keys, world)
 
         if self.is_jumping:
@@ -304,6 +315,11 @@ class Player(Entity):
     def update_timers(self, dt):
         if self.jump_timer.update(dt):
             self.complete_jump()
+
+        if self.dash_timer.update(dt):
+            self.complete_dash()
+
+        self.dash_cooldown.update(dt)
 
         if self.attack_timer.update(dt):
             self.is_attacking = False
@@ -364,6 +380,41 @@ class Player(Entity):
         self.jump_start_pos = Vector2(self.position.x, self.position.y)
         self.jump_end_pos = target_position
 
+    def try_dash(self, direction):
+        if self.is_dashing or self.is_jumping or self.dash_cooldown.is_active():
+            return False
+
+        if self.stamina < STAMINA_DASH_COST:
+            return False
+
+        if direction.length() == 0:
+            direction = self.direction
+        if direction.length() == 0:
+            return False
+
+        self.dash_direction = direction.normalize()
+        self.is_dashing = True
+        self.is_running = False
+        self.is_hurt = False
+        self.dash_timer.start()
+        self.dash_cooldown.start()
+        self.stamina -= STAMINA_DASH_COST
+
+        if self.dash_direction.x != 0:
+            self.facing_left = self.dash_direction.x < 0
+        return True
+
+    def update_dash(self, dt, world):
+        step = self.dash_direction * (self.dash_speed * dt)
+        if not world.check_collision(self.position.x + step.x, self.position.y, self):
+            self.position.x += step.x
+        if not world.check_collision(self.position.x, self.position.y + step.y, self):
+            self.position.y += step.y
+
+    def complete_dash(self):
+        self.is_dashing = False
+        self.dash_direction = Vector2()
+
     def update_jump(self):
         progress = 1 - (self.jump_timer.current / self.jump_timer.duration)
         self.position.x = self.jump_start_pos.x + (self.jump_end_pos.x - self.jump_start_pos.x) * progress
@@ -378,7 +429,7 @@ class Player(Entity):
         self.jump_offset = 0
 
     def attack_towards(self, target_x, target_y):
-        if self.attack_cooldown.is_active():
+        if self.is_dashing or self.attack_cooldown.is_active():
             return False
 
         if self.stamina < ATTACK_COST:
@@ -402,6 +453,9 @@ class Player(Entity):
         return True
 
     def take_damage(self, damage):
+        if self.is_dashing:
+            return False
+
         mitigated = max(0, int(damage) - self.get_defense())
         if mitigated <= 0:
             return False
@@ -428,12 +482,15 @@ class Player(Entity):
         self.position = Vector2(self.spawn_position.x, self.spawn_position.y)
         self.is_running = False
         self.is_jumping = False
+        self.is_dashing = False
         self.is_attacking = False
         self.is_hurt = False
         self.is_hidden = False
         self.aim_direction = Vector2(1, 0)
         self.jump_offset = 0
         self.jump_timer.active = False
+        self.dash_timer.active = False
+        self.dash_cooldown.active = False
         self.attack_timer.active = False
         self.attack_cooldown.active = False
         self.hurt_timer.active = False
@@ -446,11 +503,14 @@ class Player(Entity):
         self.position = Vector2(spawn_x, spawn_y)
         self.is_running = False
         self.is_jumping = False
+        self.is_dashing = False
         self.is_attacking = False
         self.is_hurt = False
         self.is_hidden = False
         self.jump_offset = 0
         self.jump_timer.active = False
+        self.dash_timer.active = False
+        self.dash_cooldown.active = False
         self.attack_timer.active = False
         self.hurt_timer.active = False
 
@@ -503,7 +563,7 @@ class Player(Entity):
         return Vector2(dx, dy)
 
     def _draw_body(self, screen, screen_pos):
-        color = (255, 255, 255) if self.is_hurt else COLOR_PLAYER
+        color = (180, 220, 255) if self.is_dashing else (255, 255, 255) if self.is_hurt else COLOR_PLAYER
 
         if self.sprite is None:
             body_color = (160, 160, 160) if self.is_hidden else color
@@ -517,6 +577,9 @@ class Player(Entity):
             sprite = sprite.copy()
             sprite.fill((90, 90, 90, 0), special_flags=pygame.BLEND_RGB_SUB)
             sprite.fill((35, 35, 35, 0), special_flags=pygame.BLEND_RGB_ADD)
+        if self.is_dashing:
+            sprite = sprite.copy()
+            sprite.fill((40, 90, 140, 0), special_flags=pygame.BLEND_RGB_ADD)
         if self.is_hurt:
             sprite = sprite.copy()
             sprite.fill((255, 255, 255, 0), special_flags=pygame.BLEND_RGB_ADD)

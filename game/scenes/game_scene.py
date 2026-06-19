@@ -139,19 +139,13 @@ class GameScene(Scene):
                     self.player.select_hotbar_slot(event.key - pygame.K_1)
                 elif event.key == pygame.K_SPACE and not self.player.is_jumping:
                     keys = pygame.key.get_pressed()
-                    dx = 0
-                    dy = 0
-                    if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-                        dx = -1
-                    if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-                        dx = 1
-                    if keys[pygame.K_UP] or keys[pygame.K_w]:
-                        dy = -1
-                    if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-                        dy = 1
+                    direction = self._read_movement_direction(keys)
 
-                    if dx != 0 or dy != 0:
-                        self.player.try_jump(Vector2(dx, dy), self)
+                    if direction.length() > 0:
+                        self.player.try_jump(direction, self)
+                elif event.key == pygame.K_LALT:
+                    keys = pygame.key.get_pressed()
+                    self.player.try_dash(self._read_movement_direction(keys))
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 target = self._mouse_world_position(event.pos)
                 self.player.attack_towards(target.x, target.y)
@@ -431,6 +425,19 @@ class GameScene(Scene):
             mouse_pos[0] + self.camera.position.x,
             mouse_pos[1] + self.camera.position.y,
         )
+
+    def _read_movement_direction(self, keys):
+        dx = 0
+        dy = 0
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            dx = -1
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            dx = 1
+        if keys[pygame.K_UP] or keys[pygame.K_w]:
+            dy = -1
+        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+            dy = 1
+        return Vector2(dx, dy)
 
     def draw(self):
         screen_width, _ = self.app.get_screen_size()
