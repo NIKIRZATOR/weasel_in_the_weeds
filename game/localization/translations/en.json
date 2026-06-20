@@ -106,7 +106,7 @@
       "close_hint": "Enter/E - next | 1-9 - choice | Esc - close"
     },
     "hud": {
-      "controls": "WASD | SHIFT | SPACE | ALT | LMB | E | I | K - craft | M - map",
+      "controls": "WASD | SHIFT | SPACE | ALT | LMB | RMB | LMB+RMB 1.5s | E | I | K | M",
       "map_hint": "M - map | K - craft"
     },
     "window": {
@@ -212,6 +212,18 @@
     "map": {
       "name": "Map",
       "description": "A magical map that remembers opened places."
+    },
+    "rusty_knife": {
+      "name": "Knife",
+      "description": "A light knife for quick strikes."
+    },
+    "stone_spear": {
+      "name": "Spear",
+      "description": "A long spear with a sharpened stone head."
+    },
+    "short_bow": {
+      "name": "Bow",
+      "description": "A simple bow for ranged combat."
     }
   },
   "recipes": {

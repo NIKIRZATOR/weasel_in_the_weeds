@@ -106,7 +106,7 @@
       "close_hint": "Enter/E - дальше | 1-9 - выбор | Esc - закрыть"
     },
     "hud": {
-      "controls": "WASD | SHIFT | SPACE | ALT | ЛКМ | E | I | K - крафт | M - карта",
+      "controls": "WASD | SHIFT | SPACE | ALT | ЛКМ | ПКМ | ЛКМ+ПКМ 1.5с | E | I | K | M",
       "map_hint": "M - карта | K - крафт"
     },
     "window": {
@@ -212,6 +212,18 @@
     "map": {
       "name": "Карта",
       "description": "Магическая карта, запоминающая открытые места."
+    },
+    "rusty_knife": {
+      "name": "нож",
+      "description": "Легкий нож для быстрых ударов."
+    },
+    "stone_spear": {
+      "name": "копье",
+      "description": "Длинное копье с заточенным каменным наконечником."
+    },
+    "short_bow": {
+      "name": "лук",
+      "description": "Простой лук для дальнего боя."
     }
   },
   "recipes": {

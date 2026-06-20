@@ -38,6 +38,21 @@ class CharacterStats:
 
 
 @dataclass(frozen=True)
+class WeaponAttackProfile:
+    damage_bonus: int = 1
+    damage_multiplier: float = 1.0
+    range: float = 40.0
+    thickness: int = 42
+    duration: float = 0.2
+    cooldown: float = 0.1
+    stamina_cost: float = 2.0
+    is_ranged: bool = False
+    projectile_speed: float = 320.0
+    projectile_radius: int = 5
+    projectile_distance: float = 520.0
+
+
+@dataclass(frozen=True)
 class ItemDefinition:
     id: str
     name: str
@@ -51,6 +66,8 @@ class ItemDefinition:
     icon_path: str | None = None
     wallet_key: str | None = None
     description: str = ""
+    weapon_class: str | None = None
+    attack_profiles: dict[str, WeaponAttackProfile] = field(default_factory=dict)
 
     def localized_name(self) -> str:
         localizer = get_localizer()
@@ -63,6 +80,9 @@ class ItemDefinition:
         key = f"items.{self.id}.description"
         translated = localizer.t(key)
         return translated if translated != key else self.description
+
+    def get_attack_profile(self, attack_kind: str) -> WeaponAttackProfile | None:
+        return self.attack_profiles.get(str(attack_kind))
 
 
 @dataclass

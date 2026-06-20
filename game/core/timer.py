@@ -6,7 +6,9 @@ class Timer:
         self.current = 0
         self.active = False
     
-    def start(self):
+    def start(self, duration=None):
+        if duration is not None:
+            self.duration = duration
         self.active = True
         self.current = self.duration
     

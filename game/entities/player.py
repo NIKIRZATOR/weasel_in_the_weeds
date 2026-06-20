@@ -1,4 +1,5 @@
 import math
+from dataclasses import dataclass
 
 import pygame
 
@@ -7,6 +8,7 @@ from game.core.timer import Timer
 from game.core.vector import Vector2
 from game.entities.entity import Entity
 from game.items import CharacterStats, Equipment, Inventory, ItemStack, create_item_stack
+from game.items.models import WeaponAttackProfile
 from game.items.types import EquipSlot, ItemKind
 from settings import (
     ATTACK_COOLDOWN,
@@ -41,6 +43,53 @@ from settings import (
     STAMINA_REGEN,
     STAMINA_RUN_COST,
 )
+
+
+@dataclass
+class AttackContext:
+    kind: str
+    damage: int
+    range: float
+    thickness: int
+    duration: float
+    cooldown: float
+    stamina_cost: float
+    aim_direction: Vector2
+    is_ranged: bool = False
+    projectile_speed: float = 320.0
+    projectile_radius: int = 5
+    projectile_distance: float = 520.0
+
+
+DEFAULT_ATTACK_PROFILES = {
+    "light": WeaponAttackProfile(
+        damage_bonus=1,
+        damage_multiplier=1.0,
+        range=34,
+        thickness=34,
+        duration=0.16,
+        cooldown=0.18,
+        stamina_cost=2.0,
+    ),
+    "heavy": WeaponAttackProfile(
+        damage_bonus=2,
+        damage_multiplier=1.3,
+        range=42,
+        thickness=42,
+        duration=0.24,
+        cooldown=0.34,
+        stamina_cost=7.0,
+    ),
+    "charged": WeaponAttackProfile(
+        damage_bonus=4,
+        damage_multiplier=1.8,
+        range=54,
+        thickness=48,
+        duration=0.34,
+        cooldown=0.55,
+        stamina_cost=14.0,
+    ),
+}
 
 
 class Player(Entity):
@@ -117,6 +166,7 @@ class Player(Entity):
         self.dash_speed = DASH_DISTANCE / DASH_DURATION if DASH_DURATION > 0 else 0
 
         self.current_speed = self.get_effective_stats().speed
+        self.active_attack: AttackContext | None = None
         self._sync_inventory_capacities()
 
     def get_effective_stats(self):
@@ -136,6 +186,23 @@ class Player(Entity):
 
     def get_speed(self):
         return self.get_effective_stats().speed
+
+    def get_equipped_weapon(self):
+        return self.equipment.get(EquipSlot.WEAPON)
+
+    def get_attack_profile(self, attack_kind):
+        attack_kind = str(attack_kind)
+        weapon = self.get_equipped_weapon()
+        if weapon is not None:
+            profile = weapon.definition.get_attack_profile(attack_kind)
+            if profile is not None:
+                return profile
+        if attack_kind == "charged":
+            return None
+        return DEFAULT_ATTACK_PROFILES.get(attack_kind, DEFAULT_ATTACK_PROFILES["light"])
+
+    def get_current_attack_context(self):
+        return self.active_attack
 
     def get_hotbar_stack(self, index):
         if 0 <= index < HOTBAR_SIZE:
@@ -526,6 +593,7 @@ class Player(Entity):
 
         if self.attack_timer.update(dt):
             self.is_attacking = False
+            self.active_attack = None
 
         self.attack_cooldown.update(dt)
 
@@ -631,11 +699,14 @@ class Player(Entity):
         self.is_jumping = False
         self.jump_offset = 0
 
-    def attack_towards(self, target_x, target_y):
+    def attack_towards(self, target_x, target_y, attack_kind="light"):
         if self.is_dashing or self.attack_cooldown.is_active():
             return False
 
-        if self.stamina < ATTACK_COST:
+        profile = self.get_attack_profile(attack_kind)
+        if profile is None:
+            return False
+        if self.stamina < profile.stamina_cost:
             return False
 
         center = self.get_center()
@@ -650,9 +721,24 @@ class Player(Entity):
             self.facing_left = aim.x < 0
 
         self.is_attacking = True
-        self.attack_timer.start()
-        self.attack_cooldown.start()
-        self.stamina -= ATTACK_COST
+        damage = max(1, int((self.get_attack() + profile.damage_bonus) * profile.damage_multiplier))
+        self.active_attack = AttackContext(
+            kind=str(attack_kind),
+            damage=damage,
+            range=profile.range,
+            thickness=profile.thickness,
+            duration=profile.duration,
+            cooldown=profile.cooldown,
+            stamina_cost=profile.stamina_cost,
+            aim_direction=aim,
+            is_ranged=profile.is_ranged,
+            projectile_speed=profile.projectile_speed,
+            projectile_radius=profile.projectile_radius,
+            projectile_distance=profile.projectile_distance,
+        )
+        self.attack_timer.start(profile.duration)
+        self.attack_cooldown.start(profile.cooldown)
+        self.stamina -= profile.stamina_cost
         return True
 
     def take_damage(self, damage):
@@ -687,6 +773,7 @@ class Player(Entity):
         self.is_jumping = False
         self.is_dashing = False
         self.is_attacking = False
+        self.active_attack = None
         self.is_hurt = False
         self.is_hidden = False
         self.aim_direction = Vector2(1, 0)
@@ -708,6 +795,7 @@ class Player(Entity):
         self.is_jumping = False
         self.is_dashing = False
         self.is_attacking = False
+        self.active_attack = None
         self.is_hurt = False
         self.is_hidden = False
         self.jump_offset = 0
@@ -738,6 +826,7 @@ class Player(Entity):
         )
 
         self._draw_body(screen, screen_pos)
+        self._draw_weapon_marker(screen, screen_pos)
 
         if self.is_attacking:
             self._draw_attack(screen, screen_pos)
@@ -790,24 +879,72 @@ class Player(Entity):
         screen.blit(sprite, (screen_pos.x, screen_pos.y))
 
     def _draw_attack(self, screen, screen_pos):
-        attack_offset = 40
-        attack_height = 6
-
         center_x = screen_pos.x + self.width // 2
         center_y = screen_pos.y + self.height // 2
+        active_attack = self.get_current_attack_context()
+        attack_range = active_attack.range if active_attack is not None else 40
+        attack_height = max(4, int((active_attack.thickness if active_attack is not None else 6) * 0.2))
         aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(1, 0)
         start_x = center_x + aim.x * 12
         start_y = center_y + aim.y * 12
-        end_x = start_x + aim.x * attack_offset
-        end_y = start_y + aim.y * attack_offset
+        end_x = start_x + aim.x * attack_range
+        end_y = start_y + aim.y * attack_range
 
         pygame.draw.line(
             screen,
-            (255, 200, 0),
+            (140, 210, 255) if active_attack is not None and active_attack.is_ranged else (255, 200, 0),
             (start_x, start_y),
             (end_x, end_y),
             attack_height,
         )
+
+    def _draw_weapon_marker(self, screen, screen_pos):
+        weapon = self.get_equipped_weapon()
+        if weapon is None:
+            return
+
+        weapon_class = weapon.definition.weapon_class or "blade"
+        aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(-1 if self.facing_left else 1, 0)
+        hand_x = screen_pos.x + self.width * (0.34 if self.facing_left else 0.66)
+        hand_y = screen_pos.y + self.height * 0.58
+
+        if weapon_class == "dagger":
+            tip_x = hand_x + aim.x * 18
+            tip_y = hand_y + aim.y * 18
+            pygame.draw.line(screen, (215, 215, 225), (hand_x, hand_y), (tip_x, tip_y), 4)
+            pygame.draw.circle(screen, (120, 90, 60), (int(hand_x), int(hand_y)), 3)
+            return
+
+        if weapon_class == "spear":
+            butt_x = hand_x - aim.x * 10
+            butt_y = hand_y - aim.y * 10
+            tip_x = hand_x + aim.x * 30
+            tip_y = hand_y + aim.y * 30
+            pygame.draw.line(screen, (140, 98, 58), (butt_x, butt_y), (tip_x, tip_y), 3)
+            head_left = Vector2(tip_x, tip_y) + Vector2(-aim.y, aim.x) * 4
+            head_right = Vector2(tip_x, tip_y) + Vector2(aim.y, -aim.x) * 4
+            head_tip = Vector2(tip_x, tip_y) + aim * 8
+            pygame.draw.polygon(
+                screen,
+                (210, 210, 220),
+                [(head_left.x, head_left.y), (head_right.x, head_right.y), (head_tip.x, head_tip.y)],
+            )
+            return
+
+        if weapon_class == "bow":
+            perp = Vector2(-aim.y, aim.x)
+            top = Vector2(hand_x, hand_y) + perp * 12
+            bottom = Vector2(hand_x, hand_y) - perp * 12
+            mid = Vector2(hand_x, hand_y) + aim * 8
+            pygame.draw.line(screen, (122, 85, 52), (top.x, top.y), (mid.x, mid.y), 3)
+            pygame.draw.line(screen, (122, 85, 52), (mid.x, mid.y), (bottom.x, bottom.y), 3)
+            pygame.draw.line(screen, (220, 220, 235), (top.x, top.y), (bottom.x, bottom.y), 1)
+            return
+
+        tip_x = hand_x + aim.x * 22
+        tip_y = hand_y + aim.y * 22
+        pygame.draw.line(screen, (215, 215, 225), (hand_x, hand_y), (tip_x, tip_y), 4)
+        pygame.draw.circle(screen, (120, 90, 60), (int(hand_x), int(hand_y)), 3)
 
     def _sync_resource_limits(self):
         self.health = min(self.health, self.get_max_health())

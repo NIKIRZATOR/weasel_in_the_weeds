@@ -26,6 +26,7 @@ class InventoryScene(Scene):
         self.message = ""
         self.message_timer = 0.0
         self.selected_slot = None
+        self.pressed_slot = None
         self.drag_source = None
         self.drag_start_pos = None
         self.dragging = False
@@ -131,42 +132,45 @@ class InventoryScene(Scene):
     def _handle_left_button_down(self, mouse_pos):
         self._build_layout()
         slot = self._slot_at(mouse_pos)
+        self.pressed_slot = slot
         self.drag_source = None
         self.drag_start_pos = None
         self.dragging = False
 
         if slot is None:
-            self.selected_slot = None
             return
 
         kind, index = slot
         if kind in ("inventory", "hotbar", "quest"):
             stack = self._get_slot_stack(kind, index)
             if stack is None:
-                self.selected_slot = None
                 return
-            self.drag_source = slot
             self.drag_start_pos = mouse_pos
-            return
-
-        if kind == "equipment":
-            self._handle_equipment_click(index)
+        return
 
     def _handle_mouse_motion(self, mouse_pos, buttons):
-        if self.drag_source is None or self.drag_start_pos is None or not buttons[0] or self.dragging:
+        if self.pressed_slot is None or self.drag_start_pos is None or not buttons[0] or self.dragging:
             return
 
         dx = mouse_pos[0] - self.drag_start_pos[0]
         dy = mouse_pos[1] - self.drag_start_pos[1]
         if dx * dx + dy * dy >= self.drag_threshold * self.drag_threshold:
+            self.drag_source = self.pressed_slot
             self.dragging = True
 
     def _handle_left_button_up(self, mouse_pos):
-        if self.drag_source is None:
+        target = self._slot_at(mouse_pos)
+        source = self.drag_source
+        pressed_slot = self.pressed_slot
+
+        if self.dragging and source is None:
+            self.pressed_slot = None
+            self.drag_start_pos = None
+            self.dragging = False
             return
 
-        source = self.drag_source
-        target = self._slot_at(mouse_pos)
+        if not self.dragging and pressed_slot is None:
+            return
 
         if self.dragging:
             movable_kinds = {"inventory", "hotbar", "quest"}
@@ -178,7 +182,7 @@ class InventoryScene(Scene):
             else:
                 self.selected_slot = source
         else:
-            if target is None:
+            if target is None or target != pressed_slot:
                 self.selected_slot = None
             elif target[0] == "inventory":
                 self._handle_inventory_click(target[1])
@@ -189,6 +193,7 @@ class InventoryScene(Scene):
             elif target[0] == "equipment":
                 self._handle_equipment_click(target[1])
 
+        self.pressed_slot = None
         self.drag_source = None
         self.drag_start_pos = None
         self.dragging = False
@@ -201,23 +206,15 @@ class InventoryScene(Scene):
             return
 
         selected_kind, selected_index = self.selected_slot
-        if selected_kind == "inventory":
-            if selected_index == inventory_index:
-                self.selected_slot = None
-                return
-            self.player.inventory.swap_slots(selected_index, inventory_index)
+        if selected_kind == "inventory" and selected_index == inventory_index:
+            self.selected_slot = None
+            return
+
+        if stack is not None:
             self.selected_slot = ("inventory", inventory_index)
             return
 
-        if selected_kind == "hotbar":
-            if self.player.swap_inventory_and_hotbar(inventory_index, selected_index):
-                self.selected_slot = ("inventory", inventory_index)
-            else:
-                self._set_message(self.localizer.t("ui.inventory.move_failed"))
-            return
-
-        if selected_kind == "quest":
-            self._set_message(self.localizer.t("ui.inventory.quest_separate"))
+        self.selected_slot = None
 
     def _handle_hotbar_click(self, hotbar_index):
         stack = self.player.get_hotbar_stack(hotbar_index)
@@ -227,23 +224,15 @@ class InventoryScene(Scene):
             return
 
         selected_kind, selected_index = self.selected_slot
-        if selected_kind == "hotbar":
-            if selected_index == hotbar_index:
-                self.selected_slot = None
-                return
-            self.player.swap_hotbar_slots(selected_index, hotbar_index)
+        if selected_kind == "hotbar" and selected_index == hotbar_index:
+            self.selected_slot = None
+            return
+
+        if stack is not None:
             self.selected_slot = ("hotbar", hotbar_index)
             return
 
-        if selected_kind == "inventory":
-            if self.player.swap_inventory_and_hotbar(selected_index, hotbar_index):
-                self.selected_slot = ("hotbar", hotbar_index)
-            else:
-                self._set_message(self.localizer.t("ui.inventory.move_failed"))
-            return
-
-        if selected_kind == "quest":
-            self._set_message(self.localizer.t("ui.inventory.quest_no_hotbar"))
+        self.selected_slot = None
 
     def _handle_quest_click(self, quest_index):
         stack = self.player.quest_inventory.get_stack_at(quest_index)
@@ -253,15 +242,15 @@ class InventoryScene(Scene):
             return
 
         selected_kind, selected_index = self.selected_slot
-        if selected_kind == "quest":
-            if selected_index == quest_index:
-                self.selected_slot = None
-                return
-            self.player.quest_inventory.swap_slots(selected_index, quest_index)
+        if selected_kind == "quest" and selected_index == quest_index:
+            self.selected_slot = None
+            return
+
+        if stack is not None:
             self.selected_slot = ("quest", quest_index)
             return
 
-        self._set_message(self.localizer.t("ui.inventory.quest_separate"))
+        self.selected_slot = None
 
     def _handle_equipment_click(self, equip_slot):
         if self.selected_slot is not None and self.selected_slot[0] == "inventory":

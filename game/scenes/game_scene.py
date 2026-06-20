@@ -20,6 +20,7 @@ from settings import COLORS, LEVELS_DIR
 TRANSITION_FADE_DURATION = 0.45
 DAMAGE_NUMBER_DURATION = 0.75
 DAMAGE_NUMBER_RISE_SPEED = 52
+CHARGED_ATTACK_THRESHOLD = 1.0
 
 
 class GameScene(Scene):
@@ -58,6 +59,10 @@ class GameScene(Scene):
         self.transition_target_spawn = None
         self.transition_timer = 0.0
         self.damage_numbers = []
+        self.player_projectiles = []
+        self.mouse_buttons_held = set()
+        self.mouse_hold_time = 0.0
+        self.charged_combo_fired = False
 
         world_width = self.tilemap.width * self.tilemap.tile_size
         world_height = self.tilemap.height * self.tilemap.tile_size
@@ -189,9 +194,29 @@ class GameScene(Scene):
                 elif event.key == pygame.K_LALT:
                     keys = pygame.key.get_pressed()
                     self.player.try_dash(self._read_movement_direction(keys))
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 3):
+                self.mouse_buttons_held.add(event.button)
+                if self.mouse_buttons_held == {1, 3}:
+                    self.mouse_hold_time = 0.0
+                    self.charged_combo_fired = False
+            elif event.type == pygame.MOUSEBUTTONUP and event.button in (1, 3):
+                if self.charged_combo_fired:
+                    self.mouse_buttons_held.discard(event.button)
+                    if self.mouse_buttons_held != {1, 3}:
+                        self.mouse_hold_time = 0.0
+                        self.charged_combo_fired = False
+                    continue
+
+                if self.mouse_buttons_held == {1, 3}:
+                    self.mouse_buttons_held.discard(event.button)
+                    self.mouse_hold_time = 0.0
+                    continue
+
                 target = self._mouse_world_position(event.pos)
-                self.player.attack_towards(target.x, target.y)
+                attack_kind = "light" if event.button == 1 else "heavy"
+                self.player.attack_towards(target.x, target.y, attack_kind=attack_kind)
+                self.mouse_buttons_held.discard(event.button)
+                self.mouse_hold_time = 0.0
 
     def check_collision(self, x, y, entity, ignore_jump=False):
         if self.collision_system.check_collision(x, y, entity, ignore_jump):
@@ -339,11 +364,22 @@ class GameScene(Scene):
             return
 
         keys = pygame.key.get_pressed()
+        if self.mouse_buttons_held == {1, 3}:
+            self.mouse_hold_time += dt
+            if not self.charged_combo_fired and self.mouse_hold_time >= CHARGED_ATTACK_THRESHOLD:
+                mouse_pos = pygame.mouse.get_pos()
+                target = self._mouse_world_position(mouse_pos)
+                if self.player.attack_towards(target.x, target.y, attack_kind="charged"):
+                    self.charged_combo_fired = True
+        else:
+            self.mouse_hold_time = 0.0
+            self.charged_combo_fired = False
         self.player.update(dt, keys, self)
         self._update_map_reveal()
         self._update_grass_hide_zones()
         self._update_checkpoints()
         self._update_enemies(dt)
+        self._update_player_projectiles(dt)
         self._resolve_player_enemy_overlaps()
         self._apply_player_attack()
         self._update_damage_numbers(dt)
@@ -520,8 +556,17 @@ class GameScene(Scene):
             if self._player_attack_applied:
                 return
 
-            damage = max(1, int(self.player.get_attack()))
-            attack_origin, attack_end, attack_thickness = self._get_player_attack_segment()
+            attack = self.player.get_current_attack_context()
+            if attack is None:
+                return
+
+            if attack.is_ranged:
+                self._spawn_player_projectile(attack)
+                self._player_attack_applied = True
+                return
+
+            damage = attack.damage
+            attack_origin, attack_end, attack_thickness = self._get_player_attack_segment(attack)
             for enemy in self.enemies:
                 if enemy.is_dead:
                     continue
@@ -551,12 +596,41 @@ class GameScene(Scene):
                 alive_numbers.append(damage_number)
         self.damage_numbers = alive_numbers
 
-    def _get_player_attack_segment(self):
+    def _spawn_player_projectile(self, attack):
         center = self.player.get_center()
-        aim = self.player.aim_direction.normalize() if self.player.aim_direction.length() > 0 else Vector2(1, 0)
+        spawn_x = center.x + attack.aim_direction.x * 16
+        spawn_y = center.y + attack.aim_direction.y * 16
+        self.player_projectiles.append(
+            PlayerProjectile(
+                spawn_x,
+                spawn_y,
+                attack.aim_direction.x,
+                attack.aim_direction.y,
+                speed=attack.projectile_speed,
+                damage=attack.damage,
+                radius=attack.projectile_radius,
+                max_distance=attack.projectile_distance,
+            )
+        )
+
+    def _update_player_projectiles(self, dt):
+        alive_projectiles = []
+        for projectile in self.player_projectiles:
+            projectile.update(dt, self)
+            if not projectile.is_dead:
+                alive_projectiles.append(projectile)
+        self.player_projectiles = alive_projectiles
+
+    def _get_player_attack_segment(self, attack=None):
+        center = self.player.get_center()
+        attack = attack or self.player.get_current_attack_context()
+        aim_source = attack.aim_direction if attack is not None else self.player.aim_direction
+        attack_range = attack.range if attack is not None else 40
+        attack_thickness = attack.thickness if attack is not None else 42
+        aim = aim_source.normalize() if aim_source.length() > 0 else Vector2(1, 0)
         start = Vector2(center.x + aim.x * 12, center.y + aim.y * 12)
-        end = Vector2(start.x + aim.x * 40, start.y + aim.y * 40)
-        return start, end, 42
+        end = Vector2(start.x + aim.x * attack_range, start.y + aim.y * attack_range)
+        return start, end, attack_thickness
 
     def _mouse_world_position(self, mouse_pos):
         return Vector2(
@@ -585,6 +659,7 @@ class GameScene(Scene):
             world_object.draw(self.app.screen, self.camera)
         for enemy in self.enemies:
             enemy.draw(self.app.screen, self.camera)
+        self._draw_player_projectiles()
         self._draw_damage_numbers()
         self.player.draw(self.app.screen, self.camera)
         self.hud.draw(self.app.screen, self.player)
@@ -601,6 +676,10 @@ class GameScene(Scene):
     def _draw_damage_numbers(self):
         for damage_number in self.damage_numbers:
             damage_number.draw(self.app.screen, self.camera, self.info_font)
+
+    def _draw_player_projectiles(self):
+        for projectile in self.player_projectiles:
+            projectile.draw(self.app.screen, self.camera)
 
     def _draw_transition_overlay(self):
         if self.transition_target_level is None:
@@ -736,3 +815,67 @@ class DamageNumber:
         for offset_x, offset_y in ((-1, 0), (1, 0), (0, -1), (0, 1)):
             screen.blit(outline_surface, rect.move(offset_x, offset_y))
         screen.blit(text_surface, rect)
+
+
+class PlayerProjectile:
+    def __init__(self, x, y, dir_x, dir_y, speed, damage, radius=5, max_distance=520.0):
+        self.position = Vector2(x, y)
+        self.direction = Vector2(dir_x, dir_y).normalize() if Vector2(dir_x, dir_y).length() > 0 else Vector2(1, 0)
+        self.speed = float(speed)
+        self.damage = max(1, int(damage))
+        self.radius = max(2, int(radius))
+        self.max_distance = float(max_distance)
+        self.travelled_distance = 0.0
+        self.is_dead = False
+
+    def update(self, dt, game_scene):
+        if self.is_dead:
+            return
+
+        step = self.direction * (self.speed * dt)
+        next_x = self.position.x + step.x
+        next_y = self.position.y + step.y
+        probe = _ProjectileProbe(self.radius)
+
+        if game_scene.collision_system.check_collision(next_x - self.radius, next_y - self.radius, probe):
+            self.is_dead = True
+            return
+
+        self.position.x = next_x
+        self.position.y = next_y
+        self.travelled_distance += step.length()
+
+        projectile_rect = (
+            self.position.x - self.radius,
+            self.position.y - self.radius,
+            self.radius * 2,
+            self.radius * 2,
+        )
+        for enemy in game_scene.enemies:
+            if enemy.is_dead:
+                continue
+            if not _rects_intersect(projectile_rect, enemy.get_hitbox_rect()):
+                continue
+            if enemy.take_damage(self.damage):
+                game_scene._spawn_damage_number(enemy, self.damage)
+            self.is_dead = True
+            return
+
+        if self.travelled_distance >= self.max_distance:
+            self.is_dead = True
+
+    def draw(self, screen, camera):
+        if self.is_dead:
+            return
+        x = int(self.position.x - camera.position.x)
+        y = int(self.position.y - camera.position.y)
+        pygame.draw.circle(screen, (150, 220, 255), (x, y), self.radius)
+        pygame.draw.circle(screen, COLORS["BLACK"], (x, y), self.radius, width=1)
+
+
+class _ProjectileProbe:
+    def __init__(self, radius):
+        self.radius = radius * 2
+
+    def get_hitbox_at(self, x, y):
+        return (x, y, self.radius, self.radius)

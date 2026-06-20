@@ -208,6 +208,30 @@
       "height": 1
     },
     {
+      "type": "pickable_object",
+      "name": "rusty_knife",
+      "x": 3,
+      "y": 3,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "sword",
+      "x": 1,
+      "y": 1,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stone_spear",
+      "x": 8,
+      "y": 16,
+      "width": 1,
+      "height": 1
+    },
+    {
       "type": "gatherable_object",
       "name": "Fallen Log",
       "x": 9,

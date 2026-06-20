@@ -6,7 +6,7 @@ from pathlib import Path
 import pygame
 
 from game.core.assets import load_image
-from game.items.models import ItemDefinition, ItemStack
+from game.items.models import ItemDefinition, ItemStack, WeaponAttackProfile
 from game.items.types import EquipSlot, ItemKind
 from settings import ASSETS_DIR
 
@@ -36,6 +36,23 @@ def _load_item_definitions() -> dict[str, ItemDefinition]:
             icon_path=raw_item.get("icon_path"),
             wallet_key=raw_item.get("wallet_key"),
             description=raw_item.get("description", ""),
+            weapon_class=raw_item.get("weapon_class"),
+            attack_profiles={
+                str(attack_kind): WeaponAttackProfile(
+                    damage_bonus=int(raw_profile.get("damage_bonus", 1)),
+                    damage_multiplier=float(raw_profile.get("damage_multiplier", 1.0)),
+                    range=float(raw_profile.get("range", 40.0)),
+                    thickness=int(raw_profile.get("thickness", 42)),
+                    duration=float(raw_profile.get("duration", 0.2)),
+                    cooldown=float(raw_profile.get("cooldown", 0.1)),
+                    stamina_cost=float(raw_profile.get("stamina_cost", 2.0)),
+                    is_ranged=bool(raw_profile.get("is_ranged", False)),
+                    projectile_speed=float(raw_profile.get("projectile_speed", 320.0)),
+                    projectile_radius=int(raw_profile.get("projectile_radius", 5)),
+                    projectile_distance=float(raw_profile.get("projectile_distance", 520.0)),
+                )
+                for attack_kind, raw_profile in raw_item.get("attack_profiles", {}).items()
+            },
         )
 
     return definitions
