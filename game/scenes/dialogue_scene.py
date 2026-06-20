@@ -128,7 +128,11 @@ class DialogueScene(Scene):
 
     def _apply_current_node_rewards(self):
         node = self._current_node()
-        if node is None or self.current_node_id in self.npc.rewarded_nodes:
+        if node is None:
+            return
+
+        npc_key = self.npc.persistence_id
+        if self.player.has_claimed_dialogue_reward(npc_key, self.current_node_id):
             return
 
         rewards = node.get("rewards")
@@ -156,7 +160,7 @@ class DialogueScene(Scene):
             if self.player.set_flag(flag):
                 messages.append(str(flag))
 
-        self.npc.rewarded_nodes.add(self.current_node_id)
+        self.player.mark_dialogue_reward_claimed(npc_key, self.current_node_id)
         if messages:
             self.message = "Received: " + ", ".join(messages)
             self.message_timer = 2.0

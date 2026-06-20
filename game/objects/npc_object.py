@@ -24,7 +24,7 @@ class NpcObject(WorldObject):
         self.health = self.max_health
         self.dialogue_error = None
         self.dialogue = self._load_dialogue(properties)
-        self.rewarded_nodes = set()
+        self.persistence_id = self._build_persistence_id(properties)
 
     def interact(self, player, game_scene):
         if not self.dialogue:
@@ -51,6 +51,17 @@ class NpcObject(WorldObject):
             self.dialogue_error = f"Dialogue load failed: {dialogue_file}"
             print(f"{self.dialogue_error}: {error}")
             return None
+
+    def _build_persistence_id(self, properties):
+        explicit_id = properties.get("npc_id")
+        if explicit_id:
+            return str(explicit_id)
+
+        dialogue_file = properties.get("dialogue_file")
+        if dialogue_file:
+            return f"dialogue:{dialogue_file}"
+
+        return f"name:{self.name}:{int(self.position.x)}:{int(self.position.y)}"
 
     def draw(self, screen, camera):
         screen_x = self.position.x - camera.position.x

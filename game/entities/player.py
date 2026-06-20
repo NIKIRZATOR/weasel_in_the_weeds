@@ -81,6 +81,7 @@ class Player(Entity):
         self.selected_hotbar_index = 0
         self.story_flags = set()
         self.explored_tiles_by_level: dict[str, list[list[bool]]] = {}
+        self.claimed_dialogue_rewards_by_npc: dict[str, set[str]] = {}
 
         self.health = self.get_max_health()
         self.stamina = self.get_max_stamina()
@@ -261,6 +262,18 @@ class Player(Entity):
         if visited is None and width is not None and height is not None:
             visited = self.ensure_map_state(level_key, width, height)
         return visited
+
+    def has_claimed_dialogue_reward(self, npc_key, node_id):
+        if not npc_key or not node_id:
+            return False
+        return str(node_id) in self.claimed_dialogue_rewards_by_npc.get(str(npc_key), set())
+
+    def mark_dialogue_reward_claimed(self, npc_key, node_id):
+        if not npc_key or not node_id:
+            return False
+        claimed_nodes = self.claimed_dialogue_rewards_by_npc.setdefault(str(npc_key), set())
+        claimed_nodes.add(str(node_id))
+        return True
 
     def equip_inventory_slot(self, inventory_index, equip_slot):
         if not isinstance(equip_slot, EquipSlot):
