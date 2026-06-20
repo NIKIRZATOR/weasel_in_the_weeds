@@ -109,6 +109,10 @@
       "controls": "WASD | SHIFT | SPACE | ALT | ЛКМ | ПКМ | ЛКМ+ПКМ 1.5с | E | I | K | M",
       "map_hint": "M - карта | K - крафт"
     },
+    "combat": {
+      "no_stamina": "Недостаточно выносливости",
+      "unarmed": "Безоружный"
+    },
     "window": {
       "game_title": "Weales in the weeds RPG - {level}"
     },

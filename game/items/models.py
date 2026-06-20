@@ -43,9 +43,14 @@ class WeaponAttackProfile:
     damage_multiplier: float = 1.0
     range: float = 40.0
     thickness: int = 42
+    shape: str = "line"
+    arc_degrees: float = 60.0
     duration: float = 0.2
     cooldown: float = 0.1
     stamina_cost: float = 2.0
+    recovery: float = 0.0
+    knockback: float = 24.0
+    stagger: float = 0.08
     is_ranged: bool = False
     projectile_speed: float = 320.0
     projectile_radius: int = 5

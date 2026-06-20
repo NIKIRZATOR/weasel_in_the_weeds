@@ -51,10 +51,16 @@ class AttackContext:
     damage: int
     range: float
     thickness: int
+    shape: str
+    arc_degrees: float
     duration: float
     cooldown: float
+    recovery: float
     stamina_cost: float
+    knockback: float
+    stagger: float
     aim_direction: Vector2
+    weapon_class: str | None = None
     is_ranged: bool = False
     projectile_speed: float = 320.0
     projectile_radius: int = 5
@@ -67,27 +73,42 @@ DEFAULT_ATTACK_PROFILES = {
         damage_multiplier=1.0,
         range=34,
         thickness=34,
+        shape="arc",
+        arc_degrees=42,
         duration=0.16,
         cooldown=0.18,
         stamina_cost=2.0,
+        recovery=0.02,
+        knockback=18.0,
+        stagger=0.04,
     ),
     "heavy": WeaponAttackProfile(
         damage_bonus=2,
         damage_multiplier=1.3,
         range=42,
         thickness=42,
+        shape="arc",
+        arc_degrees=64,
         duration=0.24,
         cooldown=0.34,
         stamina_cost=7.0,
+        recovery=0.12,
+        knockback=34.0,
+        stagger=0.12,
     ),
     "charged": WeaponAttackProfile(
         damage_bonus=4,
         damage_multiplier=1.8,
         range=54,
         thickness=48,
+        shape="arc",
+        arc_degrees=84,
         duration=0.34,
         cooldown=0.55,
         stamina_cost=14.0,
+        recovery=0.22,
+        knockback=52.0,
+        stagger=0.22,
     ),
 }
 
@@ -157,6 +178,7 @@ class Player(Entity):
         self.attack_timer = Timer(ATTACK_DURATION)
         self.attack_cooldown = Timer(ATTACK_COOLDOWN)
         self.hurt_timer = Timer(HURT_DURATION)
+        self.recovery_timer = Timer(0.0)
 
         self.jump_start_pos = Vector2()
         self.jump_end_pos = Vector2()
@@ -167,6 +189,7 @@ class Player(Entity):
 
         self.current_speed = self.get_effective_stats().speed
         self.active_attack: AttackContext | None = None
+        self.last_attack_fail_reason = ""
         self._sync_inventory_capacities()
 
     def get_effective_stats(self):
@@ -203,6 +226,9 @@ class Player(Entity):
 
     def get_current_attack_context(self):
         return self.active_attack
+
+    def is_recovering(self):
+        return self.recovery_timer.is_active()
 
     def get_hotbar_stack(self, index):
         if 0 <= index < HOTBAR_SIZE:
@@ -572,7 +598,7 @@ class Player(Entity):
 
         if self.is_dashing:
             self.update_dash(dt, world)
-        elif not self.is_jumping and not self.is_hurt:
+        elif not self.is_jumping and not self.is_hurt and (self.is_attacking or not self.is_recovering()):
             self.handle_movement(dt, keys, world)
 
         if self.is_jumping:
@@ -600,6 +626,8 @@ class Player(Entity):
         if self.hurt_timer.update(dt):
             self.is_hurt = False
 
+        self.recovery_timer.update(dt)
+
     def handle_movement(self, dt, keys, world):
         movement = self._read_movement_input(keys)
         dx = movement.x
@@ -612,6 +640,8 @@ class Player(Entity):
             return
 
         step_speed = self.current_speed
+        if self.is_attacking:
+            step_speed *= 0.5
         if dx != 0 and dy != 0:
             step_speed *= 0.707
 
@@ -701,12 +731,15 @@ class Player(Entity):
 
     def attack_towards(self, target_x, target_y, attack_kind="light"):
         if self.is_dashing or self.attack_cooldown.is_active():
+            self.last_attack_fail_reason = "busy"
             return False
 
         profile = self.get_attack_profile(attack_kind)
         if profile is None:
+            self.last_attack_fail_reason = "no_attack_profile"
             return False
         if self.stamina < profile.stamina_cost:
+            self.last_attack_fail_reason = "not_enough_stamina"
             return False
 
         center = self.get_center()
@@ -727,10 +760,16 @@ class Player(Entity):
             damage=damage,
             range=profile.range,
             thickness=profile.thickness,
+            shape=profile.shape,
+            arc_degrees=profile.arc_degrees,
             duration=profile.duration,
             cooldown=profile.cooldown,
+            recovery=profile.recovery,
             stamina_cost=profile.stamina_cost,
+            knockback=profile.knockback,
+            stagger=profile.stagger,
             aim_direction=aim,
+            weapon_class=self.get_equipped_weapon().definition.weapon_class if self.get_equipped_weapon() is not None else None,
             is_ranged=profile.is_ranged,
             projectile_speed=profile.projectile_speed,
             projectile_radius=profile.projectile_radius,
@@ -738,7 +777,9 @@ class Player(Entity):
         )
         self.attack_timer.start(profile.duration)
         self.attack_cooldown.start(profile.cooldown)
+        self.recovery_timer.start(profile.duration + profile.recovery)
         self.stamina -= profile.stamina_cost
+        self.last_attack_fail_reason = ""
         return True
 
     def take_damage(self, damage):
@@ -784,6 +825,8 @@ class Player(Entity):
         self.attack_timer.active = False
         self.attack_cooldown.active = False
         self.hurt_timer.active = False
+        self.recovery_timer.active = False
+        self.last_attack_fail_reason = ""
 
     def set_respawn_point(self, spawn_x, spawn_y):
         self.spawn_position = Vector2(spawn_x, spawn_y)
@@ -804,6 +847,8 @@ class Player(Entity):
         self.dash_cooldown.active = False
         self.attack_timer.active = False
         self.hurt_timer.active = False
+        self.recovery_timer.active = False
+        self.last_attack_fail_reason = ""
 
     def get_visual_position(self):
         return Vector2(
@@ -882,21 +927,25 @@ class Player(Entity):
         center_x = screen_pos.x + self.width // 2
         center_y = screen_pos.y + self.height // 2
         active_attack = self.get_current_attack_context()
-        attack_range = active_attack.range if active_attack is not None else 40
-        attack_height = max(4, int((active_attack.thickness if active_attack is not None else 6) * 0.2))
+        if active_attack is None:
+            return
+        attack_range = active_attack.range
+        attack_height = max(4, int(active_attack.thickness * 0.2))
         aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(1, 0)
         start_x = center_x + aim.x * 12
         start_y = center_y + aim.y * 12
         end_x = start_x + aim.x * attack_range
         end_y = start_y + aim.y * attack_range
+        color = (140, 210, 255) if active_attack.is_ranged else (255, 200, 0)
 
-        pygame.draw.line(
-            screen,
-            (140, 210, 255) if active_attack is not None and active_attack.is_ranged else (255, 200, 0),
-            (start_x, start_y),
-            (end_x, end_y),
-            attack_height,
-        )
+        if active_attack.shape == "arc":
+            perp = Vector2(-aim.y, aim.x)
+            left = Vector2(end_x, end_y) + perp * (active_attack.thickness * 0.35)
+            right = Vector2(end_x, end_y) - perp * (active_attack.thickness * 0.35)
+            pygame.draw.polygon(screen, color, [(start_x, start_y), (left.x, left.y), (right.x, right.y)])
+            return
+
+        pygame.draw.line(screen, color, (start_x, start_y), (end_x, end_y), attack_height)
 
     def _draw_weapon_marker(self, screen, screen_pos):
         weapon = self.get_equipped_weapon()

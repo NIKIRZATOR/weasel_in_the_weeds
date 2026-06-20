@@ -80,13 +80,24 @@ class Enemy(Entity):
         self.stuck_timer = 0.0
         self.stuck_timeout = 3.0
         self.stuck_repath_cooldown = 0.0
+        self.hurt_flash_timer = 0.0
+        self.stun_timer = 0.0
+        self.knockback_velocity = Vector2(0, 0)
 
-    def take_damage(self, damage):
+    def take_damage(self, damage, attack_kind=None):
         amount = max(1, int(damage))
         self.health = max(0, self.health - amount)
+        self.hurt_flash_timer = 0.12
         if self.health <= 0:
             self.is_dead = True
         return True
+
+    def apply_hit_reaction(self, direction, force=0.0, stun=0.0):
+        if direction.length() > 0 and force > 0:
+            self.knockback_velocity = direction.normalize() * force
+        self.stun_timer = max(self.stun_timer, stun)
+        self.current_path = []
+        self.current_path_target_tile = None
 
     def update(self, dt, game_scene):
         if self.is_dead:
@@ -94,6 +105,13 @@ class Enemy(Entity):
 
         self.attack_cooldown.update(dt)
         self.stuck_repath_cooldown = max(0.0, self.stuck_repath_cooldown - dt)
+        self.hurt_flash_timer = max(0.0, self.hurt_flash_timer - dt)
+
+        if self._update_knockback(dt, game_scene):
+            return
+        if self.stun_timer > 0:
+            self.stun_timer = max(0.0, self.stun_timer - dt)
+            return
 
         player = game_scene.player
         player_center = player.get_center()
@@ -454,6 +472,18 @@ class Enemy(Entity):
     def _reset_stuck_state(self):
         self.stuck_timer = 0.0
 
+    def _update_knockback(self, dt, game_scene):
+        speed = self.knockback_velocity.length()
+        if speed <= 0.01:
+            self.knockback_velocity = Vector2(0, 0)
+            return False
+
+        step = self.knockback_velocity * dt
+        self._try_move(step.x, step.y, game_scene)
+        damping = max(0.0, 1.0 - dt * 8.0)
+        self.knockback_velocity = self.knockback_velocity * damping
+        return True
+
     def _update_facing_from_direction(self, direction):
         if abs(direction.x) > 0.0001:
             self.facing_left = direction.x < 0
@@ -472,7 +502,8 @@ class Enemy(Entity):
     def _draw_body(self, screen, camera):
         x = self.position.x - camera.position.x
         y = self.position.y - camera.position.y
-        pygame.draw.rect(screen, self.color, (x, y, self.width, self.height), border_radius=6)
+        body_color = (255, 245, 245) if self.hurt_flash_timer > 0 else self.color
+        pygame.draw.rect(screen, body_color, (x, y, self.width, self.height), border_radius=6)
         pygame.draw.rect(screen, COLORS["BLACK"], (x, y, self.width, self.height), width=2, border_radius=6)
 
         dot_color = COLORS["BLACK"]

@@ -1,3 +1,5 @@
+import math
+import random
 from pathlib import Path
 
 import pygame
@@ -20,7 +22,10 @@ from settings import COLORS, LEVELS_DIR
 TRANSITION_FADE_DURATION = 0.45
 DAMAGE_NUMBER_DURATION = 0.75
 DAMAGE_NUMBER_RISE_SPEED = 52
-CHARGED_ATTACK_THRESHOLD = 1.0
+CHARGED_ATTACK_THRESHOLD = 1.5
+HIT_STOP_DURATION = 0.055
+SCREEN_SHAKE_DURATION = 0.12
+SCREEN_SHAKE_STRENGTH = 5.0
 
 
 class GameScene(Scene):
@@ -63,6 +68,9 @@ class GameScene(Scene):
         self.mouse_buttons_held = set()
         self.mouse_hold_time = 0.0
         self.charged_combo_fired = False
+        self.hit_stop_timer = 0.0
+        self.screen_shake_timer = 0.0
+        self.screen_shake_strength = 0.0
 
         world_width = self.tilemap.width * self.tilemap.tile_size
         world_height = self.tilemap.height * self.tilemap.tile_size
@@ -214,7 +222,8 @@ class GameScene(Scene):
 
                 target = self._mouse_world_position(event.pos)
                 attack_kind = "light" if event.button == 1 else "heavy"
-                self.player.attack_towards(target.x, target.y, attack_kind=attack_kind)
+                if not self.player.attack_towards(target.x, target.y, attack_kind=attack_kind):
+                    self._handle_attack_fail()
                 self.mouse_buttons_held.discard(event.button)
                 self.mouse_hold_time = 0.0
 
@@ -363,6 +372,16 @@ class GameScene(Scene):
             self._update_level_transition(dt)
             return
 
+        self._update_screen_shake(dt)
+        if self.hit_stop_timer > 0:
+            self.hit_stop_timer = max(0.0, self.hit_stop_timer - dt)
+            self._update_damage_numbers(dt)
+            if self.last_interaction_timer > 0:
+                self.last_interaction_timer = max(0.0, self.last_interaction_timer - dt)
+                if self.last_interaction_timer == 0.0:
+                    self.last_interaction_message = ""
+            return
+
         keys = pygame.key.get_pressed()
         if self.mouse_buttons_held == {1, 3}:
             self.mouse_hold_time += dt
@@ -371,6 +390,8 @@ class GameScene(Scene):
                 target = self._mouse_world_position(mouse_pos)
                 if self.player.attack_towards(target.x, target.y, attack_kind="charged"):
                     self.charged_combo_fired = True
+                else:
+                    self._handle_attack_fail()
         else:
             self.mouse_hold_time = 0.0
             self.charged_combo_fired = False
@@ -570,13 +591,27 @@ class GameScene(Scene):
             for enemy in self.enemies:
                 if enemy.is_dead:
                     continue
-                if _segment_hits_rect(attack_origin, attack_end, attack_thickness, enemy.get_hitbox_rect()):
-                    if enemy.take_damage(damage):
-                        self._spawn_damage_number(enemy, damage)
+                if not self._attack_hits_enemy(attack, attack_origin, attack_end, attack_thickness, enemy):
+                    continue
+                if enemy.take_damage(damage, attack.kind):
+                    enemy.apply_hit_reaction(attack.aim_direction, attack.knockback, attack.stagger)
+                    self._spawn_damage_number(enemy, damage)
+                    self._trigger_hit_feedback(attack)
             self._player_attack_applied = True
             return
 
         self._player_attack_applied = False
+
+    def _attack_hits_enemy(self, attack, attack_origin, attack_end, attack_thickness, enemy):
+        if attack.shape == "arc":
+            return _arc_hits_rect(
+                attack_origin,
+                attack.aim_direction,
+                attack.range,
+                attack.arc_degrees,
+                enemy.get_hitbox_rect(),
+            )
+        return _segment_hits_rect(attack_origin, attack_end, attack_thickness, enemy.get_hitbox_rect())
 
     def _spawn_damage_number(self, enemy, damage):
         center = enemy.get_center()
@@ -632,6 +667,50 @@ class GameScene(Scene):
         end = Vector2(start.x + aim.x * attack_range, start.y + aim.y * attack_range)
         return start, end, attack_thickness
 
+    def _handle_attack_fail(self):
+        if self.player.last_attack_fail_reason == "not_enough_stamina":
+            self.last_interaction_message = self.localizer.t("ui.combat.no_stamina")
+            self.last_interaction_timer = 0.7
+
+    def _trigger_hit_feedback(self, attack):
+        self.hit_stop_timer = max(self.hit_stop_timer, HIT_STOP_DURATION)
+        strength_scale = {"light": 0.8, "heavy": 1.0, "charged": 1.35}.get(attack.kind, 0.8)
+        self.screen_shake_timer = max(self.screen_shake_timer, SCREEN_SHAKE_DURATION)
+        self.screen_shake_strength = max(self.screen_shake_strength, SCREEN_SHAKE_STRENGTH * strength_scale)
+
+    def _update_screen_shake(self, dt):
+        if self.screen_shake_timer <= 0:
+            self.screen_shake_timer = 0.0
+            self.screen_shake_strength = 0.0
+            return
+        self.screen_shake_timer = max(0.0, self.screen_shake_timer - dt)
+        if self.screen_shake_timer == 0.0:
+            self.screen_shake_strength = 0.0
+
+    def _current_screen_shake_offset(self):
+        if self.screen_shake_timer <= 0 or self.screen_shake_strength <= 0:
+            return Vector2(0, 0)
+        progress = self.screen_shake_timer / SCREEN_SHAKE_DURATION
+        strength = self.screen_shake_strength * progress
+        return Vector2(
+            random.uniform(-strength, strength),
+            random.uniform(-strength, strength),
+        )
+
+    def _build_hud_combat_state(self):
+        weapon = self.player.get_equipped_weapon()
+        charge_progress = 0.0
+        charging = self.mouse_buttons_held == {1, 3} and not self.charged_combo_fired
+        if charging:
+            charge_progress = min(1.0, self.mouse_hold_time / CHARGED_ATTACK_THRESHOLD)
+        return {
+            "charging": charging,
+            "charge_progress": charge_progress,
+            "weapon_name": weapon.name if weapon is not None else self.localizer.t("ui.combat.unarmed"),
+            "weapon_class": weapon.definition.weapon_class if weapon is not None else None,
+            "not_enough_stamina": self.player.last_attack_fail_reason == "not_enough_stamina" and self.last_interaction_timer > 0,
+        }
+
     def _mouse_world_position(self, mouse_pos):
         return Vector2(
             mouse_pos[0] + self.camera.position.x,
@@ -654,6 +733,9 @@ class GameScene(Scene):
     def draw(self):
         screen_width, _ = self.app.get_screen_size()
         self.app.screen.fill(COLORS["BLACK"])
+        shake_offset = self._current_screen_shake_offset()
+        self.camera.position.x += shake_offset.x
+        self.camera.position.y += shake_offset.y
         self.tilemap.draw(self.app.screen, self.camera)
         for world_object in self.world_objects:
             world_object.draw(self.app.screen, self.camera)
@@ -662,7 +744,9 @@ class GameScene(Scene):
         self._draw_player_projectiles()
         self._draw_damage_numbers()
         self.player.draw(self.app.screen, self.camera)
-        self.hud.draw(self.app.screen, self.player)
+        self.camera.position.x -= shake_offset.x
+        self.camera.position.y -= shake_offset.y
+        self.hud.draw(self.app.screen, self.player, combat_state=self._build_hud_combat_state())
         if self.current_interaction_target is not None:
             self._draw_interaction_prompt(self.current_interaction_target)
         if self.last_interaction_message:
@@ -856,8 +940,11 @@ class PlayerProjectile:
                 continue
             if not _rects_intersect(projectile_rect, enemy.get_hitbox_rect()):
                 continue
-            if enemy.take_damage(self.damage):
+            if enemy.take_damage(self.damage, "ranged"):
+                enemy.apply_hit_reaction(self.direction, 18.0, 0.08)
                 game_scene._spawn_damage_number(enemy, self.damage)
+                fake_attack = type("Attack", (), {"kind": "light"})()
+                game_scene._trigger_hit_feedback(fake_attack)
             self.is_dead = True
             return
 
@@ -879,3 +966,19 @@ class _ProjectileProbe:
 
     def get_hitbox_at(self, x, y):
         return (x, y, self.radius, self.radius)
+
+
+def _arc_hits_rect(origin, aim_direction, radius, arc_degrees, rect):
+    rx, ry, rw, rh = rect
+    center = Vector2(rx + rw / 2, ry + rh / 2)
+    to_target = Vector2(center.x - origin.x, center.y - origin.y)
+    distance = to_target.length()
+    if distance > radius + max(rw, rh) * 0.5:
+        return False
+    if distance == 0:
+        return True
+    aim = aim_direction.normalize() if aim_direction.length() > 0 else Vector2(1, 0)
+    direction = to_target.normalize()
+    dot = max(-1.0, min(1.0, aim.x * direction.x + aim.y * direction.y))
+    angle = math.degrees(math.acos(dot))
+    return angle <= arc_degrees / 2

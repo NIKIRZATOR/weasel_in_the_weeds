@@ -32,27 +32,42 @@
         "damage_multiplier": 1.0,
         "range": 42,
         "thickness": 40,
+        "shape": "arc",
+        "arc_degrees": 68,
         "duration": 0.16,
         "cooldown": 0.18,
-        "stamina_cost": 2
+        "stamina_cost": 2,
+        "recovery": 0.04,
+        "knockback": 20,
+        "stagger": 0.05
       },
       "heavy": {
         "damage_bonus": 3,
         "damage_multiplier": 1.35,
         "range": 54,
         "thickness": 46,
+        "shape": "arc",
+        "arc_degrees": 92,
         "duration": 0.24,
         "cooldown": 0.34,
-        "stamina_cost": 7
+        "stamina_cost": 7,
+        "recovery": 0.16,
+        "knockback": 34,
+        "stagger": 0.14
       },
       "charged": {
         "damage_bonus": 5,
         "damage_multiplier": 1.8,
         "range": 64,
         "thickness": 52,
+        "shape": "arc",
+        "arc_degrees": 112,
         "duration": 0.34,
         "cooldown": 0.55,
-        "stamina_cost": 14
+        "stamina_cost": 14,
+        "recovery": 0.26,
+        "knockback": 50,
+        "stagger": 0.24
       }
     },
     "stats": {
@@ -224,27 +239,39 @@
         "damage_multiplier": 1.0,
         "range": 34,
         "thickness": 28,
+        "shape": "line",
         "duration": 0.12,
         "cooldown": 0.14,
-        "stamina_cost": 1.5
+        "stamina_cost": 1.5,
+        "recovery": 0.02,
+        "knockback": 16,
+        "stagger": 0.04
       },
       "heavy": {
         "damage_bonus": 3,
         "damage_multiplier": 1.3,
         "range": 42,
         "thickness": 32,
+        "shape": "line",
         "duration": 0.2,
         "cooldown": 0.28,
-        "stamina_cost": 5
+        "stamina_cost": 5,
+        "recovery": 0.1,
+        "knockback": 26,
+        "stagger": 0.1
       },
       "charged": {
         "damage_bonus": 5,
         "damage_multiplier": 1.75,
         "range": 52,
         "thickness": 34,
+        "shape": "line",
         "duration": 0.3,
         "cooldown": 0.48,
-        "stamina_cost": 10
+        "stamina_cost": 10,
+        "recovery": 0.2,
+        "knockback": 38,
+        "stagger": 0.18
       }
     },
     "stats": {
@@ -267,27 +294,39 @@
         "damage_multiplier": 1.05,
         "range": 76,
         "thickness": 24,
+        "shape": "line",
         "duration": 0.16,
         "cooldown": 0.2,
-        "stamina_cost": 2.5
+        "stamina_cost": 2.5,
+        "recovery": 0.05,
+        "knockback": 20,
+        "stagger": 0.06
       },
       "heavy": {
         "damage_bonus": 4,
         "damage_multiplier": 1.35,
         "range": 90,
         "thickness": 28,
+        "shape": "line",
         "duration": 0.24,
         "cooldown": 0.34,
-        "stamina_cost": 7.5
+        "stamina_cost": 7.5,
+        "recovery": 0.16,
+        "knockback": 34,
+        "stagger": 0.14
       },
       "charged": {
         "damage_bonus": 6,
         "damage_multiplier": 1.8,
         "range": 108,
         "thickness": 30,
+        "shape": "line",
         "duration": 0.34,
         "cooldown": 0.55,
-        "stamina_cost": 14
+        "stamina_cost": 14,
+        "recovery": 0.26,
+        "knockback": 48,
+        "stagger": 0.24
       }
     },
     "stats": {
@@ -310,9 +349,13 @@
         "damage_multiplier": 1.0,
         "range": 0,
         "thickness": 14,
+        "shape": "line",
         "duration": 0.14,
         "cooldown": 0.2,
         "stamina_cost": 2,
+        "recovery": 0.04,
+        "knockback": 18,
+        "stagger": 0.08,
         "is_ranged": true,
         "projectile_speed": 360,
         "projectile_radius": 4,
@@ -323,9 +366,13 @@
         "damage_multiplier": 1.35,
         "range": 0,
         "thickness": 16,
+        "shape": "line",
         "duration": 0.22,
         "cooldown": 0.36,
         "stamina_cost": 7,
+        "recovery": 0.16,
+        "knockback": 24,
+        "stagger": 0.12,
         "is_ranged": true,
         "projectile_speed": 420,
         "projectile_radius": 5,
@@ -336,9 +383,13 @@
         "damage_multiplier": 1.8,
         "range": 0,
         "thickness": 18,
+        "shape": "line",
         "duration": 0.34,
         "cooldown": 0.58,
         "stamina_cost": 13,
+        "recovery": 0.28,
+        "knockback": 30,
+        "stagger": 0.18,
         "is_ranged": true,
         "projectile_speed": 520,
         "projectile_radius": 6,

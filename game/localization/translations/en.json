@@ -109,6 +109,10 @@
       "controls": "WASD | SHIFT | SPACE | ALT | LMB | RMB | LMB+RMB 1.5s | E | I | K | M",
       "map_hint": "M - map | K - craft"
     },
+    "combat": {
+      "no_stamina": "Not enough stamina",
+      "unarmed": "Unarmed"
+    },
     "window": {
       "game_title": "Weales in the weeds RPG - {level}"
     },

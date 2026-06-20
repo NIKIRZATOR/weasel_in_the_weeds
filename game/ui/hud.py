@@ -105,7 +105,7 @@ class HUD:
         )
         screen.blit(text, (screen_width - text.get_width() - 16, 42))
 
-    def draw_hotbar(self, screen, player):
+    def draw_hotbar(self, screen, player, combat_state=None):
         screen_width, screen_height = screen.get_size()
         slot_size = 54
         gap = 8
@@ -115,7 +115,7 @@ class HUD:
         y = screen_height - slot_size - 12
 
         weapon_rect = pygame.Rect(start_x, y, slot_size, slot_size)
-        self._draw_weapon_slot(screen, player, weapon_rect)
+        self._draw_weapon_slot(screen, player, weapon_rect, combat_state=combat_state)
         hotbar_start_x = weapon_rect.right + weapon_slot_gap
 
         for index in range(HOTBAR_SIZE):
@@ -144,12 +144,12 @@ class HUD:
                     qty_text = self.tiny_font.render(str(stack.quantity), True, COLORS['WHITE'])
                     screen.blit(qty_text, (rect.right - qty_text.get_width() - 4, rect.bottom - qty_text.get_height() - 2))
 
-    def _draw_weapon_slot(self, screen, player, rect):
+    def _draw_weapon_slot(self, screen, player, rect, combat_state=None):
         stack = player.get_equipped_weapon()
         pygame.draw.rect(screen, COLORS['UI_PANEL_ALT'], rect, border_radius=8)
         pygame.draw.rect(screen, COLORS['UI_SLOT_SELECTED'], rect, width=2, border_radius=8)
 
-        label = self.tiny_font.render("Weapon", True, COLORS['UI_TEXT_DIM'])
+        label = self.tiny_font.render("W", True, COLORS['UI_TEXT_DIM'])
         screen.blit(label, (rect.x + 4, rect.y + 2))
 
         if stack is None:
@@ -176,12 +176,48 @@ class HUD:
         text = self.small_font.render(self.localizer.t("ui.hud.map_hint"), True, COLORS["WHITE"])
         screen.blit(text, (screen_width - text.get_width() - 16, 66))
 
-    def draw(self, screen, player):
+    def draw_combat_status(self, screen, combat_state):
+        if combat_state is None:
+            return
+
+        screen_width, screen_height = screen.get_size()
+        weapon_name = str(combat_state.get("weapon_name", "") or "")
+        if weapon_name:
+            weapon_text = self.small_font.render(weapon_name, True, COLORS["WHITE"])
+            screen.blit(
+                weapon_text,
+                weapon_text.get_rect(center=(screen_width // 2, screen_height - 82)),
+            )
+
+        if combat_state.get("charging"):
+            bar_width = min(240, screen_width - 80)
+            bar_height = 12
+            bar_x = (screen_width - bar_width) // 2
+            bar_y = screen_height - 62
+            progress = max(0.0, min(1.0, float(combat_state.get("charge_progress", 0.0))))
+            pygame.draw.rect(screen, COLORS["UI_PANEL"], (bar_x, bar_y, bar_width, bar_height), border_radius=6)
+            pygame.draw.rect(
+                screen,
+                COLORS["UI_SLOT_SELECTED"],
+                (bar_x, bar_y, bar_width * progress, bar_height),
+                border_radius=6,
+            )
+            pygame.draw.rect(screen, COLORS["UI_SLOT_BORDER"], (bar_x, bar_y, bar_width, bar_height), width=2, border_radius=6)
+
+        if combat_state.get("not_enough_stamina"):
+            warning = self.small_font.render(self.localizer.t("ui.combat.no_stamina"), True, (255, 180, 130))
+            screen.blit(
+                warning,
+                warning.get_rect(center=(screen_width // 2, screen_height - 104)),
+            )
+
+    def draw(self, screen, player, combat_state=None):
         self.draw_portrait(screen, player)
         self.draw_health_bar(screen, player)
         self.draw_stamina_bar(screen, player)
         self.draw_coins(screen, player)
         self.draw_knowledge_shards(screen, player)
         self.draw_map_hint(screen, player)
-        self.draw_hotbar(screen, player)
+        self.draw_hotbar(screen, player, combat_state=combat_state)
+        self.draw_combat_status(screen, combat_state)
         self.draw_controls(screen)
