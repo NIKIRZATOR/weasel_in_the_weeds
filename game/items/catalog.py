@@ -1,56 +1,47 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pygame
+
+from game.core.assets import load_image
 from game.items.models import ItemDefinition, ItemStack
 from game.items.types import EquipSlot, ItemKind
+from settings import ASSETS_DIR
 
-ITEM_DEFINITIONS: dict[str, ItemDefinition] = {
-    "coin": ItemDefinition(
-        id="coin",
-        name="Coin",
-        kind=ItemKind.CURRENCY,
-        stackable=True,
-        max_stack=999999,
-        price=1,
-        description="A simple gold coin.",
-    ),
-    "test_item": ItemDefinition(
-        id="test_item",
-        name="test_item",
-        kind=ItemKind.WEAPON,
-        stackable=False,
-        max_stack=1,
-        equip_slot=EquipSlot.WEAPON,
-        stats={"attack": 2},
-        price=15,
-        description="",
-    ),
-    "stick": ItemDefinition(
-        id="stick",
-        name="Stick",
-        kind=ItemKind.MATERIAL,
-        stackable=True,
-        max_stack=999999,
-        price=1,
-        description="A simple stick.",
-    ),
-    "small_backpack": ItemDefinition(
-        id="small_backpack",
-        name="Small Backpack",
-        kind=ItemKind.QUEST,
-        stackable=False,
-        max_stack=1,
-        inventory_capacity_bonus=5,
-        price=0,
-        description="A small travel backpack from the hermit.",
-    ),
-    "map": ItemDefinition(
-        id="map",
-        name="Map",
-        kind=ItemKind.QUEST,
-        stackable=False,
-        max_stack=1,
-        price=0,
-        description="A magical map that remembers opened places.",
-    ),
-}
+
+CATALOG_PATH = Path(__file__).with_name("catalog_data.json")
+_ICON_CACHE: dict[tuple[str, tuple[int, int]], pygame.Surface | None] = {}
+
+
+def _load_item_definitions() -> dict[str, ItemDefinition]:
+    raw_catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+    definitions: dict[str, ItemDefinition] = {}
+
+    for item_id, raw_item in raw_catalog.items():
+        kind = ItemKind(raw_item["kind"])
+        equip_slot_value = raw_item.get("equip_slot")
+        equip_slot = EquipSlot(equip_slot_value) if equip_slot_value else None
+        definitions[item_id] = ItemDefinition(
+            id=item_id,
+            name=raw_item.get("name", item_id),
+            kind=kind,
+            stackable=bool(raw_item.get("stackable", True)),
+            max_stack=int(raw_item.get("max_stack", 99)),
+            equip_slot=equip_slot,
+            stats={key: int(value) for key, value in raw_item.get("stats", {}).items()},
+            inventory_capacity_bonus=int(raw_item.get("inventory_capacity_bonus", 0)),
+            price=int(raw_item.get("price", 0)),
+            icon_path=raw_item.get("icon_path"),
+            wallet_key=raw_item.get("wallet_key"),
+            description=raw_item.get("description", ""),
+        )
+
+    return definitions
+
+
+ITEM_DEFINITIONS: dict[str, ItemDefinition] = _load_item_definitions()
 
 
 def get_item_definition(item_id: str) -> ItemDefinition | None:
@@ -62,3 +53,24 @@ def create_item_stack(item_id: str, quantity: int = 1) -> ItemStack | None:
     if definition is None:
         return None
     return ItemStack(definition, quantity)
+
+
+def get_item_icon(item_or_definition: str | ItemDefinition | None, size: tuple[int, int]) -> pygame.Surface | None:
+    if item_or_definition is None:
+        return None
+
+    if isinstance(item_or_definition, ItemDefinition):
+        definition = item_or_definition
+    else:
+        definition = get_item_definition(str(item_or_definition))
+
+    if definition is None or not definition.icon_path:
+        return None
+
+    cache_key = (definition.icon_path, size)
+    if cache_key in _ICON_CACHE:
+        return _ICON_CACHE[cache_key]
+
+    icon = load_image(ASSETS_DIR / definition.icon_path, size=size)
+    _ICON_CACHE[cache_key] = icon
+    return icon

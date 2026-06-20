@@ -51,7 +51,11 @@
       "rewards": {
         "items": [
           "small_backpack",
-          "map"
+          "map",
+          {
+            "item_id": "knowledge_shard",
+            "quantity": 2
+          }
         ],
         "coins": 3,
         "flags": [

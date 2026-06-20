@@ -51,6 +51,7 @@ class CheckpointObject(WorldObject):
     def draw(self, screen, camera):
         screen_x = self.position.x - camera.position.x
         screen_y = self.position.y - camera.position.y
+        label_rect = pygame.Rect(screen_x, screen_y, self.width, self.height)
 
         points = [
             (screen_x + self.width / 2, screen_y),
@@ -62,4 +63,5 @@ class CheckpointObject(WorldObject):
         border_color = COLORS["UI_SLOT_SELECTED"] if self.is_activated else COLORS["BLACK"]
         border_width = 4 if self.is_activated else 2
         pygame.draw.polygon(screen, border_color, points, width=border_width)
+        self.draw_name_label(screen, label_rect)
         self.draw_debug(screen, camera)

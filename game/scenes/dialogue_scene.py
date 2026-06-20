@@ -143,6 +143,9 @@ class DialogueScene(Scene):
         coins = int(rewards.get("coins", 0))
         if coins > 0 and self.player.add_coins(coins):
             messages.append(f"+{coins} coins")
+        knowledge_shards = int(rewards.get("knowledge_shards", 0))
+        if knowledge_shards > 0 and self.player.add_knowledge_shards(knowledge_shards):
+            messages.append(f"+{knowledge_shards} shards")
 
         for raw_item in rewards.get("items", []):
             if isinstance(raw_item, str):
@@ -154,7 +157,10 @@ class DialogueScene(Scene):
 
             item_stack = create_item_stack(item_id, quantity)
             if item_stack is not None and self.player.pickup_item(item_stack=item_stack):
-                messages.append(f"{item_stack.name} x{item_stack.quantity}")
+                if item_stack.kind.value == "currency":
+                    messages.append(f"+{item_stack.quantity} {item_stack.name}")
+                else:
+                    messages.append(f"{item_stack.name} x{item_stack.quantity}")
 
         for flag in rewards.get("flags", []):
             if self.player.set_flag(flag):

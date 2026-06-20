@@ -119,6 +119,39 @@
       "solid": false
     },
     {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 7,
+      "y": 4,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Grass Patch",
+      "x": 3,
+      "y": 6,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "grass_patch_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 6,
+      "y": 15,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
       "type": "pickable_object",
       "name": "coin",
       "x": 5,
@@ -173,6 +206,17 @@
       "y": 19,
       "width": 1,
       "height": 1
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 9,
+      "y": 18,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
     },
     {
       "type": "enemy_melee",

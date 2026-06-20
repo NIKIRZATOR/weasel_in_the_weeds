@@ -1,5 +1,6 @@
 import pygame
 
+from game.items import get_item_icon
 from settings import COLORS, HOTBAR_SIZE, PLAYER_MAX_HEALTH, PLAYER_MAX_STAMINA
 
 
@@ -47,6 +48,11 @@ class HUD:
         text = self.font.render(f"Coins: {player.coins}", True, COLORS['GOLD'])
         screen.blit(text, (screen_width - text.get_width() - 16, 10))
 
+    def draw_knowledge_shards(self, screen, player):
+        screen_width, _ = screen.get_size()
+        text = self.small_font.render(f"Shards: {player.knowledge_shards}", True, COLORS['WHITE'])
+        screen.blit(text, (screen_width - text.get_width() - 16, 42))
+
     def draw_hotbar(self, screen, player):
         screen_width, screen_height = screen.get_size()
         slot_size = 54
@@ -69,9 +75,13 @@ class HUD:
             screen.blit(key_text, (rect.x + 4, rect.y + 2))
 
             if stack is not None:
-                label = stack.name[:2].upper()
-                item_text = self.small_font.render(label, True, COLORS['WHITE'])
-                screen.blit(item_text, item_text.get_rect(center=rect.center))
+                icon = get_item_icon(stack.definition, (slot_size - 16, slot_size - 16))
+                if icon is not None:
+                    screen.blit(icon, icon.get_rect(center=rect.center))
+                else:
+                    label = stack.name[:2].upper()
+                    item_text = self.small_font.render(label, True, COLORS['WHITE'])
+                    screen.blit(item_text, item_text.get_rect(center=rect.center))
 
                 if stack.quantity > 1:
                     qty_text = self.tiny_font.render(str(stack.quantity), True, COLORS['WHITE'])
@@ -79,7 +89,7 @@ class HUD:
 
     def draw_controls(self, screen):
         _, screen_height = screen.get_size()
-        controls_text = "WASD - move | SHIFT - run | SPACE - jump | ALT - dash | LMB - attack | E - interact | I - inventory | M - map"
+        controls_text = "WASD | SHIFT | SPACE | ALT | LMB | E | I | K-craft | M-map"
         text = self.small_font.render(controls_text, True, (200, 200, 200))
         screen.blit(text, (10, screen_height - 32))
 
@@ -88,13 +98,14 @@ class HUD:
             return
 
         screen_width, _ = screen.get_size()
-        text = self.small_font.render("M - map", True, COLORS["WHITE"])
-        screen.blit(text, (screen_width - text.get_width() - 16, 42))
+        text = self.small_font.render("M - map | K - craft", True, COLORS["WHITE"])
+        screen.blit(text, (screen_width - text.get_width() - 16, 66))
 
     def draw(self, screen, player):
         self.draw_health_bar(screen, player)
         self.draw_stamina_bar(screen, player)
         self.draw_coins(screen, player)
+        self.draw_knowledge_shards(screen, player)
         self.draw_map_hint(screen, player)
         self.draw_hotbar(screen, player)
         self.draw_controls(screen)

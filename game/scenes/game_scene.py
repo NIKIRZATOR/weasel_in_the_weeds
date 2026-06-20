@@ -133,6 +133,11 @@ class GameScene(Scene):
 
         self.app.set_scene(MapScene(self.app, self))
 
+    def open_crafting(self):
+        from game.scenes.crafting_scene import CraftingScene
+
+        self.app.set_scene(CraftingScene(self.app, self))
+
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.QUIT:
@@ -150,6 +155,8 @@ class GameScene(Scene):
                     else:
                         self.last_interaction_message = "You do not have a map yet."
                         self.last_interaction_timer = 1.5
+                elif event.key == pygame.K_k:
+                    self.open_crafting()
                 elif event.key == pygame.K_e:
                     self.try_interact()
                 elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4):
@@ -181,27 +188,60 @@ class GameScene(Scene):
         item_id = properties.get("item_id") or pickable_object.name
         quantity = int(properties.get("quantity", 1))
         coins = int(properties.get("coins", 0))
+        knowledge_shards = int(properties.get("knowledge_shards", 0))
 
         item_stack = None
         if item_id is not None:
             item_stack = create_item_stack(item_id, quantity)
-            if item_stack is None and coins <= 0:
+            if item_stack is None and coins <= 0 and knowledge_shards <= 0:
                 self.last_interaction_message = f"Неизвестный предмет: {item_id}"
                 self.last_interaction_timer = 1.5
                 return False
 
         currency_amount = coins
+        currency_wallet = None
         if item_stack is not None and item_stack.kind.value == "currency":
-            currency_amount += item_stack.quantity
+            currency_wallet = item_stack.definition.wallet_key
+            if currency_wallet == "coins":
+                currency_amount += item_stack.quantity
 
         if not self.player.pickup_item(item_stack=item_stack, coins=coins):
             self.last_interaction_message = "Инвентарь переполнен"
             self.last_interaction_timer = 1.5
             return False
 
+        if knowledge_shards > 0:
+            self.player.add_knowledge_shards(knowledge_shards)
+
         pickable_object.is_picked = True
         pickable_object.is_active = True
         pickable_object.color = COLORS["PICKABLE_PICKED"]
+
+        if item_stack is not None and item_stack.kind.value == "currency":
+            if currency_wallet == "coins":
+                self.last_interaction_message = f"Picked up: {currency_amount} coins"
+            elif currency_wallet == "knowledge_shards":
+                self.last_interaction_message = f"Picked up: {item_stack.quantity} knowledge shards"
+            else:
+                self.last_interaction_message = f"Picked up: {item_stack.name} x{item_stack.quantity}"
+            self.last_interaction_timer = 1.5
+            return True
+        if item_stack is not None and coins > 0:
+            self.last_interaction_message = f"Picked up: {item_stack.name} x{item_stack.quantity} + {coins} coins"
+            self.last_interaction_timer = 1.5
+            return True
+        if item_stack is not None:
+            self.last_interaction_message = f"Picked up: {item_stack.name} x{item_stack.quantity}"
+            self.last_interaction_timer = 1.5
+            return True
+        if coins > 0:
+            self.last_interaction_message = f"Picked up: {coins} coins"
+            self.last_interaction_timer = 1.5
+            return True
+        if knowledge_shards > 0:
+            self.last_interaction_message = f"Picked up: {knowledge_shards} knowledge shards"
+            self.last_interaction_timer = 1.5
+            return True
 
         if item_stack is not None and item_stack.kind.value == "currency":
             self.last_interaction_message = f"Подобрано: {currency_amount} монет"

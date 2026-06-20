@@ -1,0 +1,184 @@
+{
+  "coin": {
+    "name": "Coin",
+    "kind": "currency",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 1,
+    "icon_path": "items/currency/coin.png",
+    "wallet_key": "coins",
+    "description": "A simple gold coin."
+  },
+  "knowledge_shard": {
+    "name": "Knowledge Shard",
+    "kind": "currency",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 0,
+    "icon_path": "items/currency/knowledge_shard.png",
+    "wallet_key": "knowledge_shards",
+    "description": "A shard of knowledge used to unlock advanced recipes."
+  },
+  "test_item": {
+    "name": "Training Blade",
+    "kind": "weapon",
+    "stackable": false,
+    "max_stack": 1,
+    "equip_slot": "weapon",
+    "stats": {
+      "attack": 2
+    },
+    "price": 15,
+    "icon_path": "items/weapons/training_blade.png",
+    "description": "A simple testing blade."
+  },
+  "forest_bandage": {
+    "name": "Forest Bandage",
+    "kind": "consumable",
+    "stackable": true,
+    "max_stack": 20,
+    "price": 4,
+    "icon_path": "items/consumables/forest_bandage.png",
+    "description": "A rough herbal wrap."
+  },
+  "web_wrap": {
+    "name": "Web Wrap",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 20,
+    "price": 5,
+    "icon_path": "items/materials/web_wrap.png",
+    "description": "Sticky binding made from spider silk."
+  },
+  "beetle_charm": {
+    "name": "Beetle Charm",
+    "kind": "accessory",
+    "stackable": false,
+    "max_stack": 1,
+    "equip_slot": "accessory",
+    "stats": {
+      "defense": 1
+    },
+    "price": 8,
+    "icon_path": "items/accessories/beetle_charm.png",
+    "description": "A small charm from beetle shell and bone."
+  },
+  "stick": {
+    "name": "Stick",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 1,
+    "icon_path": "items/materials/stick.png",
+    "description": "A simple stick."
+  },
+  "grass_blade": {
+    "name": "Grass Blade",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 1,
+    "icon_path": "items/materials/grass_blade.png",
+    "description": "A fresh blade of grass."
+  },
+  "stone_pebble": {
+    "name": "Pebble",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 1,
+    "icon_path": "items/materials/stone_pebble.png",
+    "description": "A small rounded stone."
+  },
+  "seed": {
+    "name": "Seed",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 1,
+    "icon_path": "items/materials/seed.png",
+    "description": "A tiny seed worth saving."
+  },
+  "berry": {
+    "name": "Berry",
+    "kind": "consumable",
+    "stackable": true,
+    "max_stack": 99,
+    "price": 2,
+    "icon_path": "items/consumables/berry.png",
+    "description": "A wild berry."
+  },
+  "bark": {
+    "name": "Bark",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 1,
+    "icon_path": "items/materials/bark.png",
+    "description": "A strip of dry bark."
+  },
+  "mushroom": {
+    "name": "Mushroom",
+    "kind": "consumable",
+    "stackable": true,
+    "max_stack": 99,
+    "price": 2,
+    "icon_path": "items/consumables/mushroom.png",
+    "description": "A forest mushroom."
+  },
+  "feather": {
+    "name": "Feather",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 2,
+    "icon_path": "items/materials/feather.png",
+    "description": "A light bird feather."
+  },
+  "bone": {
+    "name": "Bone",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 3,
+    "icon_path": "items/materials/bone.png",
+    "description": "A small animal bone."
+  },
+  "beetle_shell": {
+    "name": "Beetle Shell",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 3,
+    "icon_path": "items/materials/beetle_shell.png",
+    "description": "A hard piece of beetle shell."
+  },
+  "web": {
+    "name": "Web",
+    "kind": "material",
+    "stackable": true,
+    "max_stack": 999999,
+    "price": 2,
+    "icon_path": "items/materials/web.png",
+    "description": "Thin spider silk."
+  },
+  "small_backpack": {
+    "name": "Small Backpack",
+    "kind": "quest",
+    "stackable": false,
+    "max_stack": 1,
+    "inventory_capacity_bonus": 5,
+    "price": 0,
+    "icon_path": "items/quest/small_backpack.png",
+    "description": "A small travel backpack from the hermit."
+  },
+  "map": {
+    "name": "Map",
+    "kind": "quest",
+    "stackable": false,
+    "max_stack": 1,
+    "price": 0,
+    "icon_path": "items/quest/map.png",
+    "description": "A magical map that remembers opened places."
+  }
+}

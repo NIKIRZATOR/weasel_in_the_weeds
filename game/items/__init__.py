@@ -1,4 +1,4 @@
-from game.items.catalog import ITEM_DEFINITIONS, create_item_stack, get_item_definition
+from game.items.catalog import ITEM_DEFINITIONS, create_item_stack, get_item_definition, get_item_icon
 from game.items.equipment import Equipment
 from game.items.inventory import Inventory
 from game.items.models import CharacterStats, ItemDefinition, ItemStack
@@ -14,5 +14,6 @@ __all__ = [
     "Equipment",
     "ITEM_DEFINITIONS",
     "get_item_definition",
+    "get_item_icon",
     "create_item_stack",
 ]

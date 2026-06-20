@@ -1,6 +1,7 @@
 import pygame
 from math import ceil
 
+from game.items import get_item_icon
 from game.items.types import EquipSlot, ItemKind
 from game.scenes.base import Scene
 from settings import COLORS, HOTBAR_SIZE, INVENTORY_COLUMNS, SCREEN_HEIGHT, SCREEN_WIDTH
@@ -16,7 +17,9 @@ class InventoryScene(Scene):
         self.player = game_scene.player
         self.title_font = pygame.font.Font(None, 62)
         self.section_font = pygame.font.Font(None, 30)
+        self.panel_title_font = pygame.font.Font(None, 24)
         self.text_font = pygame.font.Font(None, 24)
+        self.stats_font = pygame.font.Font(None, 22)
         self.small_font = pygame.font.Font(None, 20)
         self.message = ""
         self.message_timer = 0.0
@@ -35,20 +38,15 @@ class InventoryScene(Scene):
             return
         self._layout_size = layout_size
 
-        panel_width = min(SCREEN_WIDTH - 80, screen_width - 40)
-        panel_height = min(SCREEN_HEIGHT - 80, screen_height - 40)
-        compact = panel_width < 1120 or panel_height < 680
+        panel_width = min(SCREEN_WIDTH - 60, screen_width - 40)
+        panel_height = min(SCREEN_HEIGHT - 48, screen_height - 32)
+        compact = panel_width < 1120 or panel_height < 700
         outer_margin_x = max(20, (screen_width - panel_width) // 2)
-        outer_margin_y = max(20, (screen_height - panel_height) // 2)
-        self.panel_rect = pygame.Rect(
-            outer_margin_x,
-            outer_margin_y,
-            panel_width,
-            panel_height,
-        )
+        outer_margin_y = max(16, (screen_height - panel_height) // 2)
+        self.panel_rect = pygame.Rect(outer_margin_x, outer_margin_y, panel_width, panel_height)
 
         self.panel_padding = 20 if compact else 24
-        self.column_gap = 12 if compact else 16
+        self.column_gap = 10 if compact else 16
         self.inventory_slot_size = 40 if compact else 48
         self.inventory_gap = 8
         self.inventory_columns = INVENTORY_COLUMNS
@@ -56,14 +54,14 @@ class InventoryScene(Scene):
         self.inventory_rows = max(1, ceil(self.inventory_slot_count / self.inventory_columns))
         self.quest_slot_count = self.player.quest_inventory.capacity
 
-        left_width = 180 if compact else 200
-        side_width = 108 if compact else 124
+        left_width = 178 if compact else 200
+        side_width = 106 if compact else 124
         center_width = self.inventory_columns * self.inventory_slot_size
         center_width += (self.inventory_columns - 1) * self.inventory_gap + 32
 
         content_top = self.panel_rect.y + 70
-        details_height = 58
-        body_height = max(320, self.panel_rect.height - 120 - details_height)
+        details_height = 56
+        body_height = max(340, self.panel_rect.height - 112 - details_height)
 
         left_x = self.panel_rect.x + self.panel_padding
         center_x = left_x + left_width + self.column_gap
@@ -84,7 +82,7 @@ class InventoryScene(Scene):
         self.quest_panel = pygame.Rect(quest_x, content_top, side_width, body_height)
         self.details_panel = pygame.Rect(
             center_x,
-            content_top + body_height + 12,
+            content_top + body_height + 10,
             self.panel_rect.right - self.panel_padding - center_x,
             details_height,
         )
@@ -102,10 +100,10 @@ class InventoryScene(Scene):
         self.quest_origin = (self.quest_panel.x + 8, self.quest_panel.y + 60)
 
         equipment_slot_width = self.equipment_panel.width - 16
-        equipment_slot_height = 34
+        equipment_slot_height = 32
         equipment_slot_x = self.equipment_panel.x + 8
         equipment_slot_y = self.equipment_panel.y + 54
-        equipment_spacing = 12
+        equipment_spacing = 10
         self.equipment_slots = [
             (EquipSlot.HELMET, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 0, equipment_slot_width, equipment_slot_height), "Шлем"),
             (EquipSlot.CHEST, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 1, equipment_slot_width, equipment_slot_height), "Броня"),
@@ -322,10 +320,9 @@ class InventoryScene(Scene):
     def _draw_character_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.left_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.left_panel, width=2, border_radius=12)
-        label = self.section_font.render("Персонаж", True, COLORS["WHITE"])
-        self.app.screen.blit(label, (self.left_panel.x + 16, self.left_panel.y + 14))
+        self._draw_panel_title(self.left_panel, "Персонаж")
 
-        body_rect = pygame.Rect(self.left_panel.centerx - 30, self.left_panel.y + 85, 60, 90)
+        body_rect = pygame.Rect(self.left_panel.centerx - 30, self.left_panel.y + 72, 60, 90)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_SELECTED"], body_rect, border_radius=10)
         pygame.draw.rect(self.app.screen, COLORS["WHITE"], body_rect, width=2, border_radius=10)
 
@@ -338,10 +335,12 @@ class InventoryScene(Scene):
             f"SPD: {stats.speed}",
             f"Места: {self.player.inventory.capacity}",
             f"Coins: {self.player.coins}",
+            f"Shards: {self.player.knowledge_shards}",
         ]
+        stats_start_y = body_rect.bottom + 14
         for index, line in enumerate(stat_lines):
-            text = self.text_font.render(line, True, COLORS["WHITE"])
-            self.app.screen.blit(text, (self.left_panel.x + 18, self.left_panel.y + 190 + index * 28))
+            text = self.stats_font.render(line, True, COLORS["WHITE"])
+            self.app.screen.blit(text, (self.left_panel.x + 18, stats_start_y + index * 24))
 
     def _draw_hotbar_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.hotbar_panel, border_radius=12)
@@ -371,8 +370,7 @@ class InventoryScene(Scene):
     def _draw_inventory_grid(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.center_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.center_panel, width=2, border_radius=12)
-        label = self.section_font.render("Инвентарь", True, COLORS["WHITE"])
-        self.app.screen.blit(label, (self.center_panel.x + 16, self.center_panel.y + 14))
+        self._draw_panel_title(self.center_panel, "Инвентарь")
 
         for row in range(self.inventory_rows):
             for col in range(self.inventory_columns):
@@ -398,8 +396,7 @@ class InventoryScene(Scene):
     def _draw_equipment_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.equipment_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.equipment_panel, width=2, border_radius=12)
-        label = self.section_font.render("Экипировка", True, COLORS["WHITE"])
-        self.app.screen.blit(label, (self.equipment_panel.x + 12, self.equipment_panel.y + 14))
+        self._draw_panel_title(self.equipment_panel, "Экипировка")
 
         for slot, rect, title in self.equipment_slots:
             stack = self.player.equipment.get(slot)
@@ -411,14 +408,12 @@ class InventoryScene(Scene):
             self.app.screen.blit(title_text, (rect.x + 4, rect.y + 2))
 
             if stack is not None:
-                item_text = self.small_font.render(stack.name[:8], True, COLORS["WHITE"])
-                self.app.screen.blit(item_text, item_text.get_rect(center=rect.center))
+                self._draw_stack_label(stack, rect)
 
     def _draw_quest_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.quest_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.quest_panel, width=2, border_radius=12)
-        label = self.section_font.render("Сюжетные", True, COLORS["WHITE"])
-        self.app.screen.blit(label, (self.quest_panel.x + 12, self.quest_panel.y + 14))
+        self._draw_panel_title(self.quest_panel, "Сюжетные")
 
         for row in range(self.QUEST_ROWS):
             for col in range(self.QUEST_COLUMNS):
@@ -455,9 +450,19 @@ class InventoryScene(Scene):
         detail_text = self.small_font.render(detail, True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(detail_text, (self.details_panel.x + 14, self.details_panel.y + 28))
 
+    def _draw_panel_title(self, panel_rect, text):
+        available_width = panel_rect.width - 20
+        font = self.section_font if self.section_font.size(text)[0] <= available_width else self.panel_title_font
+        label = font.render(text, True, COLORS["WHITE"])
+        self.app.screen.blit(label, (panel_rect.x + 10, panel_rect.y + 14))
+
     def _draw_stack_label(self, stack, rect):
-        item_label = self.text_font.render(stack.name[:2].upper(), True, COLORS["WHITE"])
-        self.app.screen.blit(item_label, item_label.get_rect(center=rect.center))
+        icon = get_item_icon(stack.definition, (rect.width - 12, rect.height - 12))
+        if icon is not None:
+            self.app.screen.blit(icon, icon.get_rect(center=rect.center))
+        else:
+            item_label = self.text_font.render(stack.name[:2].upper(), True, COLORS["WHITE"])
+            self.app.screen.blit(item_label, item_label.get_rect(center=rect.center))
         if stack.quantity > 1:
             qty = self.small_font.render(str(stack.quantity), True, COLORS["WHITE"])
             self.app.screen.blit(qty, (rect.right - qty.get_width() - 4, rect.bottom - qty.get_height() - 2))
@@ -481,8 +486,12 @@ class InventoryScene(Scene):
         preview.fill((60, 60, 76, 220))
         pygame.draw.rect(preview, (120, 180, 255, 240), preview.get_rect(), width=2, border_radius=8)
 
-        key_label = self.text_font.render(stack.name[:2].upper(), True, COLORS["WHITE"])
-        preview.blit(key_label, key_label.get_rect(center=preview.get_rect().center))
+        icon = get_item_icon(stack.definition, (rect.width - 12, rect.height - 12))
+        if icon is not None:
+            preview.blit(icon, icon.get_rect(center=preview.get_rect().center))
+        else:
+            key_label = self.text_font.render(stack.name[:2].upper(), True, COLORS["WHITE"])
+            preview.blit(key_label, key_label.get_rect(center=preview.get_rect().center))
         if stack.quantity > 1:
             qty = self.small_font.render(str(stack.quantity), True, COLORS["WHITE"])
             preview.blit(qty, (rect.width - qty.get_width() - 4, rect.height - qty.get_height() - 2))

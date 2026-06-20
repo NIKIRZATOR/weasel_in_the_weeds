@@ -48,6 +48,7 @@ class ItemDefinition:
     inventory_capacity_bonus: int = 0
     price: int = 0
     icon_path: str | None = None
+    wallet_key: str | None = None
     description: str = ""
 
 

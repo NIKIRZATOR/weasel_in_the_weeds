@@ -1,4 +1,6 @@
 from game.objects.checkpoint_object import CheckpointObject
+from game.objects.gatherable_catalog import get_gatherable_template
+from game.objects.gatherable_object import GatherableObject
 from game.objects.grass_hide_zone import GrassHideZone
 from game.objects.interactable_object import InteractableObject
 from game.objects.level_transition import LevelTransition
@@ -23,6 +25,8 @@ def create_world_object(raw_object, tile_size):
     x, y, width, height = _resolve_dimensions(raw_object, tile_size)
     name = raw_object.get("name", object_type or "object")
     properties = raw_object.get("properties", {})
+    if object_type == "gatherable_object":
+        properties = _resolve_gatherable_properties(name, properties)
 
     if object_type == "solid_object":
         return SolidObject(x, y, width, height, name=name, properties=properties)
@@ -41,6 +45,16 @@ def create_world_object(raw_object, tile_size):
 
     if object_type == "pickable_object":
         return PickableObject(
+            x,
+            y,
+            width,
+            height,
+            name=name,
+            properties=properties,
+        )
+
+    if object_type == "gatherable_object":
+        return GatherableObject(
             x,
             y,
             width,
@@ -88,3 +102,18 @@ def create_world_object(raw_object, tile_size):
         )
 
     return None
+
+
+def _resolve_gatherable_properties(name, properties):
+    template_id = properties.get("template")
+    if not template_id:
+        return properties
+
+    template_properties = get_gatherable_template(template_id)
+    if template_properties is None:
+        return properties
+
+    merged = dict(template_properties)
+    merged.update(properties)
+    merged.pop("template", None)
+    return merged

@@ -72,4 +72,5 @@ class LevelTransition(WorldObject):
         overlay.fill((90, 130, 230, 70))
         screen.blit(overlay, rect.topleft)
         pygame.draw.rect(screen, COLORS["WHITE"], rect, width=2, border_radius=6)
+        self.draw_name_label(screen, rect)
         self.draw_debug(screen, camera)

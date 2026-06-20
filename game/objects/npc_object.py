@@ -84,4 +84,5 @@ class NpcObject(WorldObject):
             (bar_rect.x, bar_rect.y, bar_rect.width * health_ratio, bar_rect.height),
             border_radius=2,
         )
+        self.draw_name_label(screen, rect)
         self.draw_debug(screen, camera)

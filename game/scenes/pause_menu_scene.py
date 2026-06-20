@@ -86,6 +86,10 @@ class PauseMenuScene(Scene):
                 self.app.running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.resume_game()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_k:
+                from game.scenes.crafting_scene import CraftingScene
+
+                self.app.set_scene(CraftingScene(self.app, self.game_scene))
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in self.buttons:
                     if not button["disabled"] and button["rect"].collidepoint(mouse_pos):

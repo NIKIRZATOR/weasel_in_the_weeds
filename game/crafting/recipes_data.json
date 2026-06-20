@@ -1,0 +1,68 @@
+{
+  "stone_knife": {
+    "name": "Stone Knife",
+    "category": "tools",
+    "description": "A sharpened pebble fixed to a stick. Simple but useful.",
+    "ingredients": [
+      { "item_id": "stick", "quantity": 1 },
+      { "item_id": "stone_pebble", "quantity": 2 }
+    ],
+    "result": { "item_id": "test_item", "quantity": 1 },
+    "unlock_type": "default",
+    "sort_order": 10
+  },
+  "berry_mix": {
+    "name": "Berry Mix",
+    "category": "healing",
+    "description": "A small field ration made from berries and seeds.",
+    "ingredients": [
+      { "item_id": "berry", "quantity": 2 },
+      { "item_id": "seed", "quantity": 1 }
+    ],
+    "result": { "item_id": "berry", "quantity": 3 },
+    "unlock_type": "default",
+    "sort_order": 20
+  },
+  "forest_bandage": {
+    "name": "Forest Bandage",
+    "category": "healing",
+    "description": "Bound grass and bark for simple wound care.",
+    "ingredients": [
+      { "item_id": "grass_blade", "quantity": 3 },
+      { "item_id": "bark", "quantity": 1 }
+    ],
+    "result": { "item_id": "forest_bandage", "quantity": 1 },
+    "unlock_type": "knowledge",
+    "knowledge_cost": 2,
+    "sort_order": 30
+  },
+  "web_wrap": {
+    "name": "Web Wrap",
+    "category": "survival",
+    "description": "A sticky web binding for stronger field repairs.",
+    "ingredients": [
+      { "item_id": "web", "quantity": 2 },
+      { "item_id": "grass_blade", "quantity": 2 },
+      { "item_id": "bark", "quantity": 1 }
+    ],
+    "result": { "item_id": "web_wrap", "quantity": 1 },
+    "unlock_type": "knowledge",
+    "knowledge_cost": 3,
+    "sort_order": 40
+  },
+  "beetle_charm": {
+    "name": "Beetle Charm",
+    "category": "special",
+    "description": "A tiny forest talisman assembled from light monster remains.",
+    "ingredients": [
+      { "item_id": "beetle_shell", "quantity": 2 },
+      { "item_id": "bone", "quantity": 1 },
+      { "item_id": "feather", "quantity": 1 }
+    ],
+    "result": { "item_id": "beetle_charm", "quantity": 1 },
+    "unlock_type": "knowledge",
+    "knowledge_cost": 4,
+    "required_flags": ["met_mouse_hermit"],
+    "sort_order": 50
+  }
+}

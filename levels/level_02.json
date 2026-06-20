@@ -78,6 +78,28 @@
       "height": 1
     },
     {
+      "type": "gatherable_object",
+      "name": "Bug Remains",
+      "x": 8,
+      "y": 5,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Grass Patch",
+      "x": 10,
+      "y": 4,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "grass_patch_small"
+      }
+    },
+    {
       "type": "enemy_melee",
       "name": "Forest Guard",
       "x": 12,

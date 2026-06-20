@@ -81,8 +81,10 @@ class Player(Entity):
         self.equipment = Equipment()
         self.hotbar_slots: list[ItemStack | None] = [None] * HOTBAR_SIZE
         self.coins = 0
+        self.knowledge_shards = 0
         self.selected_hotbar_index = 0
         self.story_flags = set()
+        self.unlocked_recipe_ids = set()
         self.explored_tiles_by_level: dict[str, list[list[bool]]] = {}
         self.claimed_dialogue_rewards_by_npc: dict[str, set[str]] = {}
 
@@ -246,6 +248,21 @@ class Player(Entity):
         self.coins -= int(quantity)
         return True
 
+    def add_knowledge_shards(self, quantity):
+        if quantity <= 0:
+            return False
+        self.knowledge_shards += int(quantity)
+        return True
+
+    def can_spend_knowledge_shards(self, quantity):
+        return self.knowledge_shards >= quantity
+
+    def spend_knowledge_shards(self, quantity):
+        if quantity <= 0 or self.knowledge_shards < quantity:
+            return False
+        self.knowledge_shards -= int(quantity)
+        return True
+
     def set_flag(self, flag):
         if not flag:
             return False
@@ -309,6 +326,47 @@ class Player(Entity):
         claimed_nodes = self.claimed_dialogue_rewards_by_npc.setdefault(str(npc_key), set())
         claimed_nodes.add(str(node_id))
         return True
+
+    def has_unlocked_recipe(self, recipe_id):
+        return str(recipe_id) in self.unlocked_recipe_ids
+
+    def unlock_recipe(self, recipe_id):
+        if not recipe_id:
+            return False
+        self.unlocked_recipe_ids.add(str(recipe_id))
+        return True
+
+    def is_recipe_unlocked(self, recipe):
+        if recipe is None:
+            return False
+        return recipe.is_default_unlocked() or self.has_unlocked_recipe(recipe.id)
+
+    def can_unlock_recipe(self, recipe):
+        if recipe is None or recipe.unlock_type != "knowledge":
+            return False
+        if self.is_recipe_unlocked(recipe):
+            return False
+        if recipe.required_flags and not self.has_flags(recipe.required_flags):
+            return False
+        return self.can_spend_knowledge_shards(recipe.knowledge_cost)
+
+    def can_craft_recipe(self, recipe):
+        if recipe is None or not self.is_recipe_unlocked(recipe):
+            return False
+        if recipe.required_flags and not self.has_flags(recipe.required_flags):
+            return False
+        for ingredient in recipe.ingredients:
+            if not self.has_item(ingredient.item_id, ingredient.quantity):
+                return False
+        return self.can_add_item(recipe.result.item_id, recipe.result.quantity)
+
+    def craft_recipe(self, recipe):
+        if not self.can_craft_recipe(recipe):
+            return False
+        for ingredient in recipe.ingredients:
+            if not self.remove_item(ingredient.item_id, ingredient.quantity):
+                return False
+        return self.add_item(recipe.result.item_id, recipe.result.quantity)
 
     def get_inventory_capacity(self):
         return self.base_inventory_capacity + self.get_inventory_capacity_bonus()
@@ -377,7 +435,8 @@ class Player(Entity):
     def pickup_item(self, item_stack=None, coins=0):
         if item_stack is not None:
             if item_stack.kind == ItemKind.CURRENCY:
-                coins += item_stack.quantity
+                if not self._add_currency_from_stack(item_stack):
+                    return False
                 item_stack = None
             elif not self._target_inventory_for_stack(item_stack).can_add_item(item_stack):
                 return False
@@ -388,6 +447,14 @@ class Player(Entity):
             self.add_coins(coins)
         self._sync_inventory_capacities()
         return True
+
+    def _add_currency_from_stack(self, item_stack):
+        wallet_key = item_stack.definition.wallet_key
+        if wallet_key == "coins":
+            return self.add_coins(item_stack.quantity)
+        if wallet_key == "knowledge_shards":
+            return self.add_knowledge_shards(item_stack.quantity)
+        return False
 
     def _resolve_item_stack(self, item_or_stack, quantity=1):
         if isinstance(item_or_stack, ItemStack):
