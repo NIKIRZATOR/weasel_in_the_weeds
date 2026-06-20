@@ -45,6 +45,7 @@ class ItemDefinition:
     max_stack: int = 99
     equip_slot: EquipSlot | None = None
     stats: dict[str, int] = field(default_factory=dict)
+    inventory_capacity_bonus: int = 0
     price: int = 0
     icon_path: str | None = None
     description: str = ""

@@ -17,10 +17,9 @@ class MenuScene(Scene):
         self._build_buttons()
 
     def _build_buttons(self):
-        screen_width, _ = self.app.get_screen_size()
+        screen_width, screen_height = self.app.get_screen_size()
         button_width = 300
         button_height = 48
-        start_y = 210
         gap = 14
         labels = [
             ("Новая игра", self.start_game, False),
@@ -29,6 +28,14 @@ class MenuScene(Scene):
             ("Об авторе", self.show_author, False),
             ("Выход", self.exit_game, False),
         ]
+
+        title_gap = 72
+        title_height = self.title_font.get_height()
+        buttons_height = len(labels) * button_height + max(0, len(labels) - 1) * gap
+        content_height = title_height + title_gap + buttons_height
+        content_top = max(40, (screen_height - content_height) // 2)
+        self.title_center_y = content_top + title_height // 2
+        start_y = content_top + title_height + title_gap
 
         self.buttons = []
         for index, (label, action, disabled) in enumerate(labels):
@@ -107,7 +114,7 @@ class MenuScene(Scene):
         self.app.screen.fill((18, 18, 26))
 
         title = self.title_font.render("Weales in the weeds", True, COLORS["WHITE"])
-        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, 110)))
+        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, self.title_center_y)))
 
         mouse_pos = pygame.mouse.get_pos()
         for button in self.buttons:

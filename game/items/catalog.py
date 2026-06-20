@@ -37,6 +37,7 @@ ITEM_DEFINITIONS: dict[str, ItemDefinition] = {
         kind=ItemKind.QUEST,
         stackable=False,
         max_stack=1,
+        inventory_capacity_bonus=5,
         price=0,
         description="A small travel backpack from the hermit.",
     ),

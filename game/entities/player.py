@@ -44,6 +44,7 @@ from settings import (
 
 
 class Player(Entity):
+    QUEST_INVENTORY_CAPACITY = 10
     """Класс игрока с состояниями, движением и базовой отрисовкой."""
 
     def __init__(self, x, y, spawn_x=None, spawn_y=None):
@@ -74,7 +75,9 @@ class Player(Entity):
             defense=0,
             speed=PLAYER_SPEED,
         )
+        self.base_inventory_capacity = PLAYER_INVENTORY_CAPACITY
         self.inventory = Inventory(PLAYER_INVENTORY_CAPACITY)
+        self.quest_inventory = Inventory(self.QUEST_INVENTORY_CAPACITY)
         self.equipment = Equipment()
         self.hotbar_slots: list[ItemStack | None] = [None] * HOTBAR_SIZE
         self.coins = 0
@@ -112,6 +115,7 @@ class Player(Entity):
         self.dash_speed = DASH_DISTANCE / DASH_DURATION if DASH_DURATION > 0 else 0
 
         self.current_speed = self.get_effective_stats().speed
+        self._sync_inventory_capacities()
 
     def get_effective_stats(self):
         return self.base_stats + self.equipment.get_stat_bonuses()
@@ -182,19 +186,50 @@ class Player(Entity):
         return True
 
     def can_add_item(self, item_or_stack, quantity=1):
-        return self.inventory.can_add_item(item_or_stack, quantity)
+        stack = self._resolve_item_stack(item_or_stack, quantity)
+        if stack is None:
+            return False
+        return self._target_inventory_for_stack(stack).can_add_item(stack)
 
     def add_item(self, item_or_stack, quantity=1):
-        return self.inventory.add_item(item_or_stack, quantity)
+        stack = self._resolve_item_stack(item_or_stack, quantity)
+        if stack is None:
+            return False
+
+        if not self._target_inventory_for_stack(stack).add_item(stack):
+            return False
+        self._sync_inventory_capacities()
+        return True
 
     def remove_item(self, item_id, quantity=1):
-        return self.inventory.remove_item(item_id, quantity)
+        if quantity <= 0:
+            return False
+        if not self.has_item(item_id, quantity):
+            return False
+
+        remaining = quantity
+        for inventory in self._inventories_for_item_id(item_id):
+            available = inventory.count_item(item_id)
+            if available <= 0:
+                continue
+            removed_now = min(remaining, available)
+            if inventory.remove_item(item_id, removed_now):
+                remaining -= removed_now
+            if remaining <= 0:
+                self._sync_inventory_capacities()
+                return True
+
+        self._sync_inventory_capacities()
+        return False
 
     def has_item(self, item_id, quantity=1):
-        return self.inventory.has_item(item_id, quantity)
+        return self.inventory.count_item(item_id) + self.quest_inventory.count_item(item_id) >= quantity
 
     def find_item(self, item_id):
-        return self.inventory.find_item(item_id)
+        result = self.inventory.find_item(item_id)
+        if result is not None:
+            return result
+        return self.quest_inventory.find_item(item_id)
 
     def add_coins(self, quantity):
         if quantity <= 0:
@@ -275,6 +310,18 @@ class Player(Entity):
         claimed_nodes.add(str(node_id))
         return True
 
+    def get_inventory_capacity(self):
+        return self.base_inventory_capacity + self.get_inventory_capacity_bonus()
+
+    def get_inventory_capacity_bonus(self):
+        bonus = 0
+        for inventory in (self.inventory, self.quest_inventory):
+            for _, stack in inventory.iter_stacks():
+                if stack is None:
+                    continue
+                bonus += max(0, int(stack.definition.inventory_capacity_bonus)) * stack.quantity
+        return bonus
+
     def equip_inventory_slot(self, inventory_index, equip_slot):
         if not isinstance(equip_slot, EquipSlot):
             try:
@@ -332,15 +379,56 @@ class Player(Entity):
             if item_stack.kind == ItemKind.CURRENCY:
                 coins += item_stack.quantity
                 item_stack = None
-            elif not self.inventory.can_add_item(item_stack):
+            elif not self._target_inventory_for_stack(item_stack).can_add_item(item_stack):
                 return False
 
-        if item_stack is not None and not self.inventory.add_item(item_stack):
+        if item_stack is not None and not self._target_inventory_for_stack(item_stack).add_item(item_stack):
             return False
         if coins > 0:
             self.add_coins(coins)
-        self._sync_resource_limits()
+        self._sync_inventory_capacities()
         return True
+
+    def _resolve_item_stack(self, item_or_stack, quantity=1):
+        if isinstance(item_or_stack, ItemStack):
+            return item_or_stack.copy(quantity if quantity != 1 else item_or_stack.quantity)
+        return create_item_stack(item_or_stack, quantity)
+
+    def _target_inventory_for_stack(self, stack):
+        if stack.kind == ItemKind.QUEST:
+            return self.quest_inventory
+        return self.inventory
+
+    def _inventories_for_item_id(self, item_id):
+        in_regular = self.inventory.count_item(item_id) > 0
+        in_quest = self.quest_inventory.count_item(item_id) > 0
+        if in_regular and not in_quest:
+            return [self.inventory]
+        if in_quest and not in_regular:
+            return [self.quest_inventory]
+        return [self.inventory, self.quest_inventory]
+
+    def _sync_inventory_capacities(self):
+        self._normalize_quest_items()
+        self.inventory.set_capacity(self.get_inventory_capacity())
+        self._sync_resource_limits()
+
+    def _normalize_quest_items(self):
+        for index, stack in list(self.inventory.iter_stacks()):
+            if stack is None or stack.kind != ItemKind.QUEST:
+                continue
+            if not self.quest_inventory.can_add_item(stack):
+                continue
+            self.quest_inventory.add_item(stack)
+            self.inventory.clear_slot(index)
+
+        for index, stack in enumerate(self.hotbar_slots):
+            if stack is None or stack.kind != ItemKind.QUEST:
+                continue
+            if not self.quest_inventory.can_add_item(stack):
+                continue
+            self.quest_inventory.add_item(stack)
+            self.hotbar_slots[index] = None
 
     def update(self, dt, keys, world):
         if self.health <= 0:

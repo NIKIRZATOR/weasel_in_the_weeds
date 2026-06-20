@@ -1,19 +1,15 @@
 import pygame
 from math import ceil
 
-from game.items.types import EquipSlot
+from game.items.types import EquipSlot, ItemKind
 from game.scenes.base import Scene
-from settings import (
-    COLORS,
-    HOTBAR_SIZE,
-    INVENTORY_COLUMNS,
-    INVENTORY_ROWS,
-    SCREEN_HEIGHT,
-    SCREEN_WIDTH,
-)
+from settings import COLORS, HOTBAR_SIZE, INVENTORY_COLUMNS, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 class InventoryScene(Scene):
+    QUEST_COLUMNS = 2
+    QUEST_ROWS = 5
+
     def __init__(self, app, game_scene):
         self.app = app
         self.game_scene = game_scene
@@ -29,34 +25,94 @@ class InventoryScene(Scene):
         self.drag_start_pos = None
         self.dragging = False
         self.drag_threshold = 6
+        self._layout_size = None
         self._build_layout()
 
     def _build_layout(self):
-        self.panel_rect = pygame.Rect(40, 40, SCREEN_WIDTH - 80, SCREEN_HEIGHT - 80)
-        self.left_panel = pygame.Rect(60, 110, 200, 410)
-        self.center_panel = pygame.Rect(280, 110, 320, 410)
-        self.right_panel = pygame.Rect(620, 110, 120, 410)
-        self.details_panel = pygame.Rect(280, 530, 460, 50)
+        screen_width, screen_height = self.app.get_screen_size()
+        layout_size = (screen_width, screen_height)
+        if self._layout_size == layout_size:
+            return
+        self._layout_size = layout_size
 
-        self.inventory_slot_size = 48
-        self.inventory_gap = 8
-        self.hotbar_panel = pygame.Rect(296, 154, 248, 92)
-        self.hotbar_origin = (312, 188)
-        self.inventory_origin = (310, 270)
-        self.inventory_columns = INVENTORY_COLUMNS
-        self.inventory_slot_count = self.player.inventory.capacity
-        self.inventory_rows = min(
-            INVENTORY_ROWS,
-            max(1, ceil(self.inventory_slot_count / self.inventory_columns)),
+        panel_width = min(SCREEN_WIDTH - 80, screen_width - 40)
+        panel_height = min(SCREEN_HEIGHT - 80, screen_height - 40)
+        compact = panel_width < 1120 or panel_height < 680
+        outer_margin_x = max(20, (screen_width - panel_width) // 2)
+        outer_margin_y = max(20, (screen_height - panel_height) // 2)
+        self.panel_rect = pygame.Rect(
+            outer_margin_x,
+            outer_margin_y,
+            panel_width,
+            panel_height,
         )
 
+        self.panel_padding = 20 if compact else 24
+        self.column_gap = 12 if compact else 16
+        self.inventory_slot_size = 40 if compact else 48
+        self.inventory_gap = 8
+        self.inventory_columns = INVENTORY_COLUMNS
+        self.inventory_slot_count = self.player.inventory.capacity
+        self.inventory_rows = max(1, ceil(self.inventory_slot_count / self.inventory_columns))
+        self.quest_slot_count = self.player.quest_inventory.capacity
+
+        left_width = 180 if compact else 200
+        side_width = 108 if compact else 124
+        center_width = self.inventory_columns * self.inventory_slot_size
+        center_width += (self.inventory_columns - 1) * self.inventory_gap + 32
+
+        content_top = self.panel_rect.y + 70
+        details_height = 58
+        body_height = max(320, self.panel_rect.height - 120 - details_height)
+
+        left_x = self.panel_rect.x + self.panel_padding
+        center_x = left_x + left_width + self.column_gap
+        equipment_x = center_x + center_width + self.column_gap
+        quest_x = equipment_x + side_width + self.column_gap
+
+        total_width = quest_x + side_width - left_x
+        available_width = self.panel_rect.width - self.panel_padding * 2
+        if total_width > available_width:
+            overflow = total_width - available_width
+            center_width = max(220, center_width - overflow)
+            equipment_x = center_x + center_width + self.column_gap
+            quest_x = equipment_x + side_width + self.column_gap
+
+        self.left_panel = pygame.Rect(left_x, content_top, left_width, body_height)
+        self.center_panel = pygame.Rect(center_x, content_top, center_width, body_height)
+        self.equipment_panel = pygame.Rect(equipment_x, content_top, side_width, body_height)
+        self.quest_panel = pygame.Rect(quest_x, content_top, side_width, body_height)
+        self.details_panel = pygame.Rect(
+            center_x,
+            content_top + body_height + 12,
+            self.panel_rect.right - self.panel_padding - center_x,
+            details_height,
+        )
+
+        hotbar_width = HOTBAR_SIZE * self.inventory_slot_size
+        hotbar_width += (HOTBAR_SIZE - 1) * self.inventory_gap + 16
+        self.hotbar_panel = pygame.Rect(
+            self.center_panel.x + 16,
+            self.center_panel.y + 42,
+            hotbar_width,
+            72 if compact else 92,
+        )
+        self.hotbar_origin = (self.hotbar_panel.x + 8, self.hotbar_panel.y + 30)
+        self.inventory_origin = (self.center_panel.x + 16, self.hotbar_panel.bottom + 24)
+        self.quest_origin = (self.quest_panel.x + 8, self.quest_panel.y + 60)
+
+        equipment_slot_width = self.equipment_panel.width - 16
+        equipment_slot_height = 34
+        equipment_slot_x = self.equipment_panel.x + 8
+        equipment_slot_y = self.equipment_panel.y + 54
+        equipment_spacing = 12
         self.equipment_slots = [
-            (EquipSlot.HELMET, pygame.Rect(640, 170, 70, 36), "Helmet"),
-            (EquipSlot.CHEST, pygame.Rect(640, 220, 70, 36), "Chest"),
-            (EquipSlot.BOOTS, pygame.Rect(640, 270, 70, 36), "Boots"),
-            (EquipSlot.WEAPON, pygame.Rect(640, 320, 70, 36), "Weapon"),
-            (EquipSlot.ACCESSORY_1, pygame.Rect(640, 370, 70, 36), "Acc 1"),
-            (EquipSlot.ACCESSORY_2, pygame.Rect(640, 420, 70, 36), "Acc 2"),
+            (EquipSlot.HELMET, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 0, equipment_slot_width, equipment_slot_height), "Шлем"),
+            (EquipSlot.CHEST, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 1, equipment_slot_width, equipment_slot_height), "Броня"),
+            (EquipSlot.BOOTS, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 2, equipment_slot_width, equipment_slot_height), "Обувь"),
+            (EquipSlot.WEAPON, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 3, equipment_slot_width, equipment_slot_height), "Оружие"),
+            (EquipSlot.ACCESSORY_1, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 4, equipment_slot_width, equipment_slot_height), "Акс 1"),
+            (EquipSlot.ACCESSORY_2, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 5, equipment_slot_width, equipment_slot_height), "Акс 2"),
         ]
 
     def handle_events(self, events):
@@ -73,6 +129,7 @@ class InventoryScene(Scene):
                 self._handle_left_button_up(event.pos)
 
     def _handle_left_button_down(self, mouse_pos):
+        self._build_layout()
         slot = self._slot_at(mouse_pos)
         self.drag_source = None
         self.drag_start_pos = None
@@ -83,7 +140,7 @@ class InventoryScene(Scene):
             return
 
         kind, index = slot
-        if kind in ("inventory", "hotbar"):
+        if kind in ("inventory", "hotbar", "quest"):
             stack = self._get_slot_stack(kind, index)
             if stack is None:
                 self.selected_slot = None
@@ -112,13 +169,12 @@ class InventoryScene(Scene):
         target = self._slot_at(mouse_pos)
 
         if self.dragging:
-            if target is not None and target[:2] != source[:2] and target[0] in ("inventory", "hotbar"):
+            movable_kinds = {"inventory", "hotbar", "quest"}
+            if target is not None and target[:2] != source[:2] and target[0] in movable_kinds:
                 if self._transfer_between_slots(source, target):
                     self.selected_slot = target
                 else:
                     self.selected_slot = source
-            elif target is not None and target[0] == "equipment":
-                self.selected_slot = source
             else:
                 self.selected_slot = source
         else:
@@ -128,6 +184,8 @@ class InventoryScene(Scene):
                 self._handle_inventory_click(target[1])
             elif target[0] == "hotbar":
                 self._handle_hotbar_click(target[1])
+            elif target[0] == "quest":
+                self._handle_quest_click(target[1])
             elif target[0] == "equipment":
                 self._handle_equipment_click(target[1])
 
@@ -156,6 +214,10 @@ class InventoryScene(Scene):
                 self.selected_slot = ("inventory", inventory_index)
             else:
                 self._set_message("Не удалось переместить предмет")
+            return
+
+        if selected_kind == "quest":
+            self._set_message("Сюжетные предметы хранятся отдельно")
 
     def _handle_hotbar_click(self, hotbar_index):
         stack = self.player.get_hotbar_stack(hotbar_index)
@@ -178,6 +240,28 @@ class InventoryScene(Scene):
                 self.selected_slot = ("hotbar", hotbar_index)
             else:
                 self._set_message("Не удалось переместить предмет")
+            return
+
+        if selected_kind == "quest":
+            self._set_message("Сюжетные предметы нельзя помещать в хотбар")
+
+    def _handle_quest_click(self, quest_index):
+        stack = self.player.quest_inventory.get_stack_at(quest_index)
+        if self.selected_slot is None:
+            if stack is not None:
+                self.selected_slot = ("quest", quest_index)
+            return
+
+        selected_kind, selected_index = self.selected_slot
+        if selected_kind == "quest":
+            if selected_index == quest_index:
+                self.selected_slot = None
+                return
+            self.player.quest_inventory.swap_slots(selected_index, quest_index)
+            self.selected_slot = ("quest", quest_index)
+            return
+
+        self._set_message("Сюжетные предметы хранятся отдельно")
 
     def _handle_equipment_click(self, equip_slot):
         if self.selected_slot is not None and self.selected_slot[0] == "inventory":
@@ -207,49 +291,37 @@ class InventoryScene(Scene):
                 self.message = ""
 
     def draw(self):
+        self._build_layout()
         self.game_scene.draw()
 
-        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        screen_width, screen_height = self.app.get_screen_size()
+        overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 165))
         self.app.screen.blit(overlay, (0, 0))
 
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=14)
-        pygame.draw.rect(
-            self.app.screen,
-            COLORS["UI_SLOT_BORDER"],
-            self.panel_rect,
-            width=2,
-            border_radius=14,
-        )
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.panel_rect, width=2, border_radius=14)
 
         title = self.title_font.render("Инвентарь", True, COLORS["WHITE"])
-        self.app.screen.blit(title, (70, 55))
+        self.app.screen.blit(title, (self.panel_rect.x + 28, self.panel_rect.y + 12))
         hint = self.text_font.render("Esc / I - закрыть", True, COLORS["UI_TEXT_DIM"])
-        self.app.screen.blit(hint, (SCREEN_WIDTH - hint.get_width() - 72, 60))
+        self.app.screen.blit(hint, (self.panel_rect.right - hint.get_width() - 28, self.panel_rect.y + 22))
 
         self._draw_character_panel()
         self._draw_inventory_grid()
         self._draw_hotbar_panel()
         self._draw_equipment_panel()
+        self._draw_quest_panel()
         self._draw_details_panel()
         self._draw_drag_preview()
 
         if self.message:
             message = self.text_font.render(self.message, True, (255, 220, 120))
-            self.app.screen.blit(
-                message,
-                message.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 22)),
-            )
+            self.app.screen.blit(message, message.get_rect(center=(screen_width // 2, screen_height - 22)))
 
     def _draw_character_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.left_panel, border_radius=12)
-        pygame.draw.rect(
-            self.app.screen,
-            COLORS["UI_SLOT_BORDER"],
-            self.left_panel,
-            width=2,
-            border_radius=12,
-        )
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.left_panel, width=2, border_radius=12)
         label = self.section_font.render("Персонаж", True, COLORS["WHITE"])
         self.app.screen.blit(label, (self.left_panel.x + 16, self.left_panel.y + 14))
 
@@ -264,21 +336,16 @@ class InventoryScene(Scene):
             f"ATK: {stats.attack}",
             f"DEF: {stats.defense}",
             f"SPD: {stats.speed}",
+            f"Места: {self.player.inventory.capacity}",
             f"Coins: {self.player.coins}",
         ]
         for index, line in enumerate(stat_lines):
             text = self.text_font.render(line, True, COLORS["WHITE"])
-            self.app.screen.blit(text, (self.left_panel.x + 18, self.left_panel.y + 200 + index * 30))
+            self.app.screen.blit(text, (self.left_panel.x + 18, self.left_panel.y + 190 + index * 28))
 
     def _draw_hotbar_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.hotbar_panel, border_radius=12)
-        pygame.draw.rect(
-            self.app.screen,
-            COLORS["UI_SLOT_BORDER"],
-            self.hotbar_panel,
-            width=2,
-            border_radius=12,
-        )
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.hotbar_panel, width=2, border_radius=12)
         label = self.small_font.render("Хотбар", True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(label, (self.hotbar_panel.x + 12, self.hotbar_panel.y + 10))
 
@@ -303,13 +370,7 @@ class InventoryScene(Scene):
 
     def _draw_inventory_grid(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.center_panel, border_radius=12)
-        pygame.draw.rect(
-            self.app.screen,
-            COLORS["UI_SLOT_BORDER"],
-            self.center_panel,
-            width=2,
-            border_radius=12,
-        )
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.center_panel, width=2, border_radius=12)
         label = self.section_font.render("Инвентарь", True, COLORS["WHITE"])
         self.app.screen.blit(label, (self.center_panel.x + 16, self.center_panel.y + 14))
 
@@ -335,16 +396,10 @@ class InventoryScene(Scene):
                     self._draw_stack_label(stack, rect)
 
     def _draw_equipment_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.right_panel, border_radius=12)
-        pygame.draw.rect(
-            self.app.screen,
-            COLORS["UI_SLOT_BORDER"],
-            self.right_panel,
-            width=2,
-            border_radius=12,
-        )
-        label = self.section_font.render("Надето", True, COLORS["WHITE"])
-        self.app.screen.blit(label, (self.right_panel.x + 12, self.right_panel.y + 14))
+        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.equipment_panel, border_radius=12)
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.equipment_panel, width=2, border_radius=12)
+        label = self.section_font.render("Экипировка", True, COLORS["WHITE"])
+        self.app.screen.blit(label, (self.equipment_panel.x + 12, self.equipment_panel.y + 14))
 
         for slot, rect, title in self.equipment_slots:
             stack = self.player.equipment.get(slot)
@@ -359,23 +414,37 @@ class InventoryScene(Scene):
                 item_text = self.small_font.render(stack.name[:8], True, COLORS["WHITE"])
                 self.app.screen.blit(item_text, item_text.get_rect(center=rect.center))
 
+    def _draw_quest_panel(self):
+        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.quest_panel, border_radius=12)
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.quest_panel, width=2, border_radius=12)
+        label = self.section_font.render("Сюжетные", True, COLORS["WHITE"])
+        self.app.screen.blit(label, (self.quest_panel.x + 12, self.quest_panel.y + 14))
+
+        for row in range(self.QUEST_ROWS):
+            for col in range(self.QUEST_COLUMNS):
+                index = row * self.QUEST_COLUMNS + col
+                if index >= self.quest_slot_count:
+                    continue
+
+                rect = self._quest_rect(row, col)
+                selected = self.selected_slot == ("quest", index)
+                stack = self.player.quest_inventory.get_stack_at(index)
+                if self.dragging and self.drag_source == ("quest", index):
+                    stack = None
+                border = COLORS["UI_SLOT_SELECTED"] if selected else COLORS["UI_SLOT_BORDER"]
+                pygame.draw.rect(self.app.screen, COLORS["UI_SLOT"], rect, border_radius=8)
+                pygame.draw.rect(self.app.screen, border, rect, width=2, border_radius=8)
+
+                if stack is not None:
+                    self._draw_stack_label(stack, rect)
+
     def _draw_details_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.details_panel, border_radius=10)
-        pygame.draw.rect(
-            self.app.screen,
-            COLORS["UI_SLOT_BORDER"],
-            self.details_panel,
-            width=1,
-            border_radius=10,
-        )
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.details_panel, width=1, border_radius=10)
 
         stack = self._get_selected_stack()
         if stack is None:
-            text = self.text_font.render(
-                "Выберите предмет, чтобы увидеть описание.",
-                True,
-                COLORS["UI_TEXT_DIM"],
-            )
+            text = self.text_font.render("Выберите предмет, чтобы увидеть описание.", True, COLORS["UI_TEXT_DIM"])
             self.app.screen.blit(text, (self.details_panel.x + 14, self.details_panel.y + 14))
             return
 
@@ -429,6 +498,8 @@ class InventoryScene(Scene):
             return self.player.inventory.get_stack_at(selected_index)
         if selected_kind == "hotbar":
             return self.player.get_hotbar_stack(selected_index)
+        if selected_kind == "quest":
+            return self.player.quest_inventory.get_stack_at(selected_index)
         return None
 
     def _slot_at(self, mouse_pos):
@@ -439,6 +510,10 @@ class InventoryScene(Scene):
         inventory_index = self._inventory_index_at(mouse_pos)
         if inventory_index is not None:
             return ("inventory", inventory_index)
+
+        quest_index = self._quest_index_at(mouse_pos)
+        if quest_index is not None:
+            return ("quest", quest_index)
 
         equipment_slot = self._equipment_slot_at(mouse_pos)
         if equipment_slot is not None:
@@ -451,6 +526,8 @@ class InventoryScene(Scene):
             return self.player.inventory.get_stack_at(index)
         if kind == "hotbar":
             return self.player.get_hotbar_stack(index)
+        if kind == "quest":
+            return self.player.quest_inventory.get_stack_at(index)
         if kind == "equipment":
             return self.player.equipment.get(index)
         return None
@@ -460,6 +537,10 @@ class InventoryScene(Scene):
             return self.player.inventory.set_stack_at(index, stack)
         if kind == "hotbar":
             return self.player.set_hotbar_slot(index, stack)
+        if kind == "quest":
+            if stack is not None and stack.kind != ItemKind.QUEST:
+                return False
+            return self.player.quest_inventory.set_stack_at(index, stack)
         return False
 
     def _clear_slot(self, kind, index):
@@ -467,6 +548,8 @@ class InventoryScene(Scene):
             return self.player.inventory.clear_slot(index)
         if kind == "hotbar":
             return self.player.clear_hotbar_slot(index)
+        if kind == "quest":
+            return self.player.quest_inventory.clear_slot(index)
         return None
 
     def _transfer_between_slots(self, source, target):
@@ -479,6 +562,11 @@ class InventoryScene(Scene):
         target_stack = self._get_slot_stack(target_kind, target_index)
         if source_stack is None:
             return False
+
+        if "quest" in (source_kind, target_kind):
+            if source_kind != target_kind or source_stack.kind != ItemKind.QUEST:
+                self._set_message("Сюжетные предметы нельзя переносить в обычный инвентарь")
+                return False
 
         if target_stack is None:
             if not self._set_slot_stack(target_kind, target_index, source_stack):
@@ -508,6 +596,11 @@ class InventoryScene(Scene):
         y = self.inventory_origin[1] + row * (self.inventory_slot_size + self.inventory_gap)
         return pygame.Rect(x, y, self.inventory_slot_size, self.inventory_slot_size)
 
+    def _quest_rect(self, row, col):
+        x = self.quest_origin[0] + col * (self.inventory_slot_size + self.inventory_gap)
+        y = self.quest_origin[1] + row * (self.inventory_slot_size + self.inventory_gap)
+        return pygame.Rect(x, y, self.inventory_slot_size, self.inventory_slot_size)
+
     def _hotbar_rect(self, index):
         x = self.hotbar_origin[0] + index * (self.inventory_slot_size + self.inventory_gap)
         return pygame.Rect(x, self.hotbar_origin[1], self.inventory_slot_size, self.inventory_slot_size)
@@ -519,6 +612,16 @@ class InventoryScene(Scene):
                 if index >= self.inventory_slot_count:
                     continue
                 if self._inventory_rect(row, col).collidepoint(mouse_pos):
+                    return index
+        return None
+
+    def _quest_index_at(self, mouse_pos):
+        for row in range(self.QUEST_ROWS):
+            for col in range(self.QUEST_COLUMNS):
+                index = row * self.QUEST_COLUMNS + col
+                if index >= self.quest_slot_count:
+                    continue
+                if self._quest_rect(row, col).collidepoint(mouse_pos):
                     return index
         return None
 

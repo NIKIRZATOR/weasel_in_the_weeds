@@ -9,6 +9,23 @@ class Inventory:
         self.capacity = capacity
         self.slots: list[ItemStack | None] = [None] * capacity
 
+    def set_capacity(self, capacity: int) -> bool:
+        capacity = max(0, int(capacity))
+        if capacity == self.capacity:
+            return True
+
+        if capacity > self.capacity:
+            self.slots.extend([None] * (capacity - self.capacity))
+            self.capacity = capacity
+            return True
+
+        if any(stack is not None for stack in self.slots[capacity:]):
+            return False
+
+        self.slots = self.slots[:capacity]
+        self.capacity = capacity
+        return True
+
     def get_stack_at(self, index: int) -> ItemStack | None:
         if 0 <= index < self.capacity:
             return self.slots[index]
