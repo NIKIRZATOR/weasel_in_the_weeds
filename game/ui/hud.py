@@ -79,13 +79,22 @@ class HUD:
 
     def draw_controls(self, screen):
         _, screen_height = screen.get_size()
-        controls_text = "WASD - move | SHIFT - run | SPACE - jump | ALT - dash | LMB - attack | E - interact | I - inventory"
+        controls_text = "WASD - move | SHIFT - run | SPACE - jump | ALT - dash | LMB - attack | E - interact | I - inventory | M - map"
         text = self.small_font.render(controls_text, True, (200, 200, 200))
         screen.blit(text, (10, screen_height - 32))
+
+    def draw_map_hint(self, screen, player):
+        if not player.can_open_map():
+            return
+
+        screen_width, _ = screen.get_size()
+        text = self.small_font.render("M - map", True, COLORS["WHITE"])
+        screen.blit(text, (screen_width - text.get_width() - 16, 42))
 
     def draw(self, screen, player):
         self.draw_health_bar(screen, player)
         self.draw_stamina_bar(screen, player)
         self.draw_coins(screen, player)
+        self.draw_map_hint(screen, player)
         self.draw_hotbar(screen, player)
         self.draw_controls(screen)

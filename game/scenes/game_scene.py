@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 
 from game.core.camera import Camera
@@ -23,6 +25,7 @@ class GameScene(Scene):
     def __init__(self, app, level_path, player=None, target_spawn=None):
         self.app = app
         self.level_path = level_path
+        self.level_key = Path(level_path).name
         self.level = load_level(level_path)
         pygame.display.set_caption(f"Weales in the weeds RPG - {self.level.name}")
 
@@ -125,6 +128,11 @@ class GameScene(Scene):
 
         self.app.set_scene(InventoryScene(self.app, self))
 
+    def open_map(self):
+        from game.scenes.map_scene import MapScene
+
+        self.app.set_scene(MapScene(self.app, self))
+
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.QUIT:
@@ -136,6 +144,12 @@ class GameScene(Scene):
                     self.open_pause_menu()
                 elif event.key == pygame.K_i:
                     self.open_inventory()
+                elif event.key == pygame.K_m:
+                    if self.player.can_open_map():
+                        self.open_map()
+                    else:
+                        self.last_interaction_message = "You do not have a map yet."
+                        self.last_interaction_timer = 1.5
                 elif event.key == pygame.K_e:
                     self.try_interact()
                 elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4):
@@ -239,6 +253,7 @@ class GameScene(Scene):
 
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys, self)
+        self._update_map_reveal()
         self._update_grass_hide_zones()
         self._update_checkpoints()
         self._update_enemies(dt)
@@ -259,6 +274,19 @@ class GameScene(Scene):
             if not getattr(world_object, "is_checkpoint", False):
                 continue
             world_object.activate(self.player, self)
+
+    def _update_map_reveal(self):
+        player_center = self.player.get_center()
+        tile_x = int(player_center.x // self.level.tile_size)
+        tile_y = int(player_center.y // self.level.tile_size)
+        self.player.reveal_map_area(
+            self.level_key,
+            self.level.width,
+            self.level.height,
+            tile_x,
+            tile_y,
+            radius=1,
+        )
 
     def _update_grass_hide_zones(self):
         player_hitbox = self.player.get_hitbox_rect()

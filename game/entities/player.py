@@ -80,6 +80,7 @@ class Player(Entity):
         self.coins = 0
         self.selected_hotbar_index = 0
         self.story_flags = set()
+        self.explored_tiles_by_level: dict[str, list[list[bool]]] = {}
 
         self.health = self.get_max_health()
         self.stamina = self.get_max_stamina()
@@ -226,6 +227,40 @@ class Player(Entity):
 
     def has_flags(self, flags):
         return all(self.has_flag(flag) for flag in flags)
+
+    def can_open_map(self):
+        return self.has_flag("has_map") or self.has_item("map")
+
+    def ensure_map_state(self, level_key, width, height):
+        existing = self.explored_tiles_by_level.get(level_key)
+        if existing is not None and len(existing) == height and len(existing[0]) == width:
+            return existing
+
+        visited = [[False for _ in range(width)] for _ in range(height)]
+        self.explored_tiles_by_level[level_key] = visited
+        return visited
+
+    def reveal_map_area(self, level_key, width, height, tile_x, tile_y, radius=1):
+        visited = self.ensure_map_state(level_key, width, height)
+        changed = False
+        min_y = max(0, tile_y - radius)
+        max_y = min(height - 1, tile_y + radius)
+        min_x = max(0, tile_x - radius)
+        max_x = min(width - 1, tile_x + radius)
+
+        for row in range(min_y, max_y + 1):
+            for col in range(min_x, max_x + 1):
+                if visited[row][col]:
+                    continue
+                visited[row][col] = True
+                changed = True
+        return changed
+
+    def get_map_state(self, level_key, width=None, height=None):
+        visited = self.explored_tiles_by_level.get(level_key)
+        if visited is None and width is not None and height is not None:
+            visited = self.ensure_map_state(level_key, width, height)
+        return visited
 
     def equip_inventory_slot(self, inventory_index, equip_slot):
         if not isinstance(equip_slot, EquipSlot):
