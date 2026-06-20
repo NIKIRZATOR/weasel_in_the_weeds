@@ -50,6 +50,9 @@ class MapScene(Scene):
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], map_rect, width=1, border_radius=12)
         self._draw_level_map(map_rect)
 
+    def on_language_changed(self):
+        return None
+
     def _draw_level_map(self, map_rect):
         level = self.game_scene.level
         visited = self.player.get_map_state(self.game_scene.level_key, level.width, level.height)
@@ -86,7 +89,8 @@ class MapScene(Scene):
         self.app.screen.blit(fog_surface, (origin_x, origin_y))
         self._draw_player_marker(origin_x, origin_y, tile_size)
 
-        area_name = self.small_font.render(self.game_scene.level.name, True, COLORS["WHITE"])
+        level_name = self.game_scene._localized_level_name()
+        area_name = self.small_font.render(level_name, True, COLORS["WHITE"])
         self.app.screen.blit(area_name, (map_rect.x + 12, map_rect.bottom - area_name.get_height() - 10))
 
     def _draw_player_marker(self, origin_x, origin_y, tile_size):

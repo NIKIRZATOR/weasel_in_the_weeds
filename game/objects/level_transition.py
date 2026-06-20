@@ -1,5 +1,6 @@
 import pygame
 
+from game.localization import get_localizer
 from game.objects.world_object import WorldObject
 from settings import COLORS
 
@@ -27,7 +28,11 @@ class LevelTransition(WorldObject):
         )
 
     def get_block_message(self):
-        return self.properties.get("blocked_message", "The path is blocked.")
+        localizer = get_localizer()
+        message_key = self.properties.get("blocked_message_key")
+        if message_key:
+            return localizer.t(str(message_key))
+        return self.properties.get("blocked_message", localizer.t("pickup.path_blocked"))
 
     def get_target_level(self):
         return self.properties.get("target_level")

@@ -1,6 +1,7 @@
 import pygame
 
 from game.items import get_item_icon
+from game.localization import get_localizer
 from settings import COLORS, HOTBAR_SIZE, PLAYER_MAX_HEALTH, PLAYER_MAX_STAMINA
 
 
@@ -9,9 +10,13 @@ class HUD:
     
 
     def __init__(self):
+        self.localizer = get_localizer()
         self.font = pygame.font.Font(None, 30)
         self.small_font = pygame.font.Font(None, 22)
         self.tiny_font = pygame.font.Font(None, 18)
+
+    def on_language_changed(self):
+        return None
 
     def draw_health_bar(self, screen, player):
         width = 220
@@ -25,7 +30,11 @@ class HUD:
         pygame.draw.rect(screen, COLORS['HEALTH_BG'], (x, y, width, height), border_radius=6)
         pygame.draw.rect(screen, COLORS['HEALTH'], (x, y, width * percent, height), border_radius=6)
 
-        text = self.font.render(f"HP: {current_health}/{max_health}", True, COLORS['WHITE'])
+        text = self.font.render(
+            f"{self.localizer.t('ui.inventory.stat_hp')}: {current_health}/{max_health}",
+            True,
+            COLORS['WHITE'],
+        )
         screen.blit(text, (x + width + 10, y - 2))
 
     def draw_stamina_bar(self, screen, player):
@@ -40,17 +49,29 @@ class HUD:
         pygame.draw.rect(screen, COLORS['STAMINA_BG'], (x, y, width, height), border_radius=6)
         pygame.draw.rect(screen, COLORS['STAMINA'], (x, y, width * percent, height), border_radius=6)
 
-        text = self.font.render(f"ST: {current_stamina}/{max_stamina}", True, COLORS['WHITE'])
+        text = self.font.render(
+            f"{self.localizer.t('ui.inventory.stat_st')}: {current_stamina}/{max_stamina}",
+            True,
+            COLORS['WHITE'],
+        )
         screen.blit(text, (x + width + 10, y - 2))
 
     def draw_coins(self, screen, player):
         screen_width, _ = screen.get_size()
-        text = self.font.render(f"Coins: {player.coins}", True, COLORS['GOLD'])
+        text = self.font.render(
+            f"{self.localizer.t('ui.inventory.stat_coins')}: {player.coins}",
+            True,
+            COLORS['GOLD'],
+        )
         screen.blit(text, (screen_width - text.get_width() - 16, 10))
 
     def draw_knowledge_shards(self, screen, player):
         screen_width, _ = screen.get_size()
-        text = self.small_font.render(f"Shards: {player.knowledge_shards}", True, COLORS['WHITE'])
+        text = self.small_font.render(
+            f"{self.localizer.t('ui.inventory.stat_shards')}: {player.knowledge_shards}",
+            True,
+            COLORS['WHITE'],
+        )
         screen.blit(text, (screen_width - text.get_width() - 16, 42))
 
     def draw_hotbar(self, screen, player):
@@ -89,7 +110,7 @@ class HUD:
 
     def draw_controls(self, screen):
         _, screen_height = screen.get_size()
-        controls_text = "WASD | SHIFT | SPACE | ALT | LMB | E | I | K-craft | M-map"
+        controls_text = self.localizer.t("ui.hud.controls")
         text = self.small_font.render(controls_text, True, (200, 200, 200))
         screen.blit(text, (10, screen_height - 32))
 
@@ -98,7 +119,7 @@ class HUD:
             return
 
         screen_width, _ = screen.get_size()
-        text = self.small_font.render("M - map | K - craft", True, COLORS["WHITE"])
+        text = self.small_font.render(self.localizer.t("ui.hud.map_hint"), True, COLORS["WHITE"])
         screen.blit(text, (screen_width - text.get_width() - 16, 66))
 
     def draw(self, screen, player):

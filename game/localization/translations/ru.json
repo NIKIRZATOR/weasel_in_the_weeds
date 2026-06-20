@@ -26,7 +26,7 @@
       "language": "Язык",
       "language_ru": "Русский",
       "language_en": "Английский",
-      "language_hint": "Выберите язык интерфейса",
+      "language_hint": "Язык интерфейса: {language}",
       "mode_windowed": "Окно",
       "mode_fullscreen": "Полный экран",
       "mode_borderless": "Без рамок"
@@ -105,6 +105,17 @@
       "player_name": "Игрок",
       "close_hint": "Enter/E - дальше | 1-9 - выбор | Esc - закрыть"
     },
+    "hud": {
+      "controls": "WASD | SHIFT | SPACE | ALT | ЛКМ | E | I | K - крафт | M - карта",
+      "map_hint": "M - карта | K - крафт"
+    },
+    "window": {
+      "game_title": "Weales in the weeds RPG - {level}"
+    },
+    "levels": {
+      "level_01": "Уровень 01",
+      "level_02": "Опушка леса"
+    },
     "common": {
       "loading": "Загрузка...",
       "saving": "Сохранение...",
@@ -122,7 +133,8 @@
     "picked_name": "Подобрано: {name}",
     "no_target": "Рядом нет объекта для взаимодействия",
     "no_map": "У вас пока нет карты.",
-    "transition_missing_target": "У перехода не задана целевая локация."
+    "transition_missing_target": "У перехода не задана целевая локация.",
+    "path_blocked": "Путь заблокирован."
   },
   "items": {
     "coin": {
@@ -200,6 +212,28 @@
     "map": {
       "name": "Карта",
       "description": "Магическая карта, запоминающая открытые места."
+    }
+  },
+  "recipes": {
+    "stone_knife": {
+      "name": "Каменный нож",
+      "description": "Заостренный камешек, закрепленный на палке. Просто, но полезно."
+    },
+    "berry_mix": {
+      "name": "Ягодная смесь",
+      "description": "Небольшой походный перекус из ягод и семечек."
+    },
+    "forest_bandage": {
+      "name": "Лесная повязка",
+      "description": "Связка травы и коры для простой обработки ран."
+    },
+    "web_wrap": {
+      "name": "Паутинная перевязь",
+      "description": "Липкая перевязь для более крепкого полевого ремонта."
+    },
+    "beetle_charm": {
+      "name": "Жучиный амулет",
+      "description": "Маленький лесной талисман из легких останков монстров."
     }
   },
   "enemy": {

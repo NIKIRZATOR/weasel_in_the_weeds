@@ -261,7 +261,7 @@
         },
         "required_coins": 2,
         "set_flags": ["entered_forest_edge"],
-        "blocked_message": "The path is blocked."
+        "blocked_message_key": "pickup.path_blocked"
       }
     }
   ]

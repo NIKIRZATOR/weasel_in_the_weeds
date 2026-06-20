@@ -2,6 +2,7 @@ import sys
 
 import pygame
 
+from game.localization import get_localizer
 from game.scenes.menu_scene import MenuScene
 from settings import SCREEN_HEIGHT, SCREEN_WIDTH
 
@@ -26,6 +27,18 @@ class GameApp:
             return True
         self.display_mode = mode
         self._apply_display_mode()
+        return True
+
+    def set_language(self, language):
+        localizer = get_localizer()
+        if language not in localizer.available_languages():
+            return False
+        if localizer.get_language() == language:
+            return True
+
+        localizer.set_language(language)
+        if self.scene is not None:
+            self.scene.on_language_changed()
         return True
 
     def _apply_display_mode(self):

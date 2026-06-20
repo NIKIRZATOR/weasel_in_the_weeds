@@ -15,49 +15,96 @@ class SettingsScene(Scene):
         self.section_font = pygame.font.Font(None, 34)
         self.button_font = pygame.font.Font(None, 30)
         self.info_font = pygame.font.Font(None, 24)
-        self.buttons = []
         self._layout_size = None
         self._build_buttons()
 
     def _build_buttons(self):
         screen_width, screen_height = self.app.get_screen_size()
-        button_width = 340
-        button_height = 50
-        gap = 16
-        options = [
+        mode_options = [
             (self.localizer.t("ui.settings.mode_windowed"), "windowed"),
             (self.localizer.t("ui.settings.mode_fullscreen"), "fullscreen"),
             (self.localizer.t("ui.settings.mode_borderless"), "borderless"),
         ]
+        language_options = [
+            (self.localizer.t("ui.settings.language_ru"), "ru"),
+            (self.localizer.t("ui.settings.language_en"), "en"),
+        ]
 
-        title_gap = 54
-        title_height = self.title_font.get_height()
-        subtitle_height = self.section_font.get_height()
-        buttons_height = len(options) * button_height + max(0, len(options) - 1) * gap
-        back_height = 48
-        content_height = title_height + title_gap + subtitle_height + 28 + buttons_height + 36 + back_height
-        content_top = max(36, (screen_height - content_height) // 2)
+        panel_width = min(760, screen_width - 48)
+        panel_height = min(420, screen_height - 48)
+        self.panel_rect = pygame.Rect(
+            (screen_width - panel_width) // 2,
+            (screen_height - panel_height) // 2,
+            panel_width,
+            panel_height,
+        )
 
-        self.title_center_y = content_top + title_height // 2
-        self.subtitle_center_y = content_top + title_height + title_gap + subtitle_height // 2
-        start_y = content_top + title_height + title_gap + subtitle_height + 28
+        self.title_y = self.panel_rect.y + 42
+        content_left = self.panel_rect.x + 28
+        content_right = self.panel_rect.right - 28
+        content_width = content_right - content_left
+        label_width = min(220, max(150, int(content_width * 0.32)))
+        options_gap = 12
+        options_width = content_width - label_width - options_gap
+        row_height = 56
 
-        self.buttons = []
-        for index, (label, mode) in enumerate(options):
+        self.mode_row_rect = pygame.Rect(content_left, self.panel_rect.y + 122, content_width, row_height)
+        self.language_row_rect = pygame.Rect(content_left, self.mode_row_rect.bottom + 26, content_width, row_height)
+
+        self.mode_buttons = self._build_option_row(
+            self.mode_row_rect,
+            mode_options,
+            key_name="mode",
+            label_width=label_width,
+            options_width=options_width,
+        )
+        self.language_buttons = self._build_option_row(
+            self.language_row_rect,
+            language_options,
+            key_name="language",
+            label_width=label_width,
+            options_width=options_width,
+        )
+
+        back_width = min(220, self.panel_rect.width - 56)
+        self.back_button = pygame.Rect(
+            self.panel_rect.centerx - back_width // 2,
+            self.language_row_rect.bottom + 42,
+            back_width,
+            44,
+        )
+        self.footer_y = self.back_button.bottom + 26
+        self._layout_size = self.app.get_screen_size()
+
+    def _build_option_row(self, row_rect, options, key_name, label_width, options_width):
+        button_gap = 10
+        count = max(1, len(options))
+        button_width = max(96, (options_width - button_gap * (count - 1)) // count)
+        button_height = 44
+        buttons_left = row_rect.right - options_width
+        button_top = row_rect.y + (row_rect.height - button_height) // 2
+
+        buttons = []
+        for index, (label, value) in enumerate(options):
             rect = pygame.Rect(
-                (screen_width - button_width) // 2,
-                start_y + index * (button_height + gap),
+                buttons_left + index * (button_width + button_gap),
+                button_top,
                 button_width,
                 button_height,
             )
-            self.buttons.append({"rect": rect, "label": label, "mode": mode})
-
-        self.back_button = pygame.Rect((screen_width - 220) // 2, start_y + buttons_height + 36, 220, 48)
-        self._layout_size = self.app.get_screen_size()
+            buttons.append({"rect": rect, "label": label, key_name: value})
+        return buttons
 
     def _ensure_layout(self):
         if self._layout_size != self.app.get_screen_size():
             self._build_buttons()
+
+    def on_language_changed(self):
+        self._build_buttons()
+        if self.previous_scene is not None:
+            self.previous_scene.on_language_changed()
+        if self.overlay_scene is not None and self.overlay_scene is not self.previous_scene:
+            self.overlay_scene.on_language_changed()
 
     def go_back(self):
         self.app.set_scene(self.previous_scene)
@@ -71,9 +118,14 @@ class SettingsScene(Scene):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.go_back()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                for button in self.buttons:
+                for button in self.mode_buttons:
                     if button["rect"].collidepoint(mouse_pos):
                         self.app.set_display_mode(button["mode"])
+                        return
+                for button in self.language_buttons:
+                    if button["rect"].collidepoint(mouse_pos):
+                        self.app.set_language(button["language"])
+                        self._build_buttons()
                         return
                 if self.back_button.collidepoint(mouse_pos):
                     self.go_back()
@@ -92,17 +144,40 @@ class SettingsScene(Scene):
         else:
             self.app.screen.fill((18, 18, 26))
 
-        title = self.title_font.render(self.localizer.t("ui.settings.title"), True, COLORS["WHITE"])
-        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, self.title_center_y)))
+        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=16)
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.panel_rect, width=2, border_radius=16)
 
-        subtitle = self.section_font.render(self.localizer.t("ui.settings.window_mode"), True, COLORS["UI_TEXT_DIM"])
-        self.app.screen.blit(subtitle, subtitle.get_rect(center=(screen_width // 2, self.subtitle_center_y)))
+        title = self.title_font.render(self.localizer.t("ui.settings.title"), True, COLORS["WHITE"])
+        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, self.title_y)))
 
         mouse_pos = pygame.mouse.get_pos()
-        for button in self.buttons:
+        self._draw_row_label(self.mode_row_rect, self.localizer.t("ui.settings.window_mode"))
+        for button in self.mode_buttons:
             rect = button["rect"]
             hovered = rect.collidepoint(mouse_pos)
             active = self.app.display_mode == button["mode"]
+
+            fill = (55, 55, 65)
+            border = (100, 100, 120)
+            if active:
+                fill = (64, 90, 120)
+                border = COLORS["UI_SLOT_SELECTED"]
+            elif hovered:
+                fill = (75, 75, 95)
+                border = (120, 180, 255)
+
+            pygame.draw.rect(self.app.screen, fill, rect, border_radius=8)
+            pygame.draw.rect(self.app.screen, border, rect, width=2, border_radius=8)
+
+            label = self.button_font.render(button["label"], True, COLORS["WHITE"])
+            self.app.screen.blit(label, label.get_rect(center=rect.center))
+
+        current_language = self.localizer.get_language()
+        self._draw_row_label(self.language_row_rect, self.localizer.t("ui.settings.language"))
+        for button in self.language_buttons:
+            rect = button["rect"]
+            hovered = rect.collidepoint(mouse_pos)
+            active = current_language == button["language"]
 
             fill = (55, 55, 65)
             border = (100, 100, 120)
@@ -135,11 +210,15 @@ class SettingsScene(Scene):
         )
         self.app.screen.blit(
             current_label,
-            current_label.get_rect(center=(screen_width // 2, screen_height - 80)),
+            current_label.get_rect(center=(screen_width // 2, self.footer_y)),
         )
 
-        hint = self.info_font.render(self.localizer.t("ui.settings.close_hint"), True, COLORS["UI_TEXT_DIM"])
-        self.app.screen.blit(hint, hint.get_rect(center=(screen_width // 2, screen_height - 48)))
+        hint_text = self.localizer.t(
+            "ui.settings.language_hint",
+            language=self.localizer.t(f"ui.settings.language_{current_language}"),
+        )
+        hint = self.info_font.render(hint_text, True, COLORS["UI_TEXT_DIM"])
+        self.app.screen.blit(hint, hint.get_rect(center=(screen_width // 2, self.footer_y + 26)))
 
     def _mode_title(self, mode):
         titles = {
@@ -148,3 +227,9 @@ class SettingsScene(Scene):
             "borderless": self.localizer.t("ui.settings.mode_borderless"),
         }
         return titles.get(mode, mode)
+
+    def _draw_row_label(self, row_rect, text):
+        label = self.section_font.render(text, True, COLORS["UI_TEXT_DIM"])
+        label_rect = label.get_rect()
+        label_rect.midleft = (row_rect.x + 4, row_rect.centery)
+        self.app.screen.blit(label, label_rect)

@@ -7,3 +7,6 @@ class Scene:
 
     def draw(self):
         raise NotImplementedError
+
+    def on_language_changed(self):
+        return None

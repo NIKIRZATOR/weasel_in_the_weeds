@@ -7,6 +7,7 @@ from game.core.vector import Vector2
 from game.entities.enemy import MeleeEnemy, RangedEnemy
 from game.entities.player import Player
 from game.items import create_item_stack
+from game.localization import get_localizer
 from game.objects import create_world_object
 from game.scenes.base import Scene
 from game.ui.hud import HUD
@@ -24,10 +25,11 @@ DAMAGE_NUMBER_RISE_SPEED = 52
 class GameScene(Scene):
     def __init__(self, app, level_path, player=None, target_spawn=None):
         self.app = app
+        self.localizer = get_localizer()
         self.level_path = level_path
         self.level_key = Path(level_path).name
         self.level = load_level(level_path)
-        pygame.display.set_caption(f"Weales in the weeds RPG - {self.level.name}")
+        self._update_window_caption()
 
         self.tilemap = TileMap(
             self.level.ground_layer,
@@ -66,6 +68,23 @@ class GameScene(Scene):
         self.last_interaction_message = ""
         self.last_interaction_timer = 0.0
         self.current_interaction_target = None
+
+    def on_language_changed(self):
+        self._update_window_caption()
+        self.hud.on_language_changed()
+
+    def _update_window_caption(self):
+        pygame.display.set_caption(
+            self.localizer.t(
+                "ui.window.game_title",
+                level=self._localized_level_name(),
+            )
+        )
+
+    def _localized_level_name(self):
+        key = f"ui.levels.{Path(self.level_path).stem}"
+        translated = self.localizer.t(key)
+        return translated if translated != key else self.level.name
 
     def _load_world_objects(self):
         world_objects = []
@@ -153,7 +172,7 @@ class GameScene(Scene):
                     if self.player.can_open_map():
                         self.open_map()
                     else:
-                        self.last_interaction_message = "You do not have a map yet."
+                        self.last_interaction_message = self.localizer.t("pickup.no_map")
                         self.last_interaction_timer = 1.5
                 elif event.key == pygame.K_k:
                     self.open_crafting()
@@ -194,7 +213,7 @@ class GameScene(Scene):
         if item_id is not None:
             item_stack = create_item_stack(item_id, quantity)
             if item_stack is None and coins <= 0 and knowledge_shards <= 0:
-                self.last_interaction_message = f"Неизвестный предмет: {item_id}"
+                self.last_interaction_message = self.localizer.t("pickup.unknown_item", item_id=item_id)
                 self.last_interaction_timer = 1.5
                 return False
 
@@ -206,7 +225,7 @@ class GameScene(Scene):
                 currency_amount += item_stack.quantity
 
         if not self.player.pickup_item(item_stack=item_stack, coins=coins):
-            self.last_interaction_message = "Инвентарь переполнен"
+            self.last_interaction_message = self.localizer.t("pickup.inventory_full")
             self.last_interaction_timer = 1.5
             return False
 
@@ -219,47 +238,75 @@ class GameScene(Scene):
 
         if item_stack is not None and item_stack.kind.value == "currency":
             if currency_wallet == "coins":
-                self.last_interaction_message = f"Picked up: {currency_amount} coins"
+                self.last_interaction_message = self.localizer.t("pickup.picked_currency_coins", amount=currency_amount)
             elif currency_wallet == "knowledge_shards":
-                self.last_interaction_message = f"Picked up: {item_stack.quantity} knowledge shards"
+                self.last_interaction_message = self.localizer.t(
+                    "pickup.picked_currency_knowledge_shards",
+                    amount=item_stack.quantity,
+                )
             else:
-                self.last_interaction_message = f"Picked up: {item_stack.name} x{item_stack.quantity}"
+                self.last_interaction_message = self.localizer.t(
+                    "pickup.picked_item",
+                    name=item_stack.name,
+                    quantity=item_stack.quantity,
+                )
             self.last_interaction_timer = 1.5
             return True
         if item_stack is not None and coins > 0:
-            self.last_interaction_message = f"Picked up: {item_stack.name} x{item_stack.quantity} + {coins} coins"
+            self.last_interaction_message = self.localizer.t(
+                "pickup.picked_item_with_coins",
+                name=item_stack.name,
+                quantity=item_stack.quantity,
+                coins=coins,
+            )
             self.last_interaction_timer = 1.5
             return True
         if item_stack is not None:
-            self.last_interaction_message = f"Picked up: {item_stack.name} x{item_stack.quantity}"
+            self.last_interaction_message = self.localizer.t(
+                "pickup.picked_item",
+                name=item_stack.name,
+                quantity=item_stack.quantity,
+            )
             self.last_interaction_timer = 1.5
             return True
         if coins > 0:
-            self.last_interaction_message = f"Picked up: {coins} coins"
+            self.last_interaction_message = self.localizer.t("pickup.picked_coins", coins=coins)
             self.last_interaction_timer = 1.5
             return True
         if knowledge_shards > 0:
-            self.last_interaction_message = f"Picked up: {knowledge_shards} knowledge shards"
+            self.last_interaction_message = self.localizer.t(
+                "pickup.picked_currency_knowledge_shards",
+                amount=knowledge_shards,
+            )
             self.last_interaction_timer = 1.5
             return True
 
         if item_stack is not None and item_stack.kind.value == "currency":
-            self.last_interaction_message = f"Подобрано: {currency_amount} монет"
+            self.last_interaction_message = self.localizer.t("pickup.picked_currency_coins", amount=currency_amount)
         elif item_stack is not None and coins > 0:
-            self.last_interaction_message = f"Подобрано: {item_stack.name} x{item_stack.quantity} + {coins} монет"
+            self.last_interaction_message = self.localizer.t(
+                "pickup.picked_item_with_coins",
+                name=item_stack.name,
+                quantity=item_stack.quantity,
+                coins=coins,
+            )
         elif item_stack is not None:
-            self.last_interaction_message = f"Подобрано: {item_stack.name} x{item_stack.quantity}"
+            self.last_interaction_message = self.localizer.t(
+                "pickup.picked_item",
+                name=item_stack.name,
+                quantity=item_stack.quantity,
+            )
         elif coins > 0:
-            self.last_interaction_message = f"Подобрано: {coins} монет"
+            self.last_interaction_message = self.localizer.t("pickup.picked_coins", coins=coins)
         else:
-            self.last_interaction_message = f"Подобрано: {pickable_object.name}"
+            self.last_interaction_message = self.localizer.t("pickup.picked_name", name=pickable_object.name)
         self.last_interaction_timer = 1.5
         return True
 
     def try_interact(self):
         target = self._find_interaction_target()
         if target is None:
-            self.last_interaction_message = "Рядом нет объекта для взаимодействия"
+            self.last_interaction_message = self.localizer.t("pickup.no_target")
             self.last_interaction_timer = 1.0
             return False
 
@@ -354,7 +401,7 @@ class GameScene(Scene):
 
             target_level = world_object.get_target_level()
             if not target_level:
-                self.last_interaction_message = "Transition target is missing."
+                self.last_interaction_message = self.localizer.t("pickup.transition_missing_target")
                 self.last_interaction_timer = 1.0
                 return
 
@@ -385,7 +432,7 @@ class GameScene(Scene):
                     player=self.player,
                     target_spawn=target_spawn,
                 ),
-                title="Loading area...",
+                title=self.localizer.t("ui.common.area_loading"),
                 duration=0.8,
                 background=(10, 10, 16),
             )

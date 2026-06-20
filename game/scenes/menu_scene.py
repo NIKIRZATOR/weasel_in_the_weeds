@@ -61,6 +61,9 @@ class MenuScene(Scene):
         if self._layout_size != self.app.get_screen_size():
             self._build_buttons()
 
+    def on_language_changed(self):
+        self._build_buttons()
+
     def set_message(self, text):
         self.message = text
         self.message_timer = 2.0

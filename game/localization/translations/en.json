@@ -26,7 +26,7 @@
       "language": "Language",
       "language_ru": "Russian",
       "language_en": "English",
-      "language_hint": "Choose the interface language",
+      "language_hint": "Interface language: {language}",
       "mode_windowed": "Windowed",
       "mode_fullscreen": "Fullscreen",
       "mode_borderless": "Borderless"
@@ -105,6 +105,17 @@
       "player_name": "Player",
       "close_hint": "Enter/E - next | 1-9 - choice | Esc - close"
     },
+    "hud": {
+      "controls": "WASD | SHIFT | SPACE | ALT | LMB | E | I | K - craft | M - map",
+      "map_hint": "M - map | K - craft"
+    },
+    "window": {
+      "game_title": "Weales in the weeds RPG - {level}"
+    },
+    "levels": {
+      "level_01": "Level 01",
+      "level_02": "Forest Edge"
+    },
     "common": {
       "loading": "Loading...",
       "saving": "Saving...",
@@ -122,7 +133,8 @@
     "picked_name": "Picked up: {name}",
     "no_target": "No interactable object nearby",
     "no_map": "You do not have a map yet.",
-    "transition_missing_target": "Transition target is missing."
+    "transition_missing_target": "Transition target is missing.",
+    "path_blocked": "The path is blocked."
   },
   "items": {
     "coin": {
@@ -200,6 +212,28 @@
     "map": {
       "name": "Map",
       "description": "A magical map that remembers opened places."
+    }
+  },
+  "recipes": {
+    "stone_knife": {
+      "name": "Stone Knife",
+      "description": "A sharpened pebble fixed to a stick. Simple but useful."
+    },
+    "berry_mix": {
+      "name": "Berry Mix",
+      "description": "A small field ration made from berries and seeds."
+    },
+    "forest_bandage": {
+      "name": "Forest Bandage",
+      "description": "Bound grass and bark for simple wound care."
+    },
+    "web_wrap": {
+      "name": "Web Wrap",
+      "description": "A sticky web binding for stronger field repairs."
+    },
+    "beetle_charm": {
+      "name": "Beetle Charm",
+      "description": "A tiny forest talisman assembled from light monster remains."
     }
   },
   "enemy": {

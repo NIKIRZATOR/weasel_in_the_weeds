@@ -61,6 +61,9 @@ class PauseMenuScene(Scene):
         if self._layout_size != self.app.get_screen_size():
             self._build_buttons()
 
+    def on_language_changed(self):
+        self._build_buttons()
+
     def resume_game(self):
         self.app.set_scene(self.game_scene)
 

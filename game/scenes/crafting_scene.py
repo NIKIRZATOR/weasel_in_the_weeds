@@ -215,7 +215,7 @@ class CraftingScene(Scene):
             self.app.screen.blit(icon, (rect.x + 10, rect.y + 12))
             text_x = rect.x + 52
 
-        title = recipe.name if unlocked or recipe.unlock_type != "knowledge" else self.localizer.t("ui.crafting.unknown_recipe")
+        title = recipe.localized_name() if unlocked or recipe.unlock_type != "knowledge" else self.localizer.t("ui.crafting.unknown_recipe")
         title_text = self.text_font.render(title, True, COLORS["WHITE"])
         self.app.screen.blit(title_text, (text_x, rect.y + 8))
 
@@ -247,10 +247,10 @@ class CraftingScene(Scene):
         result_name = result_stack.name if result_stack is not None else recipe.result.item_id
         result_definition = get_item_definition(recipe.result.item_id)
 
-        title = self.section_font.render(recipe.name, True, COLORS["WHITE"])
+        title = self.section_font.render(recipe.localized_name(), True, COLORS["WHITE"])
         self.app.screen.blit(title, (self.right_panel.x + 16, self.right_panel.y + 54))
 
-        desc_lines = _wrap_text(recipe.description, self.text_font, self.right_panel.width - 32)
+        desc_lines = _wrap_text(recipe.localized_description(), self.text_font, self.right_panel.width - 32)
         for index, line in enumerate(desc_lines[:3]):
             text = self.text_font.render(line, True, COLORS["UI_TEXT_DIM"])
             self.app.screen.blit(text, (self.right_panel.x + 16, self.right_panel.y + 88 + index * 24))
@@ -426,7 +426,7 @@ class CraftingScene(Scene):
                 self._set_message(self.localizer.t("ui.crafting.message_not_enough_shards"))
                 return
             self.player.unlock_recipe(recipe.id)
-            self._set_message(self.localizer.t("ui.crafting.message_unlocked", name=recipe.name))
+            self._set_message(self.localizer.t("ui.crafting.message_unlocked", name=recipe.localized_name()))
             return
 
         if not self.player.can_craft_recipe(recipe):
