@@ -1,0 +1,215 @@
+{
+  "ui": {
+    "menu": {
+      "title": "Weales in the weeds",
+      "new_game": "Новая игра",
+      "continue_game": "Продолжить игру",
+      "settings": "Настройки",
+      "about": "Об авторе",
+      "exit": "Выход",
+      "author_message": "проект Weales in the weeds",
+      "new_game_loading": "Новая игра..."
+    },
+    "pause": {
+      "title": "Пауза",
+      "resume": "Вернуться в игру",
+      "inventory": "Инвентарь",
+      "settings": "Настройки",
+      "exit_to_menu": "Выход в меню"
+    },
+    "settings": {
+      "title": "Настройки",
+      "window_mode": "Режим окна",
+      "back": "Назад",
+      "close_hint": "Esc - назад",
+      "current_mode": "Текущий режим: {mode}",
+      "language": "Язык",
+      "language_ru": "Русский",
+      "language_en": "Английский",
+      "language_hint": "Выберите язык интерфейса",
+      "mode_windowed": "Окно",
+      "mode_fullscreen": "Полный экран",
+      "mode_borderless": "Без рамок"
+    },
+    "inventory": {
+      "title": "Инвентарь",
+      "close_hint": "Esc / I - закрыть",
+      "character": "Персонаж",
+      "backpack": "Инвентарь",
+      "equipment": "Экипировка",
+      "quest_items": "Сюжетные",
+      "hotbar": "Хотбар",
+      "select_item_hint": "Выберите предмет, чтобы увидеть описание.",
+      "equip_success": "Предмет экипирован",
+      "unequip_success": "Предмет снят",
+      "equip_failed": "Нельзя экипировать в этот слот",
+      "inventory_full": "Инвентарь переполнен",
+      "move_failed": "Не удалось переместить предмет",
+      "quest_separate": "Сюжетные предметы хранятся отдельно",
+      "quest_no_hotbar": "Сюжетные предметы нельзя помещать в хотбар",
+      "quest_cannot_move": "Сюжетные предметы нельзя переносить в обычный инвентарь",
+      "stat_hp": "HP",
+      "stat_st": "ST",
+      "stat_atk": "ATK",
+      "stat_def": "DEF",
+      "stat_spd": "SPD",
+      "stat_slots": "Места",
+      "stat_coins": "Монеты",
+      "stat_shards": "Осколки",
+      "slot_helmet": "Шлем",
+      "slot_chest": "Броня",
+      "slot_boots": "Обувь",
+      "slot_weapon": "Оружие",
+      "slot_accessory_1": "Акс 1",
+      "slot_accessory_2": "Акс 2"
+    },
+    "crafting": {
+      "title": "Крафт",
+      "close_hint": "Esc / K - закрыть",
+      "knowledge_shards": "Осколки знаний: {count}",
+      "no_recipes": "В этой категории пока нет рецептов.",
+      "unknown_recipe": "Неизвестный рецепт",
+      "ready": "Готово",
+      "missing_materials": "Не хватает материалов",
+      "unlock_short": "Открытие: {cost} оск.",
+      "result": "Результат: {name} x{quantity}",
+      "materials": "Материалы",
+      "unlock_cost": "Цена открытия: {cost} осколков знаний",
+      "status_can_unlock": "Этот рецепт можно открыть.",
+      "status_need_more_shards": "Не хватает осколков знаний.",
+      "status_locked": "Рецепт пока закрыт.",
+      "status_ready": "Все материалы готовы.",
+      "status_no_space": "Не хватает места в инвентаре.",
+      "status_missing": "Не хватает части материалов.",
+      "action_unavailable": "Недоступно",
+      "action_unlock": "Открыть",
+      "action_craft": "Создать",
+      "message_not_enough_shards": "Недостаточно осколков знаний.",
+      "message_unlocked": "Открыт рецепт: {name}",
+      "message_inventory_full": "Инвентарь переполнен.",
+      "message_missing_materials": "Не хватает материалов.",
+      "message_crafting_failed": "Не удалось создать предмет.",
+      "message_crafted": "Создано: {name} x{quantity}",
+      "category_all": "Все",
+      "category_tools": "Инструменты",
+      "category_healing": "Лечение",
+      "category_survival": "Выживание",
+      "category_special": "Особое"
+    },
+    "map": {
+      "title": "Карта",
+      "close_hint": "M / Esc - закрыть"
+    },
+    "dialogue": {
+      "received": "Получено: {items}",
+      "player_name": "Игрок",
+      "close_hint": "Enter/E - дальше | 1-9 - выбор | Esc - закрыть"
+    },
+    "common": {
+      "loading": "Загрузка...",
+      "saving": "Сохранение...",
+      "area_loading": "Загрузка локации..."
+    }
+  },
+  "pickup": {
+    "unknown_item": "Неизвестный предмет: {item_id}",
+    "inventory_full": "Инвентарь переполнен",
+    "picked_item": "Подобрано: {name} x{quantity}",
+    "picked_item_with_coins": "Подобрано: {name} x{quantity} + {coins} монет",
+    "picked_coins": "Подобрано: {coins} монет",
+    "picked_currency_coins": "Подобрано: {amount} монет",
+    "picked_currency_knowledge_shards": "Подобрано: {amount} осколков знаний",
+    "picked_name": "Подобрано: {name}",
+    "no_target": "Рядом нет объекта для взаимодействия",
+    "no_map": "У вас пока нет карты.",
+    "transition_missing_target": "У перехода не задана целевая локация."
+  },
+  "items": {
+    "coin": {
+      "name": "Монета",
+      "description": "Обычная золотая монета."
+    },
+    "knowledge_shard": {
+      "name": "Осколок знаний",
+      "description": "Фрагмент знания, который открывает продвинутые рецепты."
+    },
+    "test_item": {
+      "name": "Учебный клинок",
+      "description": "Простой тренировочный клинок."
+    },
+    "forest_bandage": {
+      "name": "Лесная повязка",
+      "description": "Грубая повязка из лесных трав."
+    },
+    "web_wrap": {
+      "name": "Паутина",
+      "description": "Липкая перевязь из паучьего шелка."
+    },
+    "beetle_charm": {
+      "name": "Жучиный амулет",
+      "description": "Маленький амулет из панциря жука и кости."
+    },
+    "stick": {
+      "name": "Палка",
+      "description": "Обычная палка."
+    },
+    "grass_blade": {
+      "name": "Травинка",
+      "description": "Свежая травинка."
+    },
+    "stone_pebble": {
+      "name": "Камешек",
+      "description": "Небольшой округлый камень."
+    },
+    "seed": {
+      "name": "Семечко",
+      "description": "Маленькое семечко, которое стоит сохранить."
+    },
+    "berry": {
+      "name": "Ягода",
+      "description": "Лесная ягода."
+    },
+    "bark": {
+      "name": "Кора",
+      "description": "Полоска сухой коры."
+    },
+    "mushroom": {
+      "name": "Гриб",
+      "description": "Лесной гриб."
+    },
+    "feather": {
+      "name": "Перо",
+      "description": "Легкое птичье перо."
+    },
+    "bone": {
+      "name": "Кость",
+      "description": "Небольшая звериная кость."
+    },
+    "beetle_shell": {
+      "name": "Панцирь жука",
+      "description": "Твердый кусок жучиного панциря."
+    },
+    "web": {
+      "name": "Паутина",
+      "description": "Тонкий паучий шелк."
+    },
+    "small_backpack": {
+      "name": "Маленький рюкзак",
+      "description": "Небольшой походный рюкзак от отшельника."
+    },
+    "map": {
+      "name": "Карта",
+      "description": "Магическая карта, запоминающая открытые места."
+    }
+  },
+  "enemy": {
+    "melee": {
+      "name": "Громила",
+      "description": "Противник ближнего боя."
+    },
+    "ranged": {
+      "name": "Стрелок",
+      "description": "Противник дальнего боя."
+    }
+  }
+}

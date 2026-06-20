@@ -1,0 +1,215 @@
+{
+  "ui": {
+    "menu": {
+      "title": "Weales in the weeds",
+      "new_game": "New Game",
+      "continue_game": "Continue",
+      "settings": "Settings",
+      "about": "About",
+      "exit": "Exit",
+      "author_message": "Weales in the weeds project",
+      "new_game_loading": "New Game..."
+    },
+    "pause": {
+      "title": "Pause",
+      "resume": "Resume",
+      "inventory": "Inventory",
+      "settings": "Settings",
+      "exit_to_menu": "Exit to Menu"
+    },
+    "settings": {
+      "title": "Settings",
+      "window_mode": "Window Mode",
+      "back": "Back",
+      "close_hint": "Esc - back",
+      "current_mode": "Current mode: {mode}",
+      "language": "Language",
+      "language_ru": "Russian",
+      "language_en": "English",
+      "language_hint": "Choose the interface language",
+      "mode_windowed": "Windowed",
+      "mode_fullscreen": "Fullscreen",
+      "mode_borderless": "Borderless"
+    },
+    "inventory": {
+      "title": "Inventory",
+      "close_hint": "Esc / I - close",
+      "character": "Character",
+      "backpack": "Backpack",
+      "equipment": "Equipment",
+      "quest_items": "Quest",
+      "hotbar": "Hotbar",
+      "select_item_hint": "Select an item to see its description.",
+      "equip_success": "Item equipped",
+      "unequip_success": "Item unequipped",
+      "equip_failed": "Cannot equip into this slot",
+      "inventory_full": "Inventory is full",
+      "move_failed": "Failed to move item",
+      "quest_separate": "Quest items are stored separately",
+      "quest_no_hotbar": "Quest items cannot be moved to the hotbar",
+      "quest_cannot_move": "Quest items cannot be moved into the regular inventory",
+      "stat_hp": "HP",
+      "stat_st": "ST",
+      "stat_atk": "ATK",
+      "stat_def": "DEF",
+      "stat_spd": "SPD",
+      "stat_slots": "Slots",
+      "stat_coins": "Coins",
+      "stat_shards": "Shards",
+      "slot_helmet": "Helmet",
+      "slot_chest": "Chest",
+      "slot_boots": "Boots",
+      "slot_weapon": "Weapon",
+      "slot_accessory_1": "Acc 1",
+      "slot_accessory_2": "Acc 2"
+    },
+    "crafting": {
+      "title": "Crafting",
+      "close_hint": "Esc / K - close",
+      "knowledge_shards": "Knowledge shards: {count}",
+      "no_recipes": "No recipes in this category.",
+      "unknown_recipe": "Unknown Recipe",
+      "ready": "Ready",
+      "missing_materials": "Missing materials",
+      "unlock_short": "Unlock: {cost} shards",
+      "result": "Result: {name} x{quantity}",
+      "materials": "Materials",
+      "unlock_cost": "Unlock cost: {cost} knowledge shards",
+      "status_can_unlock": "You can unlock this recipe.",
+      "status_need_more_shards": "You need more knowledge shards.",
+      "status_locked": "This recipe is still locked.",
+      "status_ready": "All materials are ready.",
+      "status_no_space": "Not enough inventory space.",
+      "status_missing": "Some materials are missing.",
+      "action_unavailable": "Unavailable",
+      "action_unlock": "Unlock",
+      "action_craft": "Craft",
+      "message_not_enough_shards": "Not enough knowledge shards.",
+      "message_unlocked": "Unlocked: {name}",
+      "message_inventory_full": "Inventory is full.",
+      "message_missing_materials": "Missing materials.",
+      "message_crafting_failed": "Crafting failed.",
+      "message_crafted": "Crafted: {name} x{quantity}",
+      "category_all": "All",
+      "category_tools": "Tools",
+      "category_healing": "Healing",
+      "category_survival": "Survival",
+      "category_special": "Special"
+    },
+    "map": {
+      "title": "Map",
+      "close_hint": "M / Esc - close"
+    },
+    "dialogue": {
+      "received": "Received: {items}",
+      "player_name": "Player",
+      "close_hint": "Enter/E - next | 1-9 - choice | Esc - close"
+    },
+    "common": {
+      "loading": "Loading...",
+      "saving": "Saving...",
+      "area_loading": "Loading area..."
+    }
+  },
+  "pickup": {
+    "unknown_item": "Unknown item: {item_id}",
+    "inventory_full": "Inventory is full",
+    "picked_item": "Picked up: {name} x{quantity}",
+    "picked_item_with_coins": "Picked up: {name} x{quantity} + {coins} coins",
+    "picked_coins": "Picked up: {coins} coins",
+    "picked_currency_coins": "Picked up: {amount} coins",
+    "picked_currency_knowledge_shards": "Picked up: {amount} knowledge shards",
+    "picked_name": "Picked up: {name}",
+    "no_target": "No interactable object nearby",
+    "no_map": "You do not have a map yet.",
+    "transition_missing_target": "Transition target is missing."
+  },
+  "items": {
+    "coin": {
+      "name": "Coin",
+      "description": "A simple gold coin."
+    },
+    "knowledge_shard": {
+      "name": "Knowledge Shard",
+      "description": "A shard of knowledge used to unlock advanced recipes."
+    },
+    "test_item": {
+      "name": "Training Blade",
+      "description": "A simple testing blade."
+    },
+    "forest_bandage": {
+      "name": "Forest Bandage",
+      "description": "A rough herbal wrap."
+    },
+    "web_wrap": {
+      "name": "Web Wrap",
+      "description": "Sticky binding made from spider silk."
+    },
+    "beetle_charm": {
+      "name": "Beetle Charm",
+      "description": "A small charm from beetle shell and bone."
+    },
+    "stick": {
+      "name": "Stick",
+      "description": "A simple stick."
+    },
+    "grass_blade": {
+      "name": "Grass Blade",
+      "description": "A fresh blade of grass."
+    },
+    "stone_pebble": {
+      "name": "Pebble",
+      "description": "A small rounded stone."
+    },
+    "seed": {
+      "name": "Seed",
+      "description": "A tiny seed worth saving."
+    },
+    "berry": {
+      "name": "Berry",
+      "description": "A wild berry."
+    },
+    "bark": {
+      "name": "Bark",
+      "description": "A strip of dry bark."
+    },
+    "mushroom": {
+      "name": "Mushroom",
+      "description": "A forest mushroom."
+    },
+    "feather": {
+      "name": "Feather",
+      "description": "A light bird feather."
+    },
+    "bone": {
+      "name": "Bone",
+      "description": "A small animal bone."
+    },
+    "beetle_shell": {
+      "name": "Beetle Shell",
+      "description": "A hard piece of beetle shell."
+    },
+    "web": {
+      "name": "Web",
+      "description": "Thin spider silk."
+    },
+    "small_backpack": {
+      "name": "Small Backpack",
+      "description": "A small travel backpack from the hermit."
+    },
+    "map": {
+      "name": "Map",
+      "description": "A magical map that remembers opened places."
+    }
+  },
+  "enemy": {
+    "melee": {
+      "name": "Brute",
+      "description": "A close-range enemy."
+    },
+    "ranged": {
+      "name": "Shooter",
+      "description": "A ranged enemy."
+    }
+  }
+}

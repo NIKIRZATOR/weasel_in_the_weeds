@@ -1,6 +1,7 @@
 import pygame
 
 from game.items import create_item_stack
+from game.localization import get_localizer
 from game.scenes.base import Scene
 from settings import COLORS
 
@@ -15,6 +16,7 @@ class DialogueScene(Scene):
         self.nodes = self.dialogue.get("nodes", {})
         self.current_node_id = self.dialogue.get("start")
         self.selected_choice = 0
+        self.localizer = get_localizer()
         self.font = pygame.font.Font(None, 30)
         self.small_font = pygame.font.Font(None, 24)
         self.name_font = pygame.font.Font(None, 34)
@@ -142,10 +144,10 @@ class DialogueScene(Scene):
         messages = []
         coins = int(rewards.get("coins", 0))
         if coins > 0 and self.player.add_coins(coins):
-            messages.append(f"+{coins} coins")
+            messages.append(f"+{coins} {self.localizer.t('ui.inventory.stat_coins').lower()}")
         knowledge_shards = int(rewards.get("knowledge_shards", 0))
         if knowledge_shards > 0 and self.player.add_knowledge_shards(knowledge_shards):
-            messages.append(f"+{knowledge_shards} shards")
+            messages.append(f"+{knowledge_shards} {self.localizer.t('ui.inventory.stat_shards').lower()}")
 
         for raw_item in rewards.get("items", []):
             if isinstance(raw_item, str):
@@ -168,7 +170,7 @@ class DialogueScene(Scene):
 
         self.player.mark_dialogue_reward_claimed(npc_key, self.current_node_id)
         if messages:
-            self.message = "Received: " + ", ".join(messages)
+            self.message = self.localizer.t("ui.dialogue.received", items=", ".join(messages))
             self.message_timer = 2.0
 
     def _draw_portrait(self, panel, speaker):
@@ -176,7 +178,7 @@ class DialogueScene(Scene):
         left_rect = pygame.Rect(panel.x + 28, panel.y + 52, portrait_size, portrait_size)
         right_rect = pygame.Rect(panel.right - portrait_size - 28, panel.y + 52, portrait_size, portrait_size)
         rect = left_rect if speaker == "player" else right_rect
-        label = "Player" if speaker == "player" else self.npc.name
+        label = self.localizer.t("ui.dialogue.player_name") if speaker == "player" else self.npc.name
         fill = COLORS["PLAYER"] if speaker == "player" else self.npc.color
 
         pygame.draw.rect(self.app.screen, fill, rect, border_radius=10)
@@ -187,7 +189,7 @@ class DialogueScene(Scene):
     def _draw_text(self, panel, node, speaker):
         margin = 180
         text_rect = pygame.Rect(panel.x + margin, panel.y + 50, panel.width - margin * 2, 96)
-        speaker_name = "Player" if speaker == "player" else self.npc.name
+        speaker_name = self.localizer.t("ui.dialogue.player_name") if speaker == "player" else self.npc.name
         name = self.name_font.render(speaker_name, True, COLORS["WHITE"])
         self.app.screen.blit(name, (text_rect.x, text_rect.y - 30))
 
@@ -220,7 +222,7 @@ class DialogueScene(Scene):
                 )
 
     def _draw_hint(self, panel):
-        hint = self.small_font.render("Enter/E - next | 1-9 - choice | Esc - close", True, COLORS["UI_TEXT_DIM"])
+        hint = self.small_font.render(self.localizer.t("ui.dialogue.close_hint"), True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(hint, (panel.right - hint.get_width() - 18, panel.bottom - 28))
 
     def _close(self):

@@ -4,23 +4,17 @@ import pygame
 
 from game.crafting import get_recipe_definitions
 from game.items import create_item_stack, get_item_definition, get_item_icon
+from game.localization import get_localizer
 from game.scenes.base import Scene
 from settings import COLORS, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 class CraftingScene(Scene):
-    CATEGORY_LABELS = {
-        "all": "All",
-        "tools": "Tools",
-        "healing": "Healing",
-        "survival": "Survival",
-        "special": "Special",
-    }
-
     def __init__(self, app, game_scene):
         self.app = app
         self.game_scene = game_scene
         self.player = game_scene.player
+        self.localizer = get_localizer()
         self.title_font = pygame.font.Font(None, 56)
         self.section_font = pygame.font.Font(None, 30)
         self.text_font = pygame.font.Font(None, 24)
@@ -110,9 +104,9 @@ class CraftingScene(Scene):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=16)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.panel_rect, width=2, border_radius=16)
 
-        title = self.title_font.render("Crafting", True, COLORS["WHITE"])
+        title = self.title_font.render(self.localizer.t("ui.crafting.title"), True, COLORS["WHITE"])
         self.app.screen.blit(title, (self.panel_rect.x + 24, self.panel_rect.y + 14))
-        hint = self.text_font.render("Esc / K - close", True, COLORS["UI_TEXT_DIM"])
+        hint = self.text_font.render(self.localizer.t("ui.crafting.close_hint"), True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(hint, (self.panel_rect.right - hint.get_width() - 24, self.panel_rect.y + 24))
 
         self._draw_left_panel()
@@ -168,14 +162,14 @@ class CraftingScene(Scene):
             row_y += row_height + 10
 
         if not recipes:
-            empty = self.text_font.render("No recipes in this category.", True, COLORS["UI_TEXT_DIM"])
+            empty = self.text_font.render(self.localizer.t("ui.crafting.no_recipes"), True, COLORS["UI_TEXT_DIM"])
             self.app.screen.blit(empty, (self.left_panel.x + 18, row_y))
 
     def _draw_category_buttons(self):
         categories = self._available_categories()
         total_width = 0
         for category in categories:
-            label = self.CATEGORY_LABELS.get(category, category.title())
+            label = self._category_label(category)
             total_width += max(74, self.small_font.size(label)[0] + 20) + 8
         self.category_content_width = max(0, total_width - 8)
         max_scroll = self._max_category_scroll()
@@ -190,7 +184,7 @@ class CraftingScene(Scene):
         previous_clip = self.app.screen.get_clip()
         self.app.screen.set_clip(self.category_scroll_area)
         for category in categories:
-            label = self.CATEGORY_LABELS.get(category, category.title())
+            label = self._category_label(category)
             width = max(74, self.small_font.size(label)[0] + 20)
             rect = pygame.Rect(button_x, self.category_scroll_area.y, width, self.category_scroll_area.height)
             active = category == self.active_category
@@ -221,15 +215,15 @@ class CraftingScene(Scene):
             self.app.screen.blit(icon, (rect.x + 10, rect.y + 12))
             text_x = rect.x + 52
 
-        title = recipe.name if unlocked or recipe.unlock_type != "knowledge" else "Unknown Recipe"
+        title = recipe.name if unlocked or recipe.unlock_type != "knowledge" else self.localizer.t("ui.crafting.unknown_recipe")
         title_text = self.text_font.render(title, True, COLORS["WHITE"])
         self.app.screen.blit(title_text, (text_x, rect.y + 8))
 
         if unlocked:
-            status = "Ready" if can_craft else "Missing materials"
+            status = self.localizer.t("ui.crafting.ready") if can_craft else self.localizer.t("ui.crafting.missing_materials")
             color = (150, 230, 150) if can_craft else COLORS["UI_TEXT_DIM"]
         else:
-            status = f"Unlock: {recipe.knowledge_cost} shards"
+            status = self.localizer.t("ui.crafting.unlock_short", cost=recipe.knowledge_cost)
             color = (150, 230, 150) if can_unlock else (220, 150, 150)
         status_text = self.small_font.render(status, True, color)
         self.app.screen.blit(status_text, (text_x, rect.y + 32))
@@ -238,7 +232,11 @@ class CraftingScene(Scene):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.right_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.right_panel, width=2, border_radius=12)
 
-        shards = self.text_font.render(f"Knowledge shards: {self.player.knowledge_shards}", True, COLORS["WHITE"])
+        shards = self.text_font.render(
+            self.localizer.t("ui.crafting.knowledge_shards", count=self.player.knowledge_shards),
+            True,
+            COLORS["WHITE"],
+        )
         self.app.screen.blit(shards, (self.right_panel.x + 16, self.right_panel.y + 14))
 
         recipe = self._selected_recipe()
@@ -264,15 +262,19 @@ class CraftingScene(Scene):
             result_text_x = self.right_panel.x + 60
         else:
             result_text_x = self.right_panel.x + 16
-        result_text = self.text_font.render(f"Result: {result_name} x{recipe.result.quantity}", True, COLORS["WHITE"])
+        result_text = self.text_font.render(
+            self.localizer.t("ui.crafting.result", name=result_name, quantity=recipe.result.quantity),
+            True,
+            COLORS["WHITE"],
+        )
         self.app.screen.blit(result_text, (result_text_x, result_y + 6))
 
-        material_title = self.text_font.render("Materials", True, COLORS["WHITE"])
+        material_title = self.text_font.render(self.localizer.t("ui.crafting.materials"), True, COLORS["WHITE"])
         self.app.screen.blit(material_title, (self.right_panel.x + 16, self.right_panel.y + 214))
         row_y = self.right_panel.y + 246
         for ingredient in recipe.ingredients:
             item_definition = get_item_definition(ingredient.item_id)
-            label = item_definition.name if item_definition is not None else ingredient.item_id
+            label = item_definition.localized_name() if item_definition is not None else ingredient.item_id
             current = self.player.inventory.count_item(ingredient.item_id) + self.player.quest_inventory.count_item(ingredient.item_id)
             enough = current >= ingredient.quantity
             color = (150, 230, 150) if enough else (220, 150, 150)
@@ -289,7 +291,7 @@ class CraftingScene(Scene):
         status_y = max(row_y + 12, self.right_panel.bottom - 120)
         if not self.player.is_recipe_unlocked(recipe) and recipe.unlock_type == "knowledge":
             unlock_text = self.text_font.render(
-                f"Unlock cost: {recipe.knowledge_cost} knowledge shards",
+                self.localizer.t("ui.crafting.unlock_cost", cost=recipe.knowledge_cost),
                 True,
                 COLORS["WHITE"],
             )
@@ -391,10 +393,10 @@ class CraftingScene(Scene):
 
     def _primary_action(self, recipe):
         if recipe is None:
-            return "Unavailable", False
+            return self.localizer.t("ui.crafting.action_unavailable"), False
         if not self.player.is_recipe_unlocked(recipe) and recipe.unlock_type == "knowledge":
-            return "Unlock", self.player.can_unlock_recipe(recipe)
-        return "Craft", self.player.can_craft_recipe(recipe)
+            return self.localizer.t("ui.crafting.action_unlock"), self.player.can_unlock_recipe(recipe)
+        return self.localizer.t("ui.crafting.action_craft"), self.player.can_craft_recipe(recipe)
 
     def _recipe_status_text(self, recipe):
         if recipe is None:
@@ -402,14 +404,14 @@ class CraftingScene(Scene):
         if not self.player.is_recipe_unlocked(recipe):
             if recipe.unlock_type == "knowledge":
                 if self.player.can_unlock_recipe(recipe):
-                    return "You can unlock this recipe."
-                return "You need more knowledge shards."
-            return "This recipe is still locked."
+                    return self.localizer.t("ui.crafting.status_can_unlock")
+                return self.localizer.t("ui.crafting.status_need_more_shards")
+            return self.localizer.t("ui.crafting.status_locked")
         if self.player.can_craft_recipe(recipe):
-            return "All materials are ready."
+            return self.localizer.t("ui.crafting.status_ready")
         if not self.player.can_add_item(recipe.result.item_id, recipe.result.quantity):
-            return "Not enough inventory space."
-        return "Some materials are missing."
+            return self.localizer.t("ui.crafting.status_no_space")
+        return self.localizer.t("ui.crafting.status_missing")
 
     def _perform_primary_action(self):
         recipe = self._selected_recipe()
@@ -418,29 +420,29 @@ class CraftingScene(Scene):
 
         if not self.player.is_recipe_unlocked(recipe) and recipe.unlock_type == "knowledge":
             if not self.player.can_unlock_recipe(recipe):
-                self._set_message("Not enough knowledge shards.")
+                self._set_message(self.localizer.t("ui.crafting.message_not_enough_shards"))
                 return
             if not self.player.spend_knowledge_shards(recipe.knowledge_cost):
-                self._set_message("Not enough knowledge shards.")
+                self._set_message(self.localizer.t("ui.crafting.message_not_enough_shards"))
                 return
             self.player.unlock_recipe(recipe.id)
-            self._set_message(f"Unlocked: {recipe.name}")
+            self._set_message(self.localizer.t("ui.crafting.message_unlocked", name=recipe.name))
             return
 
         if not self.player.can_craft_recipe(recipe):
             if not self.player.can_add_item(recipe.result.item_id, recipe.result.quantity):
-                self._set_message("Inventory is full.")
+                self._set_message(self.localizer.t("ui.crafting.message_inventory_full"))
             else:
-                self._set_message("Missing materials.")
+                self._set_message(self.localizer.t("ui.crafting.message_missing_materials"))
             return
 
         if not self.player.craft_recipe(recipe):
-            self._set_message("Crafting failed.")
+            self._set_message(self.localizer.t("ui.crafting.message_crafting_failed"))
             return
 
         result_stack = create_item_stack(recipe.result.item_id, recipe.result.quantity)
         result_name = result_stack.name if result_stack is not None else recipe.result.item_id
-        self._set_message(f"Crafted: {result_name} x{recipe.result.quantity}")
+        self._set_message(self.localizer.t("ui.crafting.message_crafted", name=result_name, quantity=recipe.result.quantity))
 
     def _set_message(self, text):
         self.message = text
@@ -450,7 +452,7 @@ class CraftingScene(Scene):
         categories = self._available_categories()
         total_width = 0
         for category in categories:
-            label = self.CATEGORY_LABELS.get(category, category.title())
+            label = self._category_label(category)
             total_width += max(74, self.small_font.size(label)[0] + 20) + 8
         visible_width = self.left_panel.width - 28
         return total_width - 8 > visible_width
@@ -469,7 +471,7 @@ class CraftingScene(Scene):
         categories = self._available_categories()
         button_x = self.category_scroll_area.x
         for category in categories:
-            label = self.CATEGORY_LABELS.get(category, category.title())
+            label = self._category_label(category)
             width = max(74, self.small_font.size(label)[0] + 20)
             if category == self.active_category:
                 left = button_x - self.category_scroll_offset
@@ -480,6 +482,11 @@ class CraftingScene(Scene):
                     self.category_scroll_offset = min(self._max_category_scroll(), button_x + width - self.category_scroll_area.right)
                 return
             button_x += width + 8
+
+    def _category_label(self, category):
+        key = f"ui.crafting.category_{category}"
+        translated = self.localizer.t(key)
+        return translated if translated != key else category.title()
 
 
 def _wrap_text(text, font, max_width):

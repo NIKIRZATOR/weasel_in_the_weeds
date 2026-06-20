@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from game.localization import get_localizer
 from game.items.types import EquipSlot, ItemKind
 
 
@@ -51,6 +52,18 @@ class ItemDefinition:
     wallet_key: str | None = None
     description: str = ""
 
+    def localized_name(self) -> str:
+        localizer = get_localizer()
+        key = f"items.{self.id}.name"
+        translated = localizer.t(key)
+        return translated if translated != key else self.name
+
+    def localized_description(self) -> str:
+        localizer = get_localizer()
+        key = f"items.{self.id}.description"
+        translated = localizer.t(key)
+        return translated if translated != key else self.description
+
 
 @dataclass
 class ItemStack:
@@ -70,7 +83,11 @@ class ItemStack:
 
     @property
     def name(self) -> str:
-        return self.definition.name
+        return self.definition.localized_name()
+
+    @property
+    def description(self) -> str:
+        return self.definition.localized_description()
 
     @property
     def kind(self) -> ItemKind:

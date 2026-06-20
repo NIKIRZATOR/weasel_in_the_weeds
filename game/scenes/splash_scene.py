@@ -1,5 +1,6 @@
 import pygame
 
+from game.localization import get_localizer
 from game.scenes.base import Scene
 from settings import COLORS
 
@@ -9,13 +10,14 @@ class SplashScene(Scene):
         self,
         app,
         next_scene_factory,
-        title="Загрузка...",
+        title=None,
         duration=1.0,
         background=(15, 15, 25),
     ):
         self.app = app
         self.next_scene_factory = next_scene_factory
-        self.title = title
+        self.localizer = get_localizer()
+        self.title = title or self.localizer.t("ui.common.loading")
         self.duration = duration
         self.background = background
         self.elapsed = 0.0

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pygame
 
+from game.localization import get_localizer
 from game.scenes.base import Scene
 from settings import COLORS
 
@@ -11,6 +12,7 @@ class MapScene(Scene):
         self.app = app
         self.game_scene = game_scene
         self.player = game_scene.player
+        self.localizer = get_localizer()
         self.title_font = pygame.font.Font(None, 44)
         self.text_font = pygame.font.Font(None, 24)
         self.small_font = pygame.font.Font(None, 20)
@@ -37,10 +39,10 @@ class MapScene(Scene):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], panel_rect, border_radius=16)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], panel_rect, width=2, border_radius=16)
 
-        title = self.title_font.render("Map", True, COLORS["WHITE"])
+        title = self.title_font.render(self.localizer.t("ui.map.title"), True, COLORS["WHITE"])
         self.app.screen.blit(title, (panel_rect.x + 24, panel_rect.y + 18))
 
-        hint = self.text_font.render("M / Esc - close", True, COLORS["UI_TEXT_DIM"])
+        hint = self.text_font.render(self.localizer.t("ui.map.close_hint"), True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(hint, (panel_rect.right - hint.get_width() - 24, panel_rect.y + 24))
 
         map_rect = pygame.Rect(panel_rect.x + 24, panel_rect.y + 76, panel_rect.width - 48, panel_rect.height - 120)

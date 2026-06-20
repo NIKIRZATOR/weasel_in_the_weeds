@@ -3,6 +3,7 @@ from math import ceil
 
 from game.items import get_item_icon
 from game.items.types import EquipSlot, ItemKind
+from game.localization import get_localizer
 from game.scenes.base import Scene
 from settings import COLORS, HOTBAR_SIZE, INVENTORY_COLUMNS, SCREEN_HEIGHT, SCREEN_WIDTH
 
@@ -15,6 +16,7 @@ class InventoryScene(Scene):
         self.app = app
         self.game_scene = game_scene
         self.player = game_scene.player
+        self.localizer = get_localizer()
         self.title_font = pygame.font.Font(None, 62)
         self.section_font = pygame.font.Font(None, 30)
         self.panel_title_font = pygame.font.Font(None, 24)
@@ -105,12 +107,12 @@ class InventoryScene(Scene):
         equipment_slot_y = self.equipment_panel.y + 54
         equipment_spacing = 10
         self.equipment_slots = [
-            (EquipSlot.HELMET, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 0, equipment_slot_width, equipment_slot_height), "Шлем"),
-            (EquipSlot.CHEST, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 1, equipment_slot_width, equipment_slot_height), "Броня"),
-            (EquipSlot.BOOTS, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 2, equipment_slot_width, equipment_slot_height), "Обувь"),
-            (EquipSlot.WEAPON, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 3, equipment_slot_width, equipment_slot_height), "Оружие"),
-            (EquipSlot.ACCESSORY_1, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 4, equipment_slot_width, equipment_slot_height), "Акс 1"),
-            (EquipSlot.ACCESSORY_2, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 5, equipment_slot_width, equipment_slot_height), "Акс 2"),
+            (EquipSlot.HELMET, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 0, equipment_slot_width, equipment_slot_height)),
+            (EquipSlot.CHEST, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 1, equipment_slot_width, equipment_slot_height)),
+            (EquipSlot.BOOTS, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 2, equipment_slot_width, equipment_slot_height)),
+            (EquipSlot.WEAPON, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 3, equipment_slot_width, equipment_slot_height)),
+            (EquipSlot.ACCESSORY_1, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 4, equipment_slot_width, equipment_slot_height)),
+            (EquipSlot.ACCESSORY_2, pygame.Rect(equipment_slot_x, equipment_slot_y + (equipment_slot_height + equipment_spacing) * 5, equipment_slot_width, equipment_slot_height)),
         ]
 
     def handle_events(self, events):
@@ -211,11 +213,11 @@ class InventoryScene(Scene):
             if self.player.swap_inventory_and_hotbar(inventory_index, selected_index):
                 self.selected_slot = ("inventory", inventory_index)
             else:
-                self._set_message("Не удалось переместить предмет")
+                self._set_message(self.localizer.t("ui.inventory.move_failed"))
             return
 
         if selected_kind == "quest":
-            self._set_message("Сюжетные предметы хранятся отдельно")
+            self._set_message(self.localizer.t("ui.inventory.quest_separate"))
 
     def _handle_hotbar_click(self, hotbar_index):
         stack = self.player.get_hotbar_stack(hotbar_index)
@@ -237,11 +239,11 @@ class InventoryScene(Scene):
             if self.player.swap_inventory_and_hotbar(selected_index, hotbar_index):
                 self.selected_slot = ("hotbar", hotbar_index)
             else:
-                self._set_message("Не удалось переместить предмет")
+                self._set_message(self.localizer.t("ui.inventory.move_failed"))
             return
 
         if selected_kind == "quest":
-            self._set_message("Сюжетные предметы нельзя помещать в хотбар")
+            self._set_message(self.localizer.t("ui.inventory.quest_no_hotbar"))
 
     def _handle_quest_click(self, quest_index):
         stack = self.player.quest_inventory.get_stack_at(quest_index)
@@ -259,24 +261,24 @@ class InventoryScene(Scene):
             self.selected_slot = ("quest", quest_index)
             return
 
-        self._set_message("Сюжетные предметы хранятся отдельно")
+        self._set_message(self.localizer.t("ui.inventory.quest_separate"))
 
     def _handle_equipment_click(self, equip_slot):
         if self.selected_slot is not None and self.selected_slot[0] == "inventory":
             inventory_index = self.selected_slot[1]
             if self.player.equip_inventory_slot(inventory_index, equip_slot):
-                self._set_message("Предмет экипирован")
+                self._set_message(self.localizer.t("ui.inventory.equip_success"))
                 self.selected_slot = None
             else:
-                self._set_message("Нельзя экипировать в этот слот")
+                self._set_message(self.localizer.t("ui.inventory.equip_failed"))
             return
 
         if self.player.equipment.get(equip_slot) is not None:
             if self.player.unequip_to_inventory(equip_slot):
-                self._set_message("Предмет снят")
+                self._set_message(self.localizer.t("ui.inventory.unequip_success"))
                 self.selected_slot = None
             else:
-                self._set_message("Инвентарь переполнен")
+                self._set_message(self.localizer.t("ui.inventory.inventory_full"))
 
     def _set_message(self, text):
         self.message = text
@@ -300,9 +302,9 @@ class InventoryScene(Scene):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=14)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.panel_rect, width=2, border_radius=14)
 
-        title = self.title_font.render("Инвентарь", True, COLORS["WHITE"])
+        title = self.title_font.render(self.localizer.t("ui.inventory.title"), True, COLORS["WHITE"])
         self.app.screen.blit(title, (self.panel_rect.x + 28, self.panel_rect.y + 12))
-        hint = self.text_font.render("Esc / I - закрыть", True, COLORS["UI_TEXT_DIM"])
+        hint = self.text_font.render(self.localizer.t("ui.inventory.close_hint"), True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(hint, (self.panel_rect.right - hint.get_width() - 28, self.panel_rect.y + 22))
 
         self._draw_character_panel()
@@ -320,7 +322,7 @@ class InventoryScene(Scene):
     def _draw_character_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.left_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.left_panel, width=2, border_radius=12)
-        self._draw_panel_title(self.left_panel, "Персонаж")
+        self._draw_panel_title(self.left_panel, self.localizer.t("ui.inventory.character"))
 
         body_rect = pygame.Rect(self.left_panel.centerx - 30, self.left_panel.y + 72, 60, 90)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_SELECTED"], body_rect, border_radius=10)
@@ -328,14 +330,14 @@ class InventoryScene(Scene):
 
         stats = self.player.get_effective_stats()
         stat_lines = [
-            f"HP: {int(self.player.health)}/{self.player.get_max_health()}",
-            f"ST: {int(self.player.stamina)}/{self.player.get_max_stamina()}",
-            f"ATK: {stats.attack}",
-            f"DEF: {stats.defense}",
-            f"SPD: {stats.speed}",
-            f"Места: {self.player.inventory.capacity}",
-            f"Coins: {self.player.coins}",
-            f"Shards: {self.player.knowledge_shards}",
+            f"{self.localizer.t('ui.inventory.stat_hp')}: {int(self.player.health)}/{self.player.get_max_health()}",
+            f"{self.localizer.t('ui.inventory.stat_st')}: {int(self.player.stamina)}/{self.player.get_max_stamina()}",
+            f"{self.localizer.t('ui.inventory.stat_atk')}: {stats.attack}",
+            f"{self.localizer.t('ui.inventory.stat_def')}: {stats.defense}",
+            f"{self.localizer.t('ui.inventory.stat_spd')}: {stats.speed}",
+            f"{self.localizer.t('ui.inventory.stat_slots')}: {self.player.inventory.capacity}",
+            f"{self.localizer.t('ui.inventory.stat_coins')}: {self.player.coins}",
+            f"{self.localizer.t('ui.inventory.stat_shards')}: {self.player.knowledge_shards}",
         ]
         stats_start_y = body_rect.bottom + 14
         for index, line in enumerate(stat_lines):
@@ -345,7 +347,7 @@ class InventoryScene(Scene):
     def _draw_hotbar_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.hotbar_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.hotbar_panel, width=2, border_radius=12)
-        label = self.small_font.render("Хотбар", True, COLORS["UI_TEXT_DIM"])
+        label = self.small_font.render(self.localizer.t("ui.inventory.hotbar"), True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(label, (self.hotbar_panel.x + 12, self.hotbar_panel.y + 10))
 
         for index in range(HOTBAR_SIZE):
@@ -370,7 +372,7 @@ class InventoryScene(Scene):
     def _draw_inventory_grid(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.center_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.center_panel, width=2, border_radius=12)
-        self._draw_panel_title(self.center_panel, "Инвентарь")
+        self._draw_panel_title(self.center_panel, self.localizer.t("ui.inventory.backpack"))
 
         for row in range(self.inventory_rows):
             for col in range(self.inventory_columns):
@@ -396,15 +398,15 @@ class InventoryScene(Scene):
     def _draw_equipment_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.equipment_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.equipment_panel, width=2, border_radius=12)
-        self._draw_panel_title(self.equipment_panel, "Экипировка")
+        self._draw_panel_title(self.equipment_panel, self.localizer.t("ui.inventory.equipment"))
 
-        for slot, rect, title in self.equipment_slots:
+        for slot, rect in self.equipment_slots:
             stack = self.player.equipment.get(slot)
             border = COLORS["EQUIP_SLOT_FILLED"] if stack is not None else COLORS["EQUIP_SLOT"]
             pygame.draw.rect(self.app.screen, COLORS["UI_SLOT"], rect, border_radius=8)
             pygame.draw.rect(self.app.screen, border, rect, width=2, border_radius=8)
 
-            title_text = self.small_font.render(title, True, COLORS["UI_TEXT_DIM"])
+            title_text = self.small_font.render(self._equipment_slot_label(slot), True, COLORS["UI_TEXT_DIM"])
             self.app.screen.blit(title_text, (rect.x + 4, rect.y + 2))
 
             if stack is not None:
@@ -413,7 +415,7 @@ class InventoryScene(Scene):
     def _draw_quest_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.quest_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.quest_panel, width=2, border_radius=12)
-        self._draw_panel_title(self.quest_panel, "Сюжетные")
+        self._draw_panel_title(self.quest_panel, self.localizer.t("ui.inventory.quest_items"))
 
         for row in range(self.QUEST_ROWS):
             for col in range(self.QUEST_COLUMNS):
@@ -439,14 +441,14 @@ class InventoryScene(Scene):
 
         stack = self._get_selected_stack()
         if stack is None:
-            text = self.text_font.render("Выберите предмет, чтобы увидеть описание.", True, COLORS["UI_TEXT_DIM"])
+            text = self.text_font.render(self.localizer.t("ui.inventory.select_item_hint"), True, COLORS["UI_TEXT_DIM"])
             self.app.screen.blit(text, (self.details_panel.x + 14, self.details_panel.y + 14))
             return
 
         name = self.text_font.render(stack.name, True, COLORS["WHITE"])
         self.app.screen.blit(name, (self.details_panel.x + 14, self.details_panel.y + 4))
 
-        detail = stack.definition.description or stack.kind.value
+        detail = stack.description or stack.kind.value
         detail_text = self.small_font.render(detail, True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(detail_text, (self.details_panel.x + 14, self.details_panel.y + 28))
 
@@ -574,7 +576,7 @@ class InventoryScene(Scene):
 
         if "quest" in (source_kind, target_kind):
             if source_kind != target_kind or source_stack.kind != ItemKind.QUEST:
-                self._set_message("Сюжетные предметы нельзя переносить в обычный инвентарь")
+                self._set_message(self.localizer.t("ui.inventory.quest_cannot_move"))
                 return False
 
         if target_stack is None:
@@ -645,3 +647,14 @@ class InventoryScene(Scene):
             if slot[1].collidepoint(mouse_pos):
                 return slot
         return None
+
+    def _equipment_slot_label(self, slot):
+        mapping = {
+            EquipSlot.HELMET: "ui.inventory.slot_helmet",
+            EquipSlot.CHEST: "ui.inventory.slot_chest",
+            EquipSlot.BOOTS: "ui.inventory.slot_boots",
+            EquipSlot.WEAPON: "ui.inventory.slot_weapon",
+            EquipSlot.ACCESSORY_1: "ui.inventory.slot_accessory_1",
+            EquipSlot.ACCESSORY_2: "ui.inventory.slot_accessory_2",
+        }
+        return self.localizer.t(mapping.get(slot, "ui.inventory.equipment"))

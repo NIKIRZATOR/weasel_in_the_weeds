@@ -1,5 +1,6 @@
 import pygame
 
+from game.localization import get_localizer
 from game.scenes.base import Scene
 from settings import COLORS, LEVELS_DIR
 
@@ -7,6 +8,7 @@ from settings import COLORS, LEVELS_DIR
 class MenuScene(Scene):
     def __init__(self, app):
         self.app = app
+        self.localizer = get_localizer()
         self.title_font = pygame.font.Font(None, 72)
         self.button_font = pygame.font.Font(None, 36)
         self.info_font = pygame.font.Font(None, 28)
@@ -22,11 +24,11 @@ class MenuScene(Scene):
         button_height = 48
         gap = 14
         labels = [
-            ("Новая игра", self.start_game, False),
-            ("Продолжить игру", None, True),
-            ("Настройки", self.open_settings, False),
-            ("Об авторе", self.show_author, False),
-            ("Выход", self.exit_game, False),
+            (self.localizer.t("ui.menu.new_game"), self.start_game, False),
+            (self.localizer.t("ui.menu.continue_game"), None, True),
+            (self.localizer.t("ui.menu.settings"), self.open_settings, False),
+            (self.localizer.t("ui.menu.about"), self.show_author, False),
+            (self.localizer.t("ui.menu.exit"), self.exit_game, False),
         ]
 
         title_gap = 72
@@ -71,7 +73,7 @@ class MenuScene(Scene):
             SplashScene(
                 self.app,
                 lambda: GameScene(self.app, LEVELS_DIR / "level_01.json"),
-                title="Новая игра...",
+                title=self.localizer.t("ui.menu.new_game_loading"),
             )
         )
 
@@ -81,7 +83,7 @@ class MenuScene(Scene):
         self.app.set_scene(SettingsScene(self.app, self))
 
     def show_author(self):
-        self.set_message("Автор: проект Weales in the weeds")
+        self.set_message(self.localizer.t("ui.menu.author_message"))
 
     def exit_game(self):
         self.app.running = False
@@ -113,7 +115,7 @@ class MenuScene(Scene):
         screen_width, screen_height = self.app.get_screen_size()
         self.app.screen.fill((18, 18, 26))
 
-        title = self.title_font.render("Weales in the weeds", True, COLORS["WHITE"])
+        title = self.title_font.render(self.localizer.t("ui.menu.title"), True, COLORS["WHITE"])
         self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, self.title_center_y)))
 
         mouse_pos = pygame.mouse.get_pos()

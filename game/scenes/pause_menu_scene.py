@@ -1,5 +1,6 @@
 import pygame
 
+from game.localization import get_localizer
 from game.scenes.base import Scene
 from settings import COLORS
 
@@ -8,6 +9,7 @@ class PauseMenuScene(Scene):
     def __init__(self, app, game_scene):
         self.app = app
         self.game_scene = game_scene
+        self.localizer = get_localizer()
         self.title_font = pygame.font.Font(None, 72)
         self.button_font = pygame.font.Font(None, 36)
         self.info_font = pygame.font.Font(None, 28)
@@ -18,17 +20,24 @@ class PauseMenuScene(Scene):
         self._build_buttons()
 
     def _build_buttons(self):
-        screen_width, _ = self.app.get_screen_size()
+        screen_width, screen_height = self.app.get_screen_size()
         button_width = 320
         button_height = 48
-        start_y = 240
         gap = 14
         labels = [
-            ("Вернуться в игру", self.resume_game, False),
-            ("Инвентарь", self.open_inventory, False),
-            ("Настройки", self.open_settings, False),
-            ("Выход в меню", self.exit_to_menu, False),
+            (self.localizer.t("ui.pause.resume"), self.resume_game, False),
+            (self.localizer.t("ui.pause.inventory"), self.open_inventory, False),
+            (self.localizer.t("ui.pause.settings"), self.open_settings, False),
+            (self.localizer.t("ui.pause.exit_to_menu"), self.exit_to_menu, False),
         ]
+
+        title_gap = 58
+        title_height = self.title_font.get_height()
+        buttons_height = len(labels) * button_height + max(0, len(labels) - 1) * gap
+        content_height = title_height + title_gap + buttons_height
+        content_top = max(40, (screen_height - content_height) // 2)
+        self.title_center_y = content_top + title_height // 2
+        start_y = content_top + title_height + title_gap
 
         self.buttons = []
         for index, (label, action, disabled) in enumerate(labels):
@@ -73,7 +82,7 @@ class PauseMenuScene(Scene):
             SplashScene(
                 self.app,
                 lambda: MenuScene(self.app),
-                title="Сохранение...",
+                title=self.localizer.t("ui.common.saving"),
                 background=(20, 20, 20),
             )
         )
@@ -111,8 +120,8 @@ class PauseMenuScene(Scene):
         overlay.fill((0, 0, 0, 150))
         self.app.screen.blit(overlay, (0, 0))
 
-        title = self.title_font.render("Пауза", True, COLORS["WHITE"])
-        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, 135)))
+        title = self.title_font.render(self.localizer.t("ui.pause.title"), True, COLORS["WHITE"])
+        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, self.title_center_y)))
 
         mouse_pos = pygame.mouse.get_pos()
         for button in self.buttons:

@@ -1,5 +1,6 @@
 import pygame
 
+from game.localization import get_localizer
 from game.scenes.base import Scene
 from settings import COLORS
 
@@ -9,6 +10,7 @@ class SettingsScene(Scene):
         self.app = app
         self.previous_scene = previous_scene
         self.overlay_scene = overlay_scene
+        self.localizer = get_localizer()
         self.title_font = pygame.font.Font(None, 64)
         self.section_font = pygame.font.Font(None, 34)
         self.button_font = pygame.font.Font(None, 30)
@@ -18,16 +20,27 @@ class SettingsScene(Scene):
         self._build_buttons()
 
     def _build_buttons(self):
-        screen_width, _ = self.app.get_screen_size()
+        screen_width, screen_height = self.app.get_screen_size()
         button_width = 340
         button_height = 50
-        start_y = 230
         gap = 16
         options = [
-            ("Окно", "windowed"),
-            ("Полный экран", "fullscreen"),
-            ("Без рамок", "borderless"),
+            (self.localizer.t("ui.settings.mode_windowed"), "windowed"),
+            (self.localizer.t("ui.settings.mode_fullscreen"), "fullscreen"),
+            (self.localizer.t("ui.settings.mode_borderless"), "borderless"),
         ]
+
+        title_gap = 54
+        title_height = self.title_font.get_height()
+        subtitle_height = self.section_font.get_height()
+        buttons_height = len(options) * button_height + max(0, len(options) - 1) * gap
+        back_height = 48
+        content_height = title_height + title_gap + subtitle_height + 28 + buttons_height + 36 + back_height
+        content_top = max(36, (screen_height - content_height) // 2)
+
+        self.title_center_y = content_top + title_height // 2
+        self.subtitle_center_y = content_top + title_height + title_gap + subtitle_height // 2
+        start_y = content_top + title_height + title_gap + subtitle_height + 28
 
         self.buttons = []
         for index, (label, mode) in enumerate(options):
@@ -39,7 +52,7 @@ class SettingsScene(Scene):
             )
             self.buttons.append({"rect": rect, "label": label, "mode": mode})
 
-        self.back_button = pygame.Rect((screen_width - 220) // 2, start_y + 210, 220, 48)
+        self.back_button = pygame.Rect((screen_width - 220) // 2, start_y + buttons_height + 36, 220, 48)
         self._layout_size = self.app.get_screen_size()
 
     def _ensure_layout(self):
@@ -66,7 +79,7 @@ class SettingsScene(Scene):
                     self.go_back()
 
     def update(self, dt):
-        pass
+        return None
 
     def draw(self):
         self._ensure_layout()
@@ -79,11 +92,11 @@ class SettingsScene(Scene):
         else:
             self.app.screen.fill((18, 18, 26))
 
-        title = self.title_font.render("Настройки", True, COLORS["WHITE"])
-        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, 110)))
+        title = self.title_font.render(self.localizer.t("ui.settings.title"), True, COLORS["WHITE"])
+        self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, self.title_center_y)))
 
-        subtitle = self.section_font.render("Режим окна", True, COLORS["UI_TEXT_DIM"])
-        self.app.screen.blit(subtitle, subtitle.get_rect(center=(screen_width // 2, 170)))
+        subtitle = self.section_font.render(self.localizer.t("ui.settings.window_mode"), True, COLORS["UI_TEXT_DIM"])
+        self.app.screen.blit(subtitle, subtitle.get_rect(center=(screen_width // 2, self.subtitle_center_y)))
 
         mouse_pos = pygame.mouse.get_pos()
         for button in self.buttons:
@@ -112,11 +125,11 @@ class SettingsScene(Scene):
         pygame.draw.rect(self.app.screen, back_fill, self.back_button, border_radius=8)
         pygame.draw.rect(self.app.screen, back_border, self.back_button, width=2, border_radius=8)
 
-        back_label = self.button_font.render("Назад", True, COLORS["WHITE"])
+        back_label = self.button_font.render(self.localizer.t("ui.settings.back"), True, COLORS["WHITE"])
         self.app.screen.blit(back_label, back_label.get_rect(center=self.back_button.center))
 
         current_label = self.info_font.render(
-            f"Текущий режим: {self._mode_title(self.app.display_mode)}",
+            self.localizer.t("ui.settings.current_mode", mode=self._mode_title(self.app.display_mode)),
             True,
             COLORS["UI_TEXT_DIM"],
         )
@@ -125,13 +138,13 @@ class SettingsScene(Scene):
             current_label.get_rect(center=(screen_width // 2, screen_height - 80)),
         )
 
-        hint = self.info_font.render("Esc - назад", True, COLORS["UI_TEXT_DIM"])
+        hint = self.info_font.render(self.localizer.t("ui.settings.close_hint"), True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(hint, hint.get_rect(center=(screen_width // 2, screen_height - 48)))
 
     def _mode_title(self, mode):
         titles = {
-            "windowed": "Окно",
-            "fullscreen": "Полный экран",
-            "borderless": "Без рамок",
+            "windowed": self.localizer.t("ui.settings.mode_windowed"),
+            "fullscreen": self.localizer.t("ui.settings.mode_fullscreen"),
+            "borderless": self.localizer.t("ui.settings.mode_borderless"),
         }
         return titles.get(mode, mode)
