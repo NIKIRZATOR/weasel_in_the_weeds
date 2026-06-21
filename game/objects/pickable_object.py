@@ -29,6 +29,7 @@ class PickableObject(WorldObject):
             properties=properties,
         )
         self.is_picked = False
+        self.auto_pickup = bool(properties.get("auto_pickup", False))
 
     def interact(self, player, game_scene):
         if self.is_picked:

@@ -6,11 +6,11 @@ import pygame
 
 from game.core.camera import Camera
 from game.core.vector import Vector2
-from game.entities.enemy import MeleeEnemy, RangedEnemy
+from game.entities.enemies import MeleeEnemy, RangedEnemy
 from game.entities.player import Player
 from game.items import create_item_stack
 from game.localization import get_localizer
-from game.objects import create_world_object
+from game.objects import PickableObject, create_world_object
 from game.scenes.base import Scene
 from game.ui.hud import HUD
 from game.world.collision import CollisionSystem
@@ -135,8 +135,48 @@ class GameScene(Scene):
             speed=int(properties.get("speed", raw_object.get("speed", 80))),
             damage=int(properties.get("damage", raw_object.get("damage", 4))),
             xp_reward=int(properties.get("xp_reward", raw_object.get("xp_reward", 10))),
+            **self._enemy_hitbox_kwargs(properties),
             **self._enemy_specific_kwargs(raw_object, enemy_class),
         )
+
+    def _enemy_hitbox_kwargs(self, properties):
+        result = {}
+        body = properties.get("body_hitbox") or {}
+        hurt = properties.get("hurtbox") or {}
+        attack = properties.get("attack_hitbox") or {}
+
+        if body:
+            if "width" in body:
+                result["hitbox_width"] = float(body["width"])
+            if "height" in body:
+                result["hitbox_height"] = float(body["height"])
+            if "offset_x" in body:
+                result["hitbox_offset_x"] = float(body["offset_x"])
+            if "offset_y" in body:
+                result["hitbox_offset_y"] = float(body["offset_y"])
+
+        if hurt:
+            if "width" in hurt:
+                result["hurtbox_width"] = float(hurt["width"])
+            if "height" in hurt:
+                result["hurtbox_height"] = float(hurt["height"])
+            if "offset_x" in hurt:
+                result["hurtbox_offset_x"] = float(hurt["offset_x"])
+            if "offset_y" in hurt:
+                result["hurtbox_offset_y"] = float(hurt["offset_y"])
+
+        if attack:
+            if "width" in attack:
+                result["attack_hitbox_width"] = float(attack["width"])
+            if "height" in attack:
+                result["attack_hitbox_height"] = float(attack["height"])
+            if "offset_x" in attack:
+                result["attack_hitbox_offset_x"] = float(attack["offset_x"])
+            if "offset_y" in attack:
+                result["attack_hitbox_offset_y"] = float(attack["offset_y"])
+            if "mirror_with_facing" in attack:
+                result["attack_hitbox_mirror_with_facing"] = bool(attack["mirror_with_facing"])
+        return result
 
     def _enemy_specific_kwargs(self, raw_object, enemy_class):
         properties = raw_object.get("properties", {})
@@ -411,6 +451,7 @@ class GameScene(Scene):
         self._update_grass_hide_zones()
         self._update_checkpoints()
         self._update_enemies(dt)
+        self._update_auto_pickups()
         self._update_player_projectiles(dt)
         self._resolve_player_enemy_overlaps()
         self._apply_player_attack()
@@ -434,6 +475,25 @@ class GameScene(Scene):
                 f"checkpoint:{self.level_key}:{int(world_object.position.x)}:{int(world_object.position.y)}"
             )
             self._award_player_xp(CHECKPOINT_XP_REWARD, checkpoint_key, append=True)
+
+    def _update_auto_pickups(self):
+        player_hitbox = self.player.get_hitbox_rect()
+        picked_objects = []
+        for world_object in self.world_objects:
+            if not getattr(world_object, "auto_pickup", False):
+                continue
+            if getattr(world_object, "is_picked", False):
+                continue
+            if not _rects_intersect(player_hitbox, world_object.get_hitbox_rect()):
+                continue
+            if self.try_pickup_object(world_object):
+                picked_objects.append(world_object)
+
+        if not picked_objects:
+            return
+        picked_set = set(picked_objects)
+        self.world_objects = [obj for obj in self.world_objects if obj not in picked_set]
+        self.collision_system.set_objects(self.world_objects)
 
     def _update_map_reveal(self):
         player_center = self.player.get_center()
@@ -520,12 +580,50 @@ class GameScene(Scene):
         for enemy in self.enemies:
             enemy.update(dt, self)
             if enemy.is_dead:
+                self._spawn_enemy_drops(enemy)
                 if not enemy.xp_awarded and enemy.xp_reward > 0:
                     enemy.xp_awarded = True
                     self._award_player_xp(enemy.xp_reward, append=True)
                 continue
             alive_enemies.append(enemy)
         self.enemies = alive_enemies
+
+    def _spawn_enemy_drops(self, enemy):
+        if getattr(enemy, "loot_dropped", False):
+            return
+        enemy.loot_dropped = True
+        drops = enemy.roll_loot() if hasattr(enemy, "roll_loot") else []
+        if not drops:
+            return
+
+        tile_size = max(12, int(self.level.tile_size * 0.6))
+        center = enemy.get_center()
+        start_x = center.x - tile_size / 2
+        start_y = center.y - tile_size / 2
+        for index, drop in enumerate(drops):
+            offset_x = (index % 2) * (tile_size + 4) - (tile_size + 4) / 2
+            offset_y = (index // 2) * (tile_size + 4) - (tile_size + 4) / 2
+            properties = {}
+            if "item_id" in drop:
+                properties["item_id"] = drop["item_id"]
+                properties["quantity"] = int(drop.get("quantity", 1))
+            if "coins" in drop:
+                properties["coins"] = int(drop.get("coins", 0))
+            if "knowledge_shards" in drop:
+                properties["knowledge_shards"] = int(drop.get("knowledge_shards", 0))
+            if not properties:
+                continue
+            self.world_objects.append(
+                PickableObject(
+                    start_x + offset_x,
+                    start_y + offset_y,
+                    tile_size,
+                    tile_size,
+                    name=properties.get("item_id", "enemy_drop"),
+                    properties={**properties, "auto_pickup": True},
+                )
+            )
+        self.collision_system.set_objects(self.world_objects)
 
     def _collides_with_enemies(self, x, y, entity, ignored_enemy=None):
         hitbox = entity.get_hitbox_at(x, y)
@@ -633,9 +731,9 @@ class GameScene(Scene):
                 attack.aim_direction,
                 attack.range,
                 attack.arc_degrees,
-                enemy.get_hitbox_rect(),
+                enemy.get_hurtbox_rect(),
             )
-        return _segment_hits_rect(attack_origin, attack_end, attack_thickness, enemy.get_hitbox_rect())
+        return _segment_hits_rect(attack_origin, attack_end, attack_thickness, enemy.get_hurtbox_rect())
 
     def _spawn_damage_number(self, enemy, damage):
         center = enemy.get_center()
@@ -984,7 +1082,7 @@ class PlayerProjectile:
         for enemy in game_scene.enemies:
             if enemy.is_dead:
                 continue
-            if not _rects_intersect(projectile_rect, enemy.get_hitbox_rect()):
+            if not _rects_intersect(projectile_rect, enemy.get_hurtbox_rect()):
                 continue
             if enemy.take_damage(self.damage, "ranged"):
                 enemy.apply_hit_reaction(self.direction, 18.0, 0.08)
