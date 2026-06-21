@@ -319,6 +319,9 @@ class InventoryScene(Scene):
 
         stats = self.player.get_effective_stats()
         stat_lines = [
+            self.localizer.t("ui.progression.level", level=self.player.level),
+            self.localizer.t("ui.progression.xp", xp=self.player.xp, required=self.player.get_xp_to_next_level()),
+            self.localizer.t("ui.progression.skill_points", points=self.player.skill_points),
             f"{self.localizer.t('ui.inventory.stat_hp')}: {int(self.player.health)}/{self.player.get_max_health()}",
             f"{self.localizer.t('ui.inventory.stat_st')}: {int(self.player.stamina)}/{self.player.get_max_stamina()}",
             f"{self.localizer.t('ui.inventory.stat_atk')}: {stats.attack}",

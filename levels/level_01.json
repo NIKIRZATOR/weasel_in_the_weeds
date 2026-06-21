@@ -287,6 +287,23 @@
         "set_flags": ["entered_forest_edge"],
         "blocked_message_key": "pickup.path_blocked"
       }
+    },
+    {
+      "type": "level_transition",
+      "name": "To Dart Forest",
+      "x": 18,
+      "y": 20,
+      "width": 1,
+      "height": 3,
+      "properties": {
+        "target_level": "level_03.json",
+        "target_spawn": {
+          "x": 2,
+          "y": 2
+        },
+        "set_flags": ["entered_dart_forest"],
+        "blocked_message_key": "pickup.path_blocked"
+      }
     }
   ]
 }

@@ -10,6 +10,7 @@ from game.entities.entity import Entity
 from game.items import CharacterStats, Equipment, Inventory, ItemStack, create_item_stack
 from game.items.models import WeaponAttackProfile
 from game.items.types import EquipSlot, ItemKind
+from game.progression import build_progression_bonuses, get_skill_node_definition, get_xp_to_next_level
 from settings import (
     ATTACK_COOLDOWN,
     ATTACK_COST,
@@ -157,6 +158,11 @@ class Player(Entity):
         self.unlocked_recipe_ids = set()
         self.explored_tiles_by_level: dict[str, list[list[bool]]] = {}
         self.claimed_dialogue_rewards_by_npc: dict[str, set[str]] = {}
+        self.awarded_xp_sources = set()
+        self.level = 1
+        self.xp = 0
+        self.skill_points = 0
+        self.unlocked_skill_ids = set()
 
         self.health = self.get_max_health()
         self.stamina = self.get_max_stamina()
@@ -193,7 +199,10 @@ class Player(Entity):
         self._sync_inventory_capacities()
 
     def get_effective_stats(self):
-        return self.base_stats + self.equipment.get_stat_bonuses()
+        return self.base_stats + self.equipment.get_stat_bonuses() + self.get_progression_bonuses().stats
+
+    def get_progression_bonuses(self):
+        return build_progression_bonuses(self.unlocked_skill_ids)
 
     def get_max_health(self):
         return self.get_effective_stats().max_health
@@ -212,6 +221,56 @@ class Player(Entity):
 
     def get_equipped_weapon(self):
         return self.equipment.get(EquipSlot.WEAPON)
+
+    def get_xp_to_next_level(self):
+        return get_xp_to_next_level(self.level)
+
+    def get_attack_move_speed_multiplier(self):
+        bonuses = self.get_progression_bonuses()
+        return 1.0 + bonuses.attack_move_speed_multiplier_bonus
+
+    def get_charge_time_multiplier(self):
+        return self.get_progression_bonuses().charge_time_multiplier
+
+    def get_attack_recovery_multiplier(self):
+        return self.get_progression_bonuses().recovery_multiplier
+
+    def has_unlocked_skill_node(self, node_id):
+        return str(node_id) in self.unlocked_skill_ids
+
+    def can_unlock_skill_node(self, node_id):
+        node = get_skill_node_definition(node_id)
+        if node is None or self.has_unlocked_skill_node(node_id) or self.skill_points <= 0:
+            return False
+        return all(self.has_unlocked_skill_node(required_id) for required_id in node.requires)
+
+    def unlock_skill_node(self, node_id):
+        if not self.can_unlock_skill_node(node_id):
+            return False
+        self.skill_points -= 1
+        self.unlocked_skill_ids.add(str(node_id))
+        self._sync_resource_limits()
+        return True
+
+    def add_experience(self, amount, source_key=None):
+        amount = max(0, int(amount))
+        if amount <= 0:
+            return {"gained": 0, "level_ups": 0}
+        if source_key is not None:
+            source_key = str(source_key)
+            if source_key in self.awarded_xp_sources:
+                return {"gained": 0, "level_ups": 0}
+            self.awarded_xp_sources.add(source_key)
+
+        self.xp += amount
+        level_ups = 0
+        while self.xp >= self.get_xp_to_next_level():
+            self.xp -= self.get_xp_to_next_level()
+            self.level += 1
+            self.skill_points += 1
+            level_ups += 1
+        self._sync_resource_limits()
+        return {"gained": amount, "level_ups": level_ups}
 
     def get_attack_profile(self, attack_kind):
         attack_kind = str(attack_kind)
@@ -641,7 +700,7 @@ class Player(Entity):
 
         step_speed = self.current_speed
         if self.is_attacking:
-            step_speed *= 0.5
+            step_speed *= 0.5 * self.get_attack_move_speed_multiplier()
         if dx != 0 and dy != 0:
             step_speed *= 0.707
 
@@ -738,7 +797,15 @@ class Player(Entity):
         if profile is None:
             self.last_attack_fail_reason = "no_attack_profile"
             return False
-        if self.stamina < profile.stamina_cost:
+        progression_bonuses = self.get_progression_bonuses()
+        stamina_cost = profile.stamina_cost
+        if attack_kind == "light":
+            stamina_cost *= progression_bonuses.light_stamina_cost_multiplier
+        elif attack_kind == "heavy":
+            stamina_cost *= progression_bonuses.heavy_stamina_cost_multiplier
+        elif attack_kind == "charged":
+            stamina_cost *= progression_bonuses.charged_stamina_cost_multiplier
+        if self.stamina < stamina_cost:
             self.last_attack_fail_reason = "not_enough_stamina"
             return False
 
@@ -755,6 +822,11 @@ class Player(Entity):
 
         self.is_attacking = True
         damage = max(1, int((self.get_attack() + profile.damage_bonus) * profile.damage_multiplier))
+        if profile.is_ranged:
+            damage += progression_bonuses.bow_damage_bonus
+        if attack_kind == "charged":
+            damage += progression_bonuses.charged_damage_bonus
+        recovery = profile.recovery * self.get_attack_recovery_multiplier()
         self.active_attack = AttackContext(
             kind=str(attack_kind),
             damage=damage,
@@ -764,8 +836,8 @@ class Player(Entity):
             arc_degrees=profile.arc_degrees,
             duration=profile.duration,
             cooldown=profile.cooldown,
-            recovery=profile.recovery,
-            stamina_cost=profile.stamina_cost,
+            recovery=recovery,
+            stamina_cost=stamina_cost,
             knockback=profile.knockback,
             stagger=profile.stagger,
             aim_direction=aim,
@@ -777,8 +849,8 @@ class Player(Entity):
         )
         self.attack_timer.start(profile.duration)
         self.attack_cooldown.start(profile.cooldown)
-        self.recovery_timer.start(profile.duration + profile.recovery)
-        self.stamina -= profile.stamina_cost
+        self.recovery_timer.start(profile.duration + recovery)
+        self.stamina -= stamina_cost
         self.last_attack_fail_reason = ""
         return True
 

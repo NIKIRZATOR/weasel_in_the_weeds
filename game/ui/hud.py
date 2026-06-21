@@ -87,6 +87,34 @@ class HUD:
         )
         screen.blit(text, (x + width + 8, y - 4))
 
+    def draw_progression_bar(self, screen, player):
+        width = 188
+        height = 10
+        x = 96
+        y = 58
+        required_xp = max(1, int(player.get_xp_to_next_level()))
+        current_xp = max(0, int(player.xp))
+        percent = current_xp / required_xp
+
+        pygame.draw.rect(screen, COLORS["UI_PANEL"], (x, y, width, height), border_radius=5)
+        pygame.draw.rect(screen, COLORS["UI_SLOT_SELECTED"], (x, y, width * percent, height), border_radius=5)
+        pygame.draw.rect(screen, COLORS["UI_SLOT_BORDER"], (x, y, width, height), width=1, border_radius=5)
+
+        level_text = self.tiny_font.render(f"Lv. {player.level}", True, COLORS["WHITE"])
+        xp_text = self.tiny_font.render(f"XP {current_xp}/{required_xp}", True, COLORS["WHITE"])
+        info_y = y + height + 4
+
+        level_rect = pygame.Rect(x, info_y - 1, level_text.get_width() + 10, level_text.get_height() + 4)
+        xp_rect = pygame.Rect(level_rect.right + 8, info_y - 1, xp_text.get_width() + 10, xp_text.get_height() + 4)
+
+        pygame.draw.rect(screen, COLORS["UI_PANEL"], level_rect, border_radius=5)
+        pygame.draw.rect(screen, COLORS["UI_PANEL"], xp_rect, border_radius=5)
+        pygame.draw.rect(screen, COLORS["UI_SLOT_BORDER"], level_rect, width=1, border_radius=5)
+        pygame.draw.rect(screen, COLORS["UI_SLOT_BORDER"], xp_rect, width=1, border_radius=5)
+
+        screen.blit(level_text, (level_rect.x + 5, level_rect.y + 2))
+        screen.blit(xp_text, (xp_rect.x + 5, xp_rect.y + 2))
+
     def draw_coins(self, screen, player):
         screen_width, _ = screen.get_size()
         text = self.font.render(
@@ -215,6 +243,7 @@ class HUD:
         self.draw_portrait(screen, player)
         self.draw_health_bar(screen, player)
         self.draw_stamina_bar(screen, player)
+        self.draw_progression_bar(screen, player)
         self.draw_coins(screen, player)
         self.draw_knowledge_shards(screen, player)
         self.draw_map_hint(screen, player)

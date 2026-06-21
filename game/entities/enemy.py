@@ -32,6 +32,7 @@ class Enemy(Entity):
         patrol_idle_max=1.1,
         linger_duration=1.0,
         color=None,
+        xp_reward=10,
     ):
         hitbox_size = int(min(width, height) * 0.66)
         hitbox_offset_x = (width - hitbox_size) / 2
@@ -58,6 +59,8 @@ class Enemy(Entity):
         self.color = COLORS["UI_SLOT_SELECTED"] if color is None else color
         self.facing_left = False
         self.is_dead = False
+        self.xp_reward = max(0, int(xp_reward))
+        self.xp_awarded = False
 
         self.home_position = Vector2(x, y)
         self.patrol_radius = max(self.width, int(patrol_radius))
@@ -578,6 +581,7 @@ class MeleeEnemy(Enemy):
         patrol_idle_min=0.45,
         patrol_idle_max=1.1,
         linger_duration=1.0,
+        xp_reward=10,
     ):
         super().__init__(
             x,
@@ -595,6 +599,7 @@ class MeleeEnemy(Enemy):
             patrol_idle_max=patrol_idle_max,
             linger_duration=linger_duration,
             color=(220, 55, 55),
+            xp_reward=xp_reward,
         )
         self.melee_range = float(melee_range)
         self.attack_radius = self.melee_range
@@ -699,6 +704,7 @@ class RangedEnemy(Enemy):
         patrol_idle_min=0.45,
         patrol_idle_max=1.1,
         linger_duration=1.0,
+        xp_reward=10,
     ):
         super().__init__(
             x,
@@ -716,6 +722,7 @@ class RangedEnemy(Enemy):
             patrol_idle_max=patrol_idle_max,
             linger_duration=linger_duration,
             color=(200, 35, 35),
+            xp_reward=xp_reward,
         )
         self.preferred_distance = float(preferred_distance)
         self.min_distance = float(min_distance)

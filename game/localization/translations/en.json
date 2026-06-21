@@ -14,6 +14,7 @@
       "title": "Pause",
       "resume": "Resume",
       "inventory": "Inventory",
+      "progression": "Progression",
       "settings": "Settings",
       "exit_to_menu": "Exit to Menu"
     },
@@ -106,8 +107,101 @@
       "close_hint": "Enter/E - next | 1-9 - choice | Esc - close"
     },
     "hud": {
-      "controls": "WASD | SHIFT | SPACE | ALT | LMB | RMB | LMB+RMB 1.5s | E | I | K | M",
+      "controls": "WASD | SHIFT | SPACE | ALT | LMB | RMB | LMB+RMB 1.5s | E | I | O | K | M",
       "map_hint": "M - map | K - craft"
+    },
+    "progression": {
+      "title": "Progression",
+      "close_hint": "Esc / O - close",
+      "level": "Level: {level}",
+      "level_short": "Lv {level}",
+      "xp": "XP: {xp}/{required}",
+      "skill_points": "Skill points: {points}",
+      "unlock": "Unlock node",
+      "unlocked": "Unlocked",
+      "unlock_ready": "Ready to unlock",
+      "locked": "Locked",
+      "requirements": "Requirements not met",
+      "requires": "Requires: {names}",
+      "no_points": "No skill points available",
+      "node_unlocked": "Unlocked: {name}",
+      "xp_gained": "+{amount} XP",
+      "level_up": "Level up: {level} | Skill points: {points}",
+      "effect_health": "+{value} max health",
+      "effect_stamina": "+{value} max stamina",
+      "effect_attack": "+{value} attack",
+      "effect_defense": "+{value} defense",
+      "effect_speed": "+{value} speed",
+      "effect_attack_move": "+{value}% move speed while attacking",
+      "effect_light_cost": "-{value}% light attack stamina cost",
+      "effect_heavy_cost": "-{value}% heavy attack stamina cost",
+      "effect_charged_cost": "-{value}% charged attack stamina cost",
+      "effect_bow_damage": "+{value} bow damage",
+      "effect_charged_damage": "+{value} charged damage",
+      "effect_recovery": "-{value}% attack recovery",
+      "effect_charge_time": "-{value}% charge time",
+      "nodes": {
+        "vitality_1": {
+          "name": "Vitality I",
+          "description": "A tougher body helps you survive the first bad trade."
+        },
+        "vitality_2": {
+          "name": "Vitality II",
+          "description": "Further hardens you for longer fights."
+        },
+        "iron_skin": {
+          "name": "Iron Skin",
+          "description": "Simple resilience that blunts incoming hits."
+        },
+        "endurance_1": {
+          "name": "Endurance I",
+          "description": "A steadier breath extends your stamina pool."
+        },
+        "endurance_2": {
+          "name": "Endurance II",
+          "description": "Lets you keep pressure for a bit longer."
+        },
+        "bow_focus": {
+          "name": "Bow Focus",
+          "description": "Cleaner releases and better ranged damage."
+        },
+        "edge_1": {
+          "name": "Sharpened Edge I",
+          "description": "Basic offensive training raises attack power."
+        },
+        "edge_2": {
+          "name": "Sharpened Edge II",
+          "description": "Builds on the first lessons with stronger strikes."
+        },
+        "light_hands": {
+          "name": "Light Hands",
+          "description": "Quick attacks cost less stamina."
+        },
+        "heavy_form": {
+          "name": "Heavy Form",
+          "description": "Improves control over committed heavy swings."
+        },
+        "footwork": {
+          "name": "Footwork",
+          "description": "Better movement and cleaner spacing in fights."
+        },
+        "battle_flow": {
+          "name": "Battle Flow",
+          "description": "You stay more mobile during your attacks."
+        },
+        "hunter_draw": {
+          "name": "Hunter Draw",
+          "description": "You charge shots faster and spend less stamina."
+        },
+        "relentless": {
+          "name": "Relentless",
+          "description": "Charged attacks hit harder and recover faster."
+        },
+        "relentless_2": {
+          "name": "Relentless 2",
+          "description": "Charged attacks hit harder and recover faster."
+        }
+      }
     },
     "combat": {
       "no_stamina": "Not enough stamina",

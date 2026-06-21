@@ -26,6 +26,8 @@ CHARGED_ATTACK_THRESHOLD = 1.5
 HIT_STOP_DURATION = 0.055
 SCREEN_SHAKE_DURATION = 0.12
 SCREEN_SHAKE_STRENGTH = 5.0
+CHECKPOINT_XP_REWARD = 12
+TRANSITION_XP_REWARD = 18
 
 
 class GameScene(Scene):
@@ -132,6 +134,7 @@ class GameScene(Scene):
             max_health=int(properties.get("health", raw_object.get("health", 20))),
             speed=int(properties.get("speed", raw_object.get("speed", 80))),
             damage=int(properties.get("damage", raw_object.get("damage", 4))),
+            xp_reward=int(properties.get("xp_reward", raw_object.get("xp_reward", 10))),
             **self._enemy_specific_kwargs(raw_object, enemy_class),
         )
 
@@ -170,6 +173,11 @@ class GameScene(Scene):
 
         self.app.set_scene(CraftingScene(self.app, self))
 
+    def open_progression(self):
+        from game.scenes.progression_scene import ProgressionScene
+
+        self.app.set_scene(ProgressionScene(self.app, self))
+
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.QUIT:
@@ -189,6 +197,8 @@ class GameScene(Scene):
                         self.last_interaction_timer = 1.5
                 elif event.key == pygame.K_k:
                     self.open_crafting()
+                elif event.key == pygame.K_o:
+                    self.open_progression()
                 elif event.key == pygame.K_e:
                     self.try_interact()
                 elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4):
@@ -383,9 +393,10 @@ class GameScene(Scene):
             return
 
         keys = pygame.key.get_pressed()
+        charged_threshold = CHARGED_ATTACK_THRESHOLD * self.player.get_charge_time_multiplier()
         if self.mouse_buttons_held == {1, 3}:
             self.mouse_hold_time += dt
-            if not self.charged_combo_fired and self.mouse_hold_time >= CHARGED_ATTACK_THRESHOLD:
+            if not self.charged_combo_fired and self.mouse_hold_time >= charged_threshold:
                 mouse_pos = pygame.mouse.get_pos()
                 target = self._mouse_world_position(mouse_pos)
                 if self.player.attack_towards(target.x, target.y, attack_kind="charged"):
@@ -417,7 +428,12 @@ class GameScene(Scene):
         for world_object in self.world_objects:
             if not getattr(world_object, "is_checkpoint", False):
                 continue
-            world_object.activate(self.player, self)
+            if not world_object.activate(self.player, self):
+                continue
+            checkpoint_key = (
+                f"checkpoint:{self.level_key}:{int(world_object.position.x)}:{int(world_object.position.y)}"
+            )
+            self._award_player_xp(CHECKPOINT_XP_REWARD, checkpoint_key, append=True)
 
     def _update_map_reveal(self):
         player_center = self.player.get_center()
@@ -465,6 +481,10 @@ class GameScene(Scene):
             self.transition_target_level = LEVELS_DIR / target_level
             self.transition_target_spawn = world_object.get_target_spawn()
             self.transition_timer = 0.0
+            transition_key = (
+                f"transition:{self.level_key}:{int(world_object.position.x)}:{int(world_object.position.y)}:{target_level}"
+            )
+            self._award_player_xp(TRANSITION_XP_REWARD, transition_key, append=True)
             for flag in world_object.get_flags_to_set():
                 self.player.set_flag(flag)
             return
@@ -499,8 +519,12 @@ class GameScene(Scene):
         alive_enemies = []
         for enemy in self.enemies:
             enemy.update(dt, self)
-            if not enemy.is_dead:
-                alive_enemies.append(enemy)
+            if enemy.is_dead:
+                if not enemy.xp_awarded and enemy.xp_reward > 0:
+                    enemy.xp_awarded = True
+                    self._award_player_xp(enemy.xp_reward, append=True)
+                continue
+            alive_enemies.append(enemy)
         self.enemies = alive_enemies
 
     def _collides_with_enemies(self, x, y, entity, ignored_enemy=None):
@@ -701,8 +725,9 @@ class GameScene(Scene):
         weapon = self.player.get_equipped_weapon()
         charge_progress = 0.0
         charging = self.mouse_buttons_held == {1, 3} and not self.charged_combo_fired
+        charged_threshold = CHARGED_ATTACK_THRESHOLD * self.player.get_charge_time_multiplier()
         if charging:
-            charge_progress = min(1.0, self.mouse_hold_time / CHARGED_ATTACK_THRESHOLD)
+            charge_progress = min(1.0, self.mouse_hold_time / max(0.001, charged_threshold))
         return {
             "charging": charging,
             "charge_progress": charge_progress,
@@ -710,6 +735,27 @@ class GameScene(Scene):
             "weapon_class": weapon.definition.weapon_class if weapon is not None else None,
             "not_enough_stamina": self.player.last_attack_fail_reason == "not_enough_stamina" and self.last_interaction_timer > 0,
         }
+
+    def _award_player_xp(self, amount, source_key=None, append=False):
+        result = self.player.add_experience(amount, source_key=source_key)
+        if result["gained"] <= 0:
+            return False
+
+        message = self.localizer.t("ui.progression.xp_gained", amount=result["gained"])
+        if result["level_ups"] > 0:
+            level_message = self.localizer.t(
+                "ui.progression.level_up",
+                level=self.player.level,
+                points=self.player.skill_points,
+            )
+            message = f"{message} | {level_message}"
+
+        if append and self.last_interaction_message:
+            self.last_interaction_message = f"{self.last_interaction_message} | {message}"
+        else:
+            self.last_interaction_message = message
+        self.last_interaction_timer = max(self.last_interaction_timer, 1.8)
+        return True
 
     def _mouse_world_position(self, mouse_pos):
         return Vector2(
