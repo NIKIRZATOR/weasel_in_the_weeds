@@ -196,6 +196,8 @@ class Player(Entity):
         self.current_speed = self.get_effective_stats().speed
         self.active_attack: AttackContext | None = None
         self.last_attack_fail_reason = ""
+        self.knockback_velocity = Vector2()
+        self.control_stun_timer = Timer(0.0)
         self._sync_inventory_capacities()
 
     def get_effective_stats(self):
@@ -655,9 +657,16 @@ class Player(Entity):
 
         self.update_timers(dt)
 
-        if self.is_dashing:
+        if self._update_knockback(dt, world):
+            pass
+        elif self.is_dashing:
             self.update_dash(dt, world)
-        elif not self.is_jumping and not self.is_hurt and (self.is_attacking or not self.is_recovering()):
+        elif (
+            not self.is_jumping
+            and not self.is_hurt
+            and not self.control_stun_timer.is_active()
+            and (self.is_attacking or not self.is_recovering())
+        ):
             self.handle_movement(dt, keys, world)
 
         if self.is_jumping:
@@ -685,6 +694,7 @@ class Player(Entity):
         if self.hurt_timer.update(dt):
             self.is_hurt = False
 
+        self.control_stun_timer.update(dt)
         self.recovery_timer.update(dt)
 
     def handle_movement(self, dt, keys, world):
@@ -854,7 +864,7 @@ class Player(Entity):
         self.last_attack_fail_reason = ""
         return True
 
-    def take_damage(self, damage):
+    def take_damage(self, damage, direction=None, force=0.0, stun_duration=None):
         if self.is_dashing:
             return False
 
@@ -863,7 +873,33 @@ class Player(Entity):
             return False
         self.health = max(0, self.health - mitigated)
         self.is_hurt = True
-        self.hurt_timer.start()
+        stun_time = HURT_DURATION if stun_duration is None else max(HURT_DURATION, float(stun_duration))
+        self.hurt_timer.start(stun_time)
+        if stun_duration is not None:
+            self.control_stun_timer.start(float(stun_duration))
+        if direction is not None and getattr(direction, "length", None) is not None and direction.length() > 0 and force > 0:
+            self.knockback_velocity = direction.normalize() * float(force)
+        return True
+
+    def _update_knockback(self, dt, world):
+        speed = self.knockback_velocity.length()
+        if speed <= 0.01:
+            self.knockback_velocity = Vector2()
+            return False
+
+        step = self.knockback_velocity * dt
+        moved = False
+        if not world.check_collision(self.position.x + step.x, self.position.y, self):
+            self.position.x += step.x
+            moved = True
+        if not world.check_collision(self.position.x, self.position.y + step.y, self):
+            self.position.y += step.y
+            moved = True
+
+        damping = max(0.0, 1.0 - dt * 8.0)
+        self.knockback_velocity = self.knockback_velocity * damping
+        if not moved:
+            self.knockback_velocity = Vector2()
         return True
 
     def handle_stamina(self, dt):
@@ -897,8 +933,10 @@ class Player(Entity):
         self.attack_timer.active = False
         self.attack_cooldown.active = False
         self.hurt_timer.active = False
+        self.control_stun_timer.active = False
         self.recovery_timer.active = False
         self.last_attack_fail_reason = ""
+        self.knockback_velocity = Vector2()
 
     def set_respawn_point(self, spawn_x, spawn_y):
         self.spawn_position = Vector2(spawn_x, spawn_y)
@@ -919,8 +957,10 @@ class Player(Entity):
         self.dash_cooldown.active = False
         self.attack_timer.active = False
         self.hurt_timer.active = False
+        self.control_stun_timer.active = False
         self.recovery_timer.active = False
         self.last_attack_fail_reason = ""
+        self.knockback_velocity = Vector2()
 
     def get_visual_position(self):
         return Vector2(

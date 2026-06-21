@@ -6,7 +6,7 @@ import pygame
 
 from game.core.camera import Camera
 from game.core.vector import Vector2
-from game.entities.enemies import MeleeEnemy, RangedEnemy
+from game.entities.enemies import ForestGuardianBoss, MeleeEnemy, RangedEnemy
 from game.entities.player import Player
 from game.items import create_item_stack
 from game.localization import get_localizer
@@ -112,6 +112,9 @@ class GameScene(Scene):
             if object_type == "enemy_ranged":
                 enemies.append(self._create_enemy(raw_object, RangedEnemy))
                 continue
+            if object_type in {"enemy_boss_forest_guardian", "boss_forest_guardian", "enemy_boss_deer"}:
+                enemies.append(self._create_enemy(raw_object, ForestGuardianBoss))
+                continue
 
             world_object = create_world_object(raw_object, self.level.tile_size)
             if world_object is not None:
@@ -184,6 +187,14 @@ class GameScene(Scene):
             return {
                 "melee_range": int(properties.get("melee_range", raw_object.get("melee_range", 44))),
                 "attack_cooldown": float(properties.get("attack_cooldown", raw_object.get("attack_cooldown", 1.0))),
+            }
+        if enemy_class is ForestGuardianBoss:
+            return {
+                "melee_range": int(properties.get("melee_range", raw_object.get("melee_range", 66))),
+                "charge_range": int(properties.get("charge_range", raw_object.get("charge_range", 240))),
+                "charge_speed": int(properties.get("charge_speed", raw_object.get("charge_speed", 300))),
+                "attack_cooldown": float(properties.get("attack_cooldown", raw_object.get("attack_cooldown", 1.0))),
+                "detection_radius": int(properties.get("detection_radius", raw_object.get("detection_radius", 420))),
             }
 
         return {

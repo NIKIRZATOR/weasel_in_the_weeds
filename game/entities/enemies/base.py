@@ -12,7 +12,7 @@ from game.entities.enemies.ai.behaviors import can_detect_player, pick_patrol_ta
 from game.entities.enemies.ai.states import CHASE, LINGER, PATROL_IDLE, PATROL_MOVE, RETURN_HOME
 from game.entities.enemies.ai.steering import point_distance
 from game.entities.entity import Entity
-from settings import COLORS, SHOW_INTERACTION_ZONES
+from settings import COLORS, SHOW_ENEMY_ATTACK_RADII, SHOW_INTERACTION_ZONES
 
 
 class Enemy(Entity):
@@ -611,12 +611,12 @@ class Enemy(Entity):
         )
 
     def _draw_detection_zone(self, screen, camera):
-        if not SHOW_INTERACTION_ZONES:
+        if not SHOW_ENEMY_ATTACK_RADII:
             return
         self._draw_zone(screen, camera, self.detection_radius, (255, 80, 80), COLORS["INTERACTION_ZONE"], 28)
 
     def _draw_attack_zone(self, screen, camera):
-        if not SHOW_INTERACTION_ZONES or self.attack_radius is None:
+        if not SHOW_ENEMY_ATTACK_RADII or self.attack_radius is None:
             return
         self._draw_zone(screen, camera, self.attack_radius, (255, 200, 80), (255, 220, 120), 22, border_width=2)
 

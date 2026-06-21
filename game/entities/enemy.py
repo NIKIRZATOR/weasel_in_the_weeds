@@ -1,3 +1,3 @@
-from game.entities.enemies import Enemy, MeleeEnemy, RangedEnemy, RangedProjectile
+from game.entities.enemies import Enemy, ForestGuardianBoss, MeleeEnemy, RangedEnemy, RangedProjectile
 
-__all__ = ["Enemy", "MeleeEnemy", "RangedEnemy", "RangedProjectile"]
+__all__ = ["Enemy", "ForestGuardianBoss", "MeleeEnemy", "RangedEnemy", "RangedProjectile"]

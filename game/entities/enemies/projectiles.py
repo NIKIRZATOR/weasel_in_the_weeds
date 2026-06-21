@@ -68,3 +68,27 @@ class RangedProjectile:
         pygame.draw.circle(screen, (255, 190, 70), (x, y), self.radius)
         pygame.draw.circle(screen, COLORS["BLACK"], (x, y), self.radius, width=1)
         pygame.draw.circle(screen, (90, 20, 20), (x - 1, y - 1), max(1, self.radius // 2))
+
+
+class SpikeProjectile(RangedProjectile):
+    def __init__(self, x, y, dir_x, dir_y, speed, damage, radius=6):
+        super().__init__(x, y, x + dir_x, y + dir_y, speed, damage, radius)
+
+    def draw(self, screen, camera):
+        if self.is_dead:
+            return
+
+        x = int(self.position.x - camera.position.x)
+        y = int(self.position.y - camera.position.y)
+        direction = self.direction
+        tip_x = x + int(direction.x * (self.radius + 6))
+        tip_y = y + int(direction.y * (self.radius + 6))
+        side_x = int(-direction.y * max(2, self.radius // 2))
+        side_y = int(direction.x * max(2, self.radius // 2))
+        points = [
+            (tip_x, tip_y),
+            (x - int(direction.x * self.radius) + side_x, y - int(direction.y * self.radius) + side_y),
+            (x - int(direction.x * self.radius) - side_x, y - int(direction.y * self.radius) - side_y),
+        ]
+        pygame.draw.polygon(screen, (220, 240, 210), points)
+        pygame.draw.polygon(screen, COLORS["BLACK"], points, width=1)

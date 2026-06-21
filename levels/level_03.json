@@ -90,6 +90,24 @@
       "height": 1
     },
     {
+      "type": "enemy_boss_forest_guardian",
+      "name": "Forest Guardian",
+      "x": 10,
+      "y": 8,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 160,
+        "speed": 86,
+        "damage": 10,
+        "xp_reward": 120,
+        "melee_range": 64,
+        "charge_range": 220,
+        "charge_speed": 280,
+        "detection_radius": 420
+      }
+    },
+    {
       "type": "level_transition",
       "name": "Back To Meadow",
       "x": 1,
