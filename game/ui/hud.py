@@ -268,6 +268,11 @@ class HUD:
         )
         screen.blit(text, (screen_width - text.get_width() - 16, 42))
 
+    def draw_fps(self, screen, fps):
+        screen_width, _ = screen.get_size()
+        text = self.small_font.render(f"FPS: {int(round(max(0.0, float(fps))))}", True, COLORS["WHITE"])
+        screen.blit(text, (screen_width - text.get_width() - 16, 90))
+
     def draw_hotbar(self, screen, player, combat_state=None):
         screen_width, screen_height = screen.get_size()
         slot_size = 54
@@ -374,7 +379,7 @@ class HUD:
                 warning.get_rect(center=(screen_width // 2, screen_height - 104)),
             )
 
-    def draw(self, screen, player, combat_state=None):
+    def draw(self, screen, player, combat_state=None, fps=0.0):
         self.draw_portrait(screen, player)
         self.draw_active_effects(screen, player)
         self.draw_health_bar(screen, player)
@@ -382,6 +387,7 @@ class HUD:
         self.draw_progression_bar(screen, player)
         self.draw_coins(screen, player)
         self.draw_knowledge_shards(screen, player)
+        self.draw_fps(screen, fps)
         self.draw_map_hint(screen, player)
         self.draw_hotbar(screen, player, combat_state=combat_state)
         self.draw_combat_status(screen, combat_state)

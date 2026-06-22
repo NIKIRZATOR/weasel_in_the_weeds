@@ -6,7 +6,7 @@ import pygame
 
 from game.core.camera import Camera
 from game.core.vector import Vector2
-from game.entities.enemies import ForestGuardianBoss, MeleeEnemy, RangedEnemy
+from game.entities.enemies import BeetleEnemy, ForestGuardianBoss, MeleeEnemy, RangedEnemy, SpiderEnemy
 from game.entities.player import Player
 from game.items import create_item_stack
 from game.localization import get_localizer
@@ -112,6 +112,12 @@ class GameScene(Scene):
             if object_type == "enemy_ranged":
                 enemies.append(self._create_enemy(raw_object, RangedEnemy))
                 continue
+            if object_type == "enemy_spider":
+                enemies.append(self._create_enemy(raw_object, SpiderEnemy))
+                continue
+            if object_type == "enemy_beetle":
+                enemies.append(self._create_enemy(raw_object, BeetleEnemy))
+                continue
             if object_type in {"enemy_boss_forest_guardian", "boss_forest_guardian", "enemy_boss_deer"}:
                 enemies.append(self._create_enemy(raw_object, ForestGuardianBoss))
                 continue
@@ -203,6 +209,42 @@ class GameScene(Scene):
                 "charge_speed": int(properties.get("charge_speed", raw_object.get("charge_speed", 300))),
                 "attack_cooldown": float(properties.get("attack_cooldown", raw_object.get("attack_cooldown", 1.0))),
                 "detection_radius": int(properties.get("detection_radius", raw_object.get("detection_radius", 420))),
+            }
+        if enemy_class is SpiderEnemy:
+            return {
+                "melee_range": int(properties.get("melee_range", raw_object.get("melee_range", 24))),
+                "leap_range": int(properties.get("leap_range", raw_object.get("leap_range", 150))),
+                "leap_min_range": int(properties.get("leap_min_range", raw_object.get("leap_min_range", 64))),
+                "leap_speed": int(properties.get("leap_speed", raw_object.get("leap_speed", 360))),
+                "leap_duration": float(properties.get("leap_duration", raw_object.get("leap_duration", 0.28))),
+                "spit_range": int(properties.get("spit_range", raw_object.get("spit_range", 250))),
+                "projectile_speed": int(properties.get("projectile_speed", raw_object.get("projectile_speed", 290))),
+                "projectile_radius": int(properties.get("projectile_radius", raw_object.get("projectile_radius", 6))),
+                "slow_amount": float(properties.get("slow_amount", raw_object.get("slow_amount", 0.22))),
+                "slow_duration": float(properties.get("slow_duration", raw_object.get("slow_duration", 2.6))),
+                "attack_cooldown": float(properties.get("attack_cooldown", raw_object.get("attack_cooldown", 1.1))),
+                "detection_radius": int(properties.get("detection_radius", raw_object.get("detection_radius", 260))),
+            }
+        if enemy_class is BeetleEnemy:
+            return {
+                "melee_range": int(properties.get("melee_range", raw_object.get("melee_range", 26))),
+                "charge_range": int(properties.get("charge_range", raw_object.get("charge_range", 210))),
+                "charge_min_range": int(properties.get("charge_min_range", raw_object.get("charge_min_range", 70))),
+                "charge_speed": int(properties.get("charge_speed", raw_object.get("charge_speed", 260))),
+                "charge_duration": float(properties.get("charge_duration", raw_object.get("charge_duration", 0.5))),
+                "shell_duration": float(properties.get("shell_duration", raw_object.get("shell_duration", 2.4))),
+                "shell_cooldown": float(properties.get("shell_cooldown", raw_object.get("shell_cooldown", 7.5))),
+                "shell_regen_per_second": float(
+                    properties.get("shell_regen_per_second", raw_object.get("shell_regen_per_second", 4.5))
+                ),
+                "shell_trigger_health_ratio": float(
+                    properties.get("shell_trigger_health_ratio", raw_object.get("shell_trigger_health_ratio", 0.45))
+                ),
+                "shell_damage_multiplier": float(
+                    properties.get("shell_damage_multiplier", raw_object.get("shell_damage_multiplier", 0.35))
+                ),
+                "attack_cooldown": float(properties.get("attack_cooldown", raw_object.get("attack_cooldown", 1.0))),
+                "detection_radius": int(properties.get("detection_radius", raw_object.get("detection_radius", 230))),
             }
 
         return {
@@ -922,7 +964,12 @@ class GameScene(Scene):
         self.player.draw(self.app.screen, self.camera)
         self.camera.position.x -= shake_offset.x
         self.camera.position.y -= shake_offset.y
-        self.hud.draw(self.app.screen, self.player, combat_state=self._build_hud_combat_state())
+        self.hud.draw(
+            self.app.screen,
+            self.player,
+            combat_state=self._build_hud_combat_state(),
+            fps=self.app.current_fps,
+        )
         if self.current_interaction_target is not None:
             self._draw_interaction_prompt(self.current_interaction_target)
         if self.last_interaction_message:

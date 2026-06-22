@@ -14,6 +14,7 @@ class GameApp:
         self.screen = None
         self._apply_display_mode()
         self.clock = pygame.time.Clock()
+        self.current_fps = 0.0
         self.running = True
         self.scene = MenuScene(self)
 
@@ -69,6 +70,7 @@ class GameApp:
     def run(self):
         while self.running:
             dt = self.clock.tick(60) / 1000.0
+            self.current_fps = self.clock.get_fps()
             if dt > 0.033:
                 dt = 0.033
 
