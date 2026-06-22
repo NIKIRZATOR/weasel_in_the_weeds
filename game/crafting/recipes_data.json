@@ -64,5 +64,53 @@
     "knowledge_cost": 4,
     "required_flags": ["met_mouse_hermit"],
     "sort_order": 50
+  },
+  "temp_healing_tonic": {
+    "name": "Healing Tonic",
+    "category": "healing",
+    "description": "TEMP: placeholder recipe; ingredients will be replaced later.",
+    "ingredients": [
+      { "item_id": "berry", "quantity": 1 }
+    ],
+    "result": { "item_id": "healing_tonic", "quantity": 1 },
+    "unlock_type": "default",
+    "sort_order": 100,
+    "is_temporary": true
+  },
+  "temp_healing_infusion": {
+    "name": "Healing Infusion",
+    "category": "healing",
+    "description": "TEMP: placeholder recipe; ingredients will be replaced later.",
+    "ingredients": [
+      { "item_id": "berry", "quantity": 1 }
+    ],
+    "result": { "item_id": "healing_infusion", "quantity": 1 },
+    "unlock_type": "default",
+    "sort_order": 110,
+    "is_temporary": true
+  },
+  "temp_stamina_tonic": {
+    "name": "Stamina Tonic",
+    "category": "survival",
+    "description": "TEMP: placeholder recipe; ingredients will be replaced later.",
+    "ingredients": [
+      { "item_id": "berry", "quantity": 1 }
+    ],
+    "result": { "item_id": "stamina_tonic", "quantity": 1 },
+    "unlock_type": "default",
+    "sort_order": 120,
+    "is_temporary": true
+  },
+  "temp_stamina_infusion": {
+    "name": "Stamina Infusion",
+    "category": "survival",
+    "description": "TEMP: placeholder recipe; ingredients will be replaced later.",
+    "ingredients": [
+      { "item_id": "berry", "quantity": 1 }
+    ],
+    "result": { "item_id": "stamina_infusion", "quantity": 1 },
+    "unlock_type": "default",
+    "sort_order": 130,
+    "is_temporary": true
   }
 }

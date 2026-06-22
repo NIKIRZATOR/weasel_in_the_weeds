@@ -555,6 +555,10 @@ class ItemRecipeEditor(tk.Tk):
         if flags:
             data["required_flags"] = flags
 
+        previous_data = self.recipes_data.get(old_id, {})
+        if previous_data.get("is_temporary", False):
+            data["is_temporary"] = True
+
         if new_id != old_id and old_id in self.recipes_data:
             del self.recipes_data[old_id]
         self.recipes_data[new_id] = data

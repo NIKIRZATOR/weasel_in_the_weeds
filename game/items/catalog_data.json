@@ -86,6 +86,72 @@
     "icon_path": "items/consumables/forest_bandage.png",
     "description": "A rough herbal wrap."
   },
+  "healing_tonic": {
+    "name": "Healing Tonic",
+    "kind": "consumable",
+    "stackable": true,
+    "max_stack": 20,
+    "price": 8,
+    "icon_path": "items/consumables/healing_tonic.png",
+    "effects": [
+      {
+        "type": "restore",
+        "resource": "health",
+        "amount": 30
+      }
+    ],
+    "description": "Immediately restores 30 health."
+  },
+  "healing_infusion": {
+    "name": "Healing Infusion",
+    "kind": "consumable",
+    "stackable": true,
+    "max_stack": 20,
+    "price": 10,
+    "icon_path": "items/consumables/healing_infusion.png",
+    "effects": [
+      {
+        "type": "apply_status",
+        "effect_id": "health_regeneration",
+        "value": 4,
+        "duration": 8
+      }
+    ],
+    "description": "Restores 4 health per second for 8 seconds."
+  },
+  "stamina_tonic": {
+    "name": "Stamina Tonic",
+    "kind": "consumable",
+    "stackable": true,
+    "max_stack": 20,
+    "price": 8,
+    "icon_path": "items/consumables/stamina_tonic.png",
+    "effects": [
+      {
+        "type": "restore",
+        "resource": "stamina",
+        "amount": 35
+      }
+    ],
+    "description": "Immediately restores 35 stamina."
+  },
+  "stamina_infusion": {
+    "name": "Stamina Infusion",
+    "kind": "consumable",
+    "stackable": true,
+    "max_stack": 20,
+    "price": 10,
+    "icon_path": "items/consumables/stamina_infusion.png",
+    "effects": [
+      {
+        "type": "apply_status",
+        "effect_id": "stamina_regeneration",
+        "value": 6,
+        "duration": 8
+      }
+    ],
+    "description": "Restores 6 stamina per second for 8 seconds."
+  },
   "web_wrap": {
     "name": "Web Wrap",
     "kind": "material",

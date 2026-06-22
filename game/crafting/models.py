@@ -29,6 +29,7 @@ class RecipeDefinition:
     knowledge_cost: int = 0
     required_flags: tuple[str, ...] = ()
     sort_order: int = 0
+    is_temporary: bool = False
 
     def is_default_unlocked(self) -> bool:
         return self.unlock_type == "default"

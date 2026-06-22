@@ -107,7 +107,7 @@
       "close_hint": "Enter/E - next | 1-9 - choice | Esc - close"
     },
     "hud": {
-      "controls": "WASD | SHIFT | SPACE | ALT | LMB | RMB | LMB+RMB 1.5s | E | I | O | K | M",
+      "controls": "WASD | SHIFT | SPACE | ALT | LMB | RMB | LMB+RMB 1.5s | E | F | 1-4 | I | O | K | M",
       "map_hint": "M - map | K - craft"
     },
     "progression": {
@@ -207,6 +207,10 @@
       "no_stamina": "Not enough stamina",
       "unarmed": "Unarmed"
     },
+    "consumables": {
+      "used": "Used: {name}",
+      "cannot_use": "The selected item cannot be used"
+    },
     "window": {
       "game_title": "Weales in the weeds RPG - {level}"
     },
@@ -250,6 +254,22 @@
     "forest_bandage": {
       "name": "Forest Bandage",
       "description": "A rough herbal wrap."
+    },
+    "healing_tonic": {
+      "name": "Healing Tonic",
+      "description": "Immediately restores 30 health."
+    },
+    "healing_infusion": {
+      "name": "Healing Infusion",
+      "description": "Restores 4 health per second for 8 seconds."
+    },
+    "stamina_tonic": {
+      "name": "Stamina Tonic",
+      "description": "Immediately restores 35 stamina."
+    },
+    "stamina_infusion": {
+      "name": "Stamina Infusion",
+      "description": "Restores 6 stamina per second for 8 seconds."
     },
     "web_wrap": {
       "name": "Web Wrap",
@@ -344,6 +364,22 @@
     "beetle_charm": {
       "name": "Beetle Charm",
       "description": "A tiny forest talisman assembled from light monster remains."
+    },
+    "temp_healing_tonic": {
+      "name": "Healing Tonic",
+      "description": "TEMP: placeholder recipe; ingredients will be replaced later."
+    },
+    "temp_healing_infusion": {
+      "name": "Healing Infusion",
+      "description": "TEMP: placeholder recipe; ingredients will be replaced later."
+    },
+    "temp_stamina_tonic": {
+      "name": "Stamina Tonic",
+      "description": "TEMP: placeholder recipe; ingredients will be replaced later."
+    },
+    "temp_stamina_infusion": {
+      "name": "Stamina Infusion",
+      "description": "TEMP: placeholder recipe; ingredients will be replaced later."
     }
   },
   "enemy": {

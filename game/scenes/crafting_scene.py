@@ -216,6 +216,8 @@ class CraftingScene(Scene):
             text_x = rect.x + 52
 
         title = recipe.localized_name() if unlocked or recipe.unlock_type != "knowledge" else self.localizer.t("ui.crafting.unknown_recipe")
+        if recipe.is_temporary:
+            title = f"[TEMP] {title}"
         title_text = self.text_font.render(title, True, COLORS["WHITE"])
         self.app.screen.blit(title_text, (text_x, rect.y + 8))
 
@@ -247,7 +249,10 @@ class CraftingScene(Scene):
         result_name = result_stack.name if result_stack is not None else recipe.result.item_id
         result_definition = get_item_definition(recipe.result.item_id)
 
-        title = self.section_font.render(recipe.localized_name(), True, COLORS["WHITE"])
+        recipe_title = recipe.localized_name()
+        if recipe.is_temporary:
+            recipe_title = f"[TEMP] {recipe_title}"
+        title = self.section_font.render(recipe_title, True, COLORS["WHITE"])
         self.app.screen.blit(title, (self.right_panel.x + 16, self.right_panel.y + 54))
 
         desc_lines = _wrap_text(recipe.localized_description(), self.text_font, self.right_panel.width - 32)

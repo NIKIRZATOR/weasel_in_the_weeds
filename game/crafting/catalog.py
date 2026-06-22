@@ -35,6 +35,7 @@ def _load_recipe_catalog() -> dict[str, RecipeDefinition]:
             knowledge_cost=max(0, int(raw_recipe.get("knowledge_cost", 0))),
             required_flags=tuple(str(flag) for flag in raw_recipe.get("required_flags", [])),
             sort_order=int(raw_recipe.get("sort_order", 0)),
+            is_temporary=bool(raw_recipe.get("is_temporary", False)),
         )
     return recipes
 

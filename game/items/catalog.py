@@ -6,7 +6,8 @@ from pathlib import Path
 import pygame
 
 from game.core.assets import load_image
-from game.items.models import ItemDefinition, ItemStack, WeaponAttackProfile
+from game.effects import EffectType
+from game.items.models import ItemDefinition, ItemEffectDefinition, ItemStack, WeaponAttackProfile
 from game.items.types import EquipSlot, ItemKind
 from settings import ASSETS_DIR
 
@@ -58,6 +59,21 @@ def _load_item_definitions() -> dict[str, ItemDefinition]:
                 )
                 for attack_kind, raw_profile in raw_item.get("attack_profiles", {}).items()
             },
+            effects=tuple(
+                ItemEffectDefinition(
+                    type=str(raw_effect.get("type", "")),
+                    resource=raw_effect.get("resource"),
+                    amount=float(raw_effect.get("amount", 0.0)),
+                    effect_id=(
+                        EffectType(raw_effect["effect_id"])
+                        if raw_effect.get("effect_id")
+                        else None
+                    ),
+                    value=float(raw_effect.get("value", 0.0)),
+                    duration=float(raw_effect.get("duration", 0.0)),
+                )
+                for raw_effect in raw_item.get("effects", [])
+            ),
         )
 
     return definitions

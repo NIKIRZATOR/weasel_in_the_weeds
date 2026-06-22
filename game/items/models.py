@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from game.effects import EffectType
 from game.localization import get_localizer
 from game.items.types import EquipSlot, ItemKind
 
@@ -58,6 +59,16 @@ class WeaponAttackProfile:
 
 
 @dataclass(frozen=True)
+class ItemEffectDefinition:
+    type: str
+    resource: str | None = None
+    amount: float = 0.0
+    effect_id: EffectType | None = None
+    value: float = 0.0
+    duration: float = 0.0
+
+
+@dataclass(frozen=True)
 class ItemDefinition:
     id: str
     name: str
@@ -73,6 +84,7 @@ class ItemDefinition:
     description: str = ""
     weapon_class: str | None = None
     attack_profiles: dict[str, WeaponAttackProfile] = field(default_factory=dict)
+    effects: tuple[ItemEffectDefinition, ...] = ()
 
     def localized_name(self) -> str:
         localizer = get_localizer()

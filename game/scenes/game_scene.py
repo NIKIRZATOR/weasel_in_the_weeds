@@ -252,6 +252,14 @@ class GameScene(Scene):
                     self.open_progression()
                 elif event.key == pygame.K_e:
                     self.try_interact()
+                elif event.key == pygame.K_f:
+                    stack = self.player.get_hotbar_stack(self.player.selected_hotbar_index)
+                    item_name = stack.name if stack is not None else ""
+                    if self.player.use_selected_hotbar_item():
+                        self.last_interaction_message = self.localizer.t("ui.consumables.used", name=item_name)
+                    else:
+                        self.last_interaction_message = self.localizer.t("ui.consumables.cannot_use")
+                    self.last_interaction_timer = 1.5
                 elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4):
                     self.player.select_hotbar_slot(event.key - pygame.K_1)
                 elif event.key == pygame.K_SPACE and not self.player.is_jumping:

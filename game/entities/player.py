@@ -7,6 +7,7 @@ from game.core.assets import load_image
 from game.core.timer import Timer
 from game.core.vector import Vector2
 from game.entities.entity import Entity
+from game.effects import ActiveEffect, EffectType, get_effect_definition
 from game.items import CharacterStats, Equipment, Inventory, ItemStack, create_item_stack
 from game.items.models import WeaponAttackProfile
 from game.items.types import EquipSlot, ItemKind
@@ -151,6 +152,7 @@ class Player(Entity):
         self.quest_inventory = Inventory(self.QUEST_INVENTORY_CAPACITY)
         self.equipment = Equipment()
         self.hotbar_slots: list[ItemStack | None] = [None] * HOTBAR_SIZE
+        self.active_effects: list[ActiveEffect] = []
         self.coins = 0
         self.knowledge_shards = 0
         self.selected_hotbar_index = 0
@@ -216,10 +218,39 @@ class Player(Entity):
         return self.get_effective_stats().attack
 
     def get_defense(self):
-        return self.get_effective_stats().defense
+        armor_bonus = sum(
+            effect.value
+            for effect in self.active_effects
+            if effect.effect_type == EffectType.ARMOR_INCREASED
+        )
+        return self.get_effective_stats().defense + int(armor_bonus)
 
     def get_speed(self):
-        return self.get_effective_stats().speed
+        return self.get_effective_stats().speed * self.get_movement_speed_multiplier()
+
+    def get_movement_speed_multiplier(self):
+        slow = sum(
+            effect.value
+            for effect in self.active_effects
+            if effect.effect_type == EffectType.SLOWED
+        )
+        return max(0.0, 1.0 - slow)
+
+    def get_damage_multiplier(self):
+        multiplier = 1.0
+        for effect in self.active_effects:
+            if effect.effect_type == EffectType.DAMAGE_INCREASED:
+                multiplier *= 1.0 + effect.value
+            elif effect.effect_type == EffectType.DAMAGE_REDUCED:
+                multiplier *= max(0.0, 1.0 - effect.value)
+        return multiplier
+
+    def get_stamina_cost_multiplier(self):
+        multiplier = 1.0
+        for effect in self.active_effects:
+            if effect.effect_type == EffectType.FATIGUE:
+                multiplier *= 1.0 + effect.value
+        return multiplier
 
     def get_equipped_weapon(self):
         return self.equipment.get(EquipSlot.WEAPON)
@@ -304,6 +335,77 @@ class Player(Entity):
             self.selected_hotbar_index = index
             return True
         return False
+
+    def use_selected_hotbar_item(self):
+        stack = self.get_hotbar_stack(self.selected_hotbar_index)
+        if stack is None or not self.use_item(stack):
+            return False
+        if stack.quantity <= 0:
+            self.hotbar_slots[self.selected_hotbar_index] = None
+        return True
+
+    def use_item(self, stack):
+        if stack is None or stack.kind != ItemKind.CONSUMABLE or not stack.definition.effects:
+            return False
+
+        applied = False
+        for item_effect in stack.definition.effects:
+            if item_effect.type == "restore":
+                applied = self.restore_resource(item_effect.resource, item_effect.amount) or applied
+            elif item_effect.type == "apply_status" and item_effect.effect_id:
+                applied = self.add_active_effect(
+                    item_effect.effect_id,
+                    item_effect.value,
+                    item_effect.duration,
+                    source_item_id=stack.item_id,
+                ) or applied
+
+        if applied:
+            stack.consume(1)
+        return applied
+
+    def restore_resource(self, resource, amount):
+        amount = max(0.0, float(amount))
+        if resource == "health":
+            previous = self.health
+            self.health = min(self.get_max_health(), self.health + amount)
+            return self.health > previous
+        if resource == "stamina":
+            previous = self.stamina
+            self.stamina = min(self.get_max_stamina(), self.stamina + amount)
+            return self.stamina > previous
+        return False
+
+    def add_active_effect(self, effect_type, value, duration, source_item_id=None):
+        definition = get_effect_definition(effect_type)
+        if definition is None or duration <= 0:
+            return False
+
+        new_effect = ActiveEffect.create(
+            definition.id,
+            value,
+            duration,
+            source_item_id=source_item_id,
+        )
+        for active_effect in self.active_effects:
+            if active_effect.effect_type == new_effect.effect_type:
+                active_effect.refresh_from(new_effect)
+                return True
+
+        self.active_effects.append(new_effect)
+        return True
+
+    def update_active_effects(self, dt):
+        elapsed = max(0.0, dt)
+        for effect in self.active_effects:
+            active_dt = min(elapsed, effect.remaining)
+            if effect.effect_type == EffectType.HEALTH_REGENERATION:
+                self.restore_resource("health", effect.value * active_dt)
+            elif effect.effect_type == EffectType.STAMINA_REGENERATION:
+                self.restore_resource("stamina", effect.value * active_dt)
+            effect.remaining -= elapsed
+
+        self.active_effects = [effect for effect in self.active_effects if effect.remaining > 0]
 
     def clear_hotbar_slot(self, index):
         if not 0 <= index < HOTBAR_SIZE:
@@ -674,6 +776,7 @@ class Player(Entity):
 
         self.handle_stamina(dt)
         self.handle_health_regen(dt)
+        self.update_active_effects(dt)
         self._sync_resource_limits()
 
     def update_timers(self, dt):
@@ -703,7 +806,11 @@ class Player(Entity):
         dy = movement.y
 
         self.is_running = keys[pygame.K_LSHIFT] and self.stamina > 0 and (dx != 0 or dy != 0)
-        self.current_speed = PLAYER_RUN_SPEED if self.is_running else self.get_speed()
+        self.current_speed = (
+            PLAYER_RUN_SPEED * self.get_movement_speed_multiplier()
+            if self.is_running
+            else self.get_speed()
+        )
 
         if dx == 0 and dy == 0:
             return
@@ -725,7 +832,8 @@ class Player(Entity):
             self.position.y = new_position.y
 
     def try_jump(self, direction, world):
-        if self.is_jumping or self.stamina < STAMINA_JUMP_COST:
+        stamina_cost = STAMINA_JUMP_COST * self.get_stamina_cost_multiplier()
+        if self.is_jumping or self.stamina < stamina_cost:
             return False
 
         if direction.length() == 0:
@@ -741,7 +849,7 @@ class Player(Entity):
             return False
 
         self.start_jump(new_position)
-        self.stamina -= STAMINA_JUMP_COST
+        self.stamina -= stamina_cost
         return True
 
     def start_jump(self, target_position):
@@ -754,7 +862,8 @@ class Player(Entity):
         if self.is_dashing or self.is_jumping or self.dash_cooldown.is_active():
             return False
 
-        if self.stamina < STAMINA_DASH_COST:
+        stamina_cost = STAMINA_DASH_COST * self.get_stamina_cost_multiplier()
+        if self.stamina < stamina_cost:
             return False
 
         if direction.length() == 0:
@@ -768,7 +877,7 @@ class Player(Entity):
         self.is_hurt = False
         self.dash_timer.start()
         self.dash_cooldown.start()
-        self.stamina -= STAMINA_DASH_COST
+        self.stamina -= stamina_cost
 
         if self.dash_direction.x != 0:
             self.facing_left = self.dash_direction.x < 0
@@ -815,6 +924,7 @@ class Player(Entity):
             stamina_cost *= progression_bonuses.heavy_stamina_cost_multiplier
         elif attack_kind == "charged":
             stamina_cost *= progression_bonuses.charged_stamina_cost_multiplier
+        stamina_cost *= self.get_stamina_cost_multiplier()
         if self.stamina < stamina_cost:
             self.last_attack_fail_reason = "not_enough_stamina"
             return False
@@ -831,11 +941,12 @@ class Player(Entity):
             self.facing_left = aim.x < 0
 
         self.is_attacking = True
-        damage = max(1, int((self.get_attack() + profile.damage_bonus) * profile.damage_multiplier))
+        damage = (self.get_attack() + profile.damage_bonus) * profile.damage_multiplier
         if profile.is_ranged:
             damage += progression_bonuses.bow_damage_bonus
         if attack_kind == "charged":
             damage += progression_bonuses.charged_damage_bonus
+        damage = max(1, int(damage * self.get_damage_multiplier()))
         recovery = profile.recovery * self.get_attack_recovery_multiplier()
         self.active_attack = AttackContext(
             kind=str(attack_kind),
@@ -905,7 +1016,8 @@ class Player(Entity):
     def handle_stamina(self, dt):
         max_stamina = self.get_max_stamina()
         if self.is_running:
-            self.stamina = max(0, self.stamina - STAMINA_RUN_COST * dt)
+            cost = STAMINA_RUN_COST * self.get_stamina_cost_multiplier()
+            self.stamina = max(0, self.stamina - cost * dt)
         elif self.stamina < max_stamina:
             self.stamina = min(max_stamina, self.stamina + STAMINA_REGEN * dt)
 
@@ -937,6 +1049,7 @@ class Player(Entity):
         self.recovery_timer.active = False
         self.last_attack_fail_reason = ""
         self.knockback_velocity = Vector2()
+        self.active_effects.clear()
 
     def set_respawn_point(self, spawn_x, spawn_y):
         self.spawn_position = Vector2(spawn_x, spawn_y)
