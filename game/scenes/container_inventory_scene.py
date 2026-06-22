@@ -30,6 +30,7 @@ class ContainerInventoryScene(Scene):
         self.drag_start_pos = None
         self.dragging = False
         self.drag_threshold = 6
+        self.take_all_button = None
         self._layout_size = None
         self._build_layout()
 
@@ -93,6 +94,14 @@ class ContainerInventoryScene(Scene):
 
     def _handle_button_down(self, mouse_pos):
         self._build_layout()
+        if self.take_all_button is not None and self.take_all_button.collidepoint(mouse_pos):
+            self._take_all_from_container()
+            self.selected_slot = None
+            self.pressed_slot = None
+            self.drag_source = None
+            self.drag_start_pos = None
+            self.dragging = False
+            return
         slot = self._slot_at(mouse_pos)
         self.pressed_slot = slot
         self.drag_source = None
@@ -219,6 +228,12 @@ class ContainerInventoryScene(Scene):
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], panel, width=2, border_radius=12)
         label = self.section_font.render(title, True, COLORS["WHITE"])
         self.app.screen.blit(label, (panel.x + 14, panel.y + 14))
+        if kind == "container":
+            self.take_all_button = pygame.Rect(panel.right - 124, panel.y + 12, 108, 30)
+            pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.take_all_button, border_radius=8)
+            pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.take_all_button, width=2, border_radius=8)
+            button_text = self.small_font.render(self.localizer.t("ui.container.take_all"), True, COLORS["WHITE"])
+            self.app.screen.blit(button_text, button_text.get_rect(center=self.take_all_button.center))
         for index in range(capacity):
             rect = self._slot_rect(origin, index, columns)
             selected = self.selected_slot == (kind, index)
@@ -284,3 +299,26 @@ class ContainerInventoryScene(Scene):
         x = origin[0] + col * (self.slot_size + self.slot_gap)
         y = origin[1] + row * (self.slot_size + self.slot_gap)
         return pygame.Rect(x, y, self.slot_size, self.slot_size)
+
+    def _take_all_from_container(self):
+        transferred_any = False
+        for index in range(self.container.inventory.capacity):
+            stack = self.container.inventory.get_stack_at(index)
+            if stack is None:
+                continue
+            if stack.kind == ItemKind.CURRENCY:
+                if not self.player.pickup_item(item_stack=stack):
+                    continue
+                self.container.inventory.set_stack_at(index, None)
+                transferred_any = True
+                continue
+            if not self.player.can_add_item(stack):
+                continue
+            if not self.player.add_item(stack):
+                continue
+            self.container.inventory.set_stack_at(index, None)
+            transferred_any = True
+
+        if transferred_any:
+            self.player._sync_inventory_capacities()
+            self.container.save_state()

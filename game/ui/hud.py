@@ -1,8 +1,10 @@
 import pygame
 
+from game.core.assets import load_image
+from game.effects import get_effect_definition
 from game.items import get_item_icon
 from game.localization import get_localizer
-from settings import COLORS, HOTBAR_SIZE, PLAYER_MAX_HEALTH, PLAYER_MAX_STAMINA
+from settings import ASSETS_DIR, COLORS, HOTBAR_SIZE, PLAYER_MAX_HEALTH, PLAYER_MAX_STAMINA
 
 
 class HUD:
@@ -14,6 +16,8 @@ class HUD:
         self.small_font = pygame.font.Font(None, 22)
         self.tiny_font = pygame.font.Font(None, 18)
         self.portrait_radius = 32
+        self.effect_rects = []
+        self.effect_icon_cache = {}
 
     def on_language_changed(self):
         return None
@@ -114,6 +118,137 @@ class HUD:
 
         screen.blit(level_text, (level_rect.x + 5, level_rect.y + 2))
         screen.blit(xp_text, (xp_rect.x + 5, xp_rect.y + 2))
+
+    def draw_active_effects(self, screen, player):
+        self.effect_rects = []
+        if not player.active_effects:
+            return
+
+        slot_width = 88
+        slot_height = 26
+        gap = 6
+        x = 16
+        y = 16 + self.portrait_radius * 2 + 18
+        mouse_pos = pygame.mouse.get_pos()
+        hovered_effect = None
+
+        for effect in player.active_effects:
+            definition = get_effect_definition(effect.effect_type)
+            is_positive = True if definition is None else definition.is_positive
+            fill = (54, 88, 64) if is_positive else (92, 62, 62)
+            border = (140, 230, 170) if is_positive else (230, 150, 150)
+            rect = pygame.Rect(x, y, slot_width, slot_height)
+
+            pygame.draw.rect(screen, fill, rect, border_radius=8)
+            pygame.draw.rect(screen, border, rect, width=2, border_radius=8)
+
+            icon = self._get_effect_icon(effect, (18, 18))
+            if icon is not None:
+                screen.blit(icon, (rect.x + 6, rect.y + (rect.height - icon.get_height()) // 2))
+                label_x = rect.x + 30
+            else:
+                label = self._effect_short_label(effect.effect_type)
+                label_text = self.tiny_font.render(label, True, COLORS["WHITE"])
+                screen.blit(label_text, (rect.x + 8, rect.y + 5))
+                label_x = rect.x + 30
+
+            time_text = self.tiny_font.render(f"{max(0.0, effect.remaining):.1f}s", True, COLORS["WHITE"])
+            screen.blit(time_text, (rect.right - time_text.get_width() - 6, rect.y + 5))
+            if icon is not None:
+                short_name = self._effect_short_label(effect.effect_type)
+                label_text = self.tiny_font.render(short_name, True, COLORS["WHITE"])
+                screen.blit(label_text, (label_x, rect.y + 5))
+
+            self.effect_rects.append((rect, effect))
+            if rect.collidepoint(mouse_pos):
+                hovered_effect = effect
+
+            y += slot_height + gap
+
+        if hovered_effect is not None:
+            self._draw_effect_tooltip(screen, hovered_effect, mouse_pos)
+
+    def _effect_short_label(self, effect_type):
+        name = self._effect_name(effect_type)
+        words = str(name).split()
+        if not words:
+            return "FX"
+        if len(words) == 1:
+            return words[0][:3].upper()
+        return "".join(word[:1] for word in words[:3]).upper()
+
+    def _effect_key(self, effect_type):
+        return effect_type.value if hasattr(effect_type, "value") else str(effect_type)
+
+    def _get_effect_icon(self, effect, size):
+        definition = get_effect_definition(effect.effect_type)
+        if definition is None or not definition.icon_path:
+            return None
+
+        cache_key = (definition.icon_path, size)
+        if cache_key in self.effect_icon_cache:
+            return self.effect_icon_cache[cache_key]
+
+        icon = load_image(ASSETS_DIR / definition.icon_path, size=size)
+        self.effect_icon_cache[cache_key] = icon
+        return icon
+
+    def _effect_name(self, effect_type):
+        effect_key = self._effect_key(effect_type)
+        key = f"ui.effects.{effect_key}.name"
+        translated = self.localizer.t(key)
+        if translated != key:
+            return translated
+        return effect_key.replace("_", " ").title()
+
+    def _effect_description(self, effect):
+        effect_key = self._effect_key(effect.effect_type)
+        key = f"ui.effects.{effect_key}.description"
+        translated = self.localizer.t(key)
+        if translated != key:
+            return translated
+        definition = get_effect_definition(effect.effect_type)
+        return definition.description if definition is not None else str(effect.effect_type)
+
+    def _effect_value_text(self, effect):
+        value = effect.value
+        effect_type = self._effect_key(effect.effect_type)
+        if effect_type in {"slowed", "damage_increased", "damage_reduced", "fatigue"}:
+            return f"{int(round(value * 100))}%"
+        return str(int(round(value))) if abs(value - round(value)) < 0.05 else f"{value:.1f}"
+
+    def _draw_effect_tooltip(self, screen, effect, mouse_pos):
+        name = self._effect_name(effect.effect_type)
+        description = self._effect_description(effect)
+        stats = self.localizer.t(
+            "ui.effects.tooltip_stats",
+            value=self._effect_value_text(effect),
+            duration=f"{max(0.0, effect.remaining):.1f}",
+        )
+
+        lines = [name, description, stats]
+        rendered_lines = [
+            self.small_font.render(lines[0], True, COLORS["WHITE"]),
+            self.tiny_font.render(lines[1], True, COLORS["WHITE"]),
+            self.tiny_font.render(lines[2], True, COLORS["UI_TEXT_DIM"]),
+        ]
+        width = max(surface.get_width() for surface in rendered_lines) + 16
+        height = sum(surface.get_height() for surface in rendered_lines) + 16
+        tooltip_rect = pygame.Rect(mouse_pos[0] + 14, mouse_pos[1] + 14, width, height)
+
+        screen_width, screen_height = screen.get_size()
+        if tooltip_rect.right > screen_width - 8:
+            tooltip_rect.x = mouse_pos[0] - width - 14
+        if tooltip_rect.bottom > screen_height - 8:
+            tooltip_rect.y = mouse_pos[1] - height - 14
+
+        pygame.draw.rect(screen, COLORS["UI_PANEL"], tooltip_rect, border_radius=8)
+        pygame.draw.rect(screen, COLORS["UI_SLOT_BORDER"], tooltip_rect, width=2, border_radius=8)
+
+        draw_y = tooltip_rect.y + 8
+        for index, surface in enumerate(rendered_lines):
+            screen.blit(surface, (tooltip_rect.x + 8, draw_y))
+            draw_y += surface.get_height() + (4 if index == 0 else 2)
 
     def draw_coins(self, screen, player):
         screen_width, _ = screen.get_size()
@@ -241,6 +376,7 @@ class HUD:
 
     def draw(self, screen, player, combat_state=None):
         self.draw_portrait(screen, player)
+        self.draw_active_effects(screen, player)
         self.draw_health_bar(screen, player)
         self.draw_stamina_bar(screen, player)
         self.draw_progression_bar(screen, player)

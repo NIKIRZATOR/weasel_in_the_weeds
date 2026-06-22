@@ -27,6 +27,7 @@ class ProgressionScene(Scene):
         self.tree_offset_y = 0
         self.tree_dragging = False
         self.tree_drag_last_pos = None
+        self.unlock_button_rect = None
         self._layout_size = None
         self._build_layout()
 
@@ -77,6 +78,8 @@ class ProgressionScene(Scene):
                         self._try_unlock_selected()
                     else:
                         self.selected_node_id = clicked_node_id
+                elif self.unlock_button_rect is not None and self.unlock_button_rect.collidepoint(event.pos):
+                    self._try_unlock_selected()
                 elif self.tree_panel.collidepoint(event.pos):
                     self.tree_dragging = True
                     self.tree_drag_last_pos = event.pos
@@ -171,15 +174,15 @@ class ProgressionScene(Scene):
             self.app.screen.blit(status_text, (self.left_panel.x + 14, status_y))
             status_y += 22
 
-        button_rect = pygame.Rect(self.left_panel.x + 14, self.left_panel.bottom - 52, self.left_panel.width - 28, 34)
+        self.unlock_button_rect = pygame.Rect(self.left_panel.x + 14, self.left_panel.bottom - 52, self.left_panel.width - 28, 34)
         can_unlock = self.player.can_unlock_skill_node(node.id)
         fill = (70, 88, 112) if can_unlock else (52, 52, 60)
         border = COLORS["UI_SLOT_SELECTED"] if can_unlock else COLORS["UI_SLOT_BORDER"]
-        pygame.draw.rect(self.app.screen, fill, button_rect, border_radius=8)
-        pygame.draw.rect(self.app.screen, border, button_rect, width=2, border_radius=8)
+        pygame.draw.rect(self.app.screen, fill, self.unlock_button_rect, border_radius=8)
+        pygame.draw.rect(self.app.screen, border, self.unlock_button_rect, width=2, border_radius=8)
         button_label = self.localizer.t("ui.progression.unlock") if can_unlock else self.localizer.t("ui.progression.requirements")
-        button_lines = self._wrap_text(button_label, self.small_font, button_rect.width - 12, max_lines=2)
-        self._draw_centered_lines(button_lines, self.small_font, COLORS["WHITE"], button_rect, line_height=14)
+        button_lines = self._wrap_text(button_label, self.small_font, self.unlock_button_rect.width - 12, max_lines=2)
+        self._draw_centered_lines(button_lines, self.small_font, COLORS["WHITE"], self.unlock_button_rect, line_height=14)
 
     def _draw_tree_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.tree_panel, border_radius=12)

@@ -68,7 +68,8 @@
       "title": "Container",
       "close_hint": "E / Esc - close",
       "player_inventory": "Backpack",
-      "drag_hint": "Drag items between the container and your backpack."
+      "drag_hint": "Drag items between the container and your backpack.",
+      "take_all": "Take all"
     },
     "crafting": {
       "title": "Crafting",
@@ -115,6 +116,37 @@
     "hud": {
       "controls": "WASD | SHIFT | SPACE | ALT | LMB | RMB | LMB+RMB 1.5s | E | F | 1-4 | I | O | K | M",
       "map_hint": "M - map | K - craft"
+    },
+    "effects": {
+      "tooltip_stats": "Power: {value} | Remaining: {duration}s",
+      "health_regeneration": {
+        "name": "HP Regen",
+        "description": "Gradually restores health."
+      },
+      "stamina_regeneration": {
+        "name": "ST Regen",
+        "description": "Gradually restores stamina."
+      },
+      "armor_increased": {
+        "name": "Armor",
+        "description": "Increases the player's defense."
+      },
+      "damage_increased": {
+        "name": "Damage",
+        "description": "Increases outgoing damage."
+      },
+      "slowed": {
+        "name": "Slow",
+        "description": "Reduces movement speed."
+      },
+      "damage_reduced": {
+        "name": "Weakened",
+        "description": "Reduces outgoing damage."
+      },
+      "fatigue": {
+        "name": "Fatigue",
+        "description": "Increases stamina costs."
+      }
     },
     "progression": {
       "title": "Progression",
@@ -221,6 +253,7 @@
       "game_title": "Weales in the weeds RPG - {level}"
     },
     "levels": {
+      "level_00": "Test Chambers",
       "level_01": "Level 01",
       "level_02": "Forest Edge"
     },

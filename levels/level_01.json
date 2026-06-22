@@ -80,6 +80,21 @@
       "y": 2
     },
     {
+      "type": "level_transition",
+      "name": "To Test Chambers",
+      "x": 2,
+      "y": 4,
+      "width": 1,
+      "height": 2,
+      "properties": {
+        "target_level": "level_00.json",
+        "target_spawn": {
+          "x": 2,
+          "y": 2
+        }
+      }
+    },
+    {
       "type": "solid_object",
       "name": "Stone Block",
       "x": 4,

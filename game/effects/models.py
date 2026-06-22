@@ -19,29 +19,51 @@ class EffectDefinition:
     id: EffectType
     is_positive: bool
     description: str
+    icon_path: str | None = None
 
 
 EFFECT_DEFINITIONS: dict[EffectType, EffectDefinition] = {
     EffectType.HEALTH_REGENERATION: EffectDefinition(
-        EffectType.HEALTH_REGENERATION, True, "Restores health every second."
+        EffectType.HEALTH_REGENERATION,
+        True,
+        "Restores health every second.",
+        "ui/effects/health_regeneration.png",
     ),
     EffectType.STAMINA_REGENERATION: EffectDefinition(
-        EffectType.STAMINA_REGENERATION, True, "Restores stamina every second."
+        EffectType.STAMINA_REGENERATION,
+        True,
+        "Restores stamina every second.",
+        "ui/effects/stamina_regeneration.png",
     ),
     EffectType.ARMOR_INCREASED: EffectDefinition(
-        EffectType.ARMOR_INCREASED, True, "Increases armor."
+        EffectType.ARMOR_INCREASED,
+        True,
+        "Increases armor.",
+        "ui/effects/armor_increased.png",
     ),
     EffectType.DAMAGE_INCREASED: EffectDefinition(
-        EffectType.DAMAGE_INCREASED, True, "Increases outgoing damage."
+        EffectType.DAMAGE_INCREASED,
+        True,
+        "Increases outgoing damage.",
+        "ui/effects/damage_increased.png",
     ),
     EffectType.SLOWED: EffectDefinition(
-        EffectType.SLOWED, False, "Reduces movement speed."
+        EffectType.SLOWED,
+        False,
+        "Reduces movement speed.",
+        "ui/effects/slowed.png",
     ),
     EffectType.DAMAGE_REDUCED: EffectDefinition(
-        EffectType.DAMAGE_REDUCED, False, "Reduces outgoing damage."
+        EffectType.DAMAGE_REDUCED,
+        False,
+        "Reduces outgoing damage.",
+        "ui/effects/damage_reduced.png",
     ),
     EffectType.FATIGUE: EffectDefinition(
-        EffectType.FATIGUE, False, "Increases stamina costs."
+        EffectType.FATIGUE,
+        False,
+        "Increases stamina costs.",
+        "ui/effects/fatigue.png",
     ),
 }
 

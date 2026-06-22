@@ -29,6 +29,9 @@ class CraftingScene(Scene):
         self.category_right_button = None
         self.category_scroll_offset = 0
         self.category_content_width = 0
+        self.recipe_scroll_area = None
+        self.recipe_scroll_offset = 0
+        self.recipe_content_height = 0
         self.recipe_rows = []
         self.action_button = None
         self._layout_size = None
@@ -56,6 +59,10 @@ class CraftingScene(Scene):
         content_height = self.panel_rect.height - 108
         left_width = int(self.panel_rect.width * 0.42)
         right_width = self.panel_rect.width - panel_padding * 2 - left_width - 16
+        compact_layout = screen_width <= 900 or screen_height <= 700
+        self.recipe_row_height = 50 if compact_layout else 58
+        self.recipe_row_gap = 8 if compact_layout else 10
+        self.recipe_icon_size = 28 if compact_layout else 34
 
         self.left_panel = pygame.Rect(self.panel_rect.x + panel_padding, content_top, left_width, content_height)
         self.right_panel = pygame.Rect(self.left_panel.right + 16, content_top, right_width, content_height)
@@ -81,9 +88,15 @@ class CraftingScene(Scene):
                 if event.button == 1:
                     self._handle_click(event.pos)
                 elif event.button == 4:
-                    self._scroll_categories(-120)
+                    if self.recipe_scroll_area is not None and self.recipe_scroll_area.collidepoint(pygame.mouse.get_pos()):
+                        self._scroll_recipes(-self._recipe_scroll_step())
+                    else:
+                        self._scroll_categories(-120)
                 elif event.button == 5:
-                    self._scroll_categories(120)
+                    if self.recipe_scroll_area is not None and self.recipe_scroll_area.collidepoint(pygame.mouse.get_pos()):
+                        self._scroll_recipes(self._recipe_scroll_step())
+                    else:
+                        self._scroll_categories(120)
 
     def update(self, dt):
         if self.message_timer > 0:
@@ -93,7 +106,6 @@ class CraftingScene(Scene):
 
     def draw(self):
         self._build_layout()
-        self._ensure_selected_recipe()
         self.game_scene.draw()
 
         screen_width, screen_height = self.app.get_screen_size()
@@ -106,8 +118,12 @@ class CraftingScene(Scene):
 
         title = self.title_font.render(self.localizer.t("ui.crafting.title"), True, COLORS["WHITE"])
         self.app.screen.blit(title, (self.panel_rect.x + 24, self.panel_rect.y + 14))
-        hint = self.text_font.render(self.localizer.t("ui.crafting.close_hint"), True, COLORS["UI_TEXT_DIM"])
-        self.app.screen.blit(hint, (self.panel_rect.right - hint.get_width() - 24, self.panel_rect.y + 24))
+        shards = self.text_font.render(
+            self.localizer.t("ui.crafting.knowledge_shards", count=self.player.knowledge_shards),
+            True,
+            COLORS["WHITE"],
+        )
+        self.app.screen.blit(shards, (self.panel_rect.right - shards.get_width() - 24, self.panel_rect.y + 24))
 
         self._draw_left_panel()
         self._draw_right_panel()
@@ -145,21 +161,38 @@ class CraftingScene(Scene):
         recipes = self._visible_recipes()
         self.recipe_rows = []
         row_y = category_y + 46
-        row_height = 58
+        row_height = self.recipe_row_height
+        row_gap = self.recipe_row_gap
+        scrollbar_width = 8
+        self.recipe_scroll_area = pygame.Rect(
+            self.left_panel.x + 14,
+            row_y,
+            self.left_panel.width - 28 - scrollbar_width - 6,
+            self.left_panel.bottom - row_y - 14,
+        )
+        self.recipe_content_height = max(0, len(recipes) * (row_height + row_gap) - row_gap)
+        self.recipe_scroll_offset = max(0, min(self.recipe_scroll_offset, self._max_recipe_scroll()))
+
+        previous_clip = self.app.screen.get_clip()
+        self.app.screen.set_clip(self.recipe_scroll_area)
+        draw_y = row_y - self.recipe_scroll_offset
         for recipe in recipes:
-            rect = pygame.Rect(self.left_panel.x + 14, row_y, self.left_panel.width - 28, row_height)
+            rect = pygame.Rect(self.left_panel.x + 14, draw_y, self.left_panel.width - 28, row_height)
             selected = recipe.id == self.selected_recipe_id
-            pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"] if selected else COLORS["UI_SLOT"], rect, border_radius=10)
-            pygame.draw.rect(
-                self.app.screen,
-                COLORS["UI_SLOT_SELECTED"] if selected else COLORS["UI_SLOT_BORDER"],
-                rect,
-                width=2,
-                border_radius=10,
-            )
-            self._draw_recipe_list_row(recipe, rect)
-            self.recipe_rows.append((recipe.id, rect))
-            row_y += row_height + 10
+            if rect.bottom >= self.recipe_scroll_area.top and rect.top <= self.recipe_scroll_area.bottom:
+                pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"] if selected else COLORS["UI_SLOT"], rect, border_radius=10)
+                pygame.draw.rect(
+                    self.app.screen,
+                    COLORS["UI_SLOT_SELECTED"] if selected else COLORS["UI_SLOT_BORDER"],
+                    rect,
+                    width=2,
+                    border_radius=10,
+                )
+                self._draw_recipe_list_row(recipe, rect)
+                self.recipe_rows.append((recipe.id, rect))
+            draw_y += row_height + row_gap
+        self.app.screen.set_clip(previous_clip)
+        self._draw_recipe_scrollbar()
 
         if not recipes:
             empty = self.text_font.render(self.localizer.t("ui.crafting.no_recipes"), True, COLORS["UI_TEXT_DIM"])
@@ -209,11 +242,12 @@ class CraftingScene(Scene):
         can_unlock = self.player.can_unlock_recipe(recipe)
         can_craft = self.player.can_craft_recipe(recipe)
         result_definition = get_item_definition(recipe.result.item_id)
-        icon = get_item_icon(result_definition, (34, 34))
+        icon = get_item_icon(result_definition, (self.recipe_icon_size, self.recipe_icon_size))
         text_x = rect.x + 12
         if icon is not None:
-            self.app.screen.blit(icon, (rect.x + 10, rect.y + 12))
-            text_x = rect.x + 52
+            icon_y = rect.y + (rect.height - self.recipe_icon_size) // 2
+            self.app.screen.blit(icon, (rect.x + 10, icon_y))
+            text_x = rect.x + self.recipe_icon_size + 24
 
         title = recipe.localized_name() if unlocked or recipe.unlock_type != "knowledge" else self.localizer.t("ui.crafting.unknown_recipe")
         if recipe.is_temporary:
@@ -228,18 +262,31 @@ class CraftingScene(Scene):
             status = self.localizer.t("ui.crafting.unlock_short", cost=recipe.knowledge_cost)
             color = (150, 230, 150) if can_unlock else (220, 150, 150)
         status_text = self.small_font.render(status, True, color)
-        self.app.screen.blit(status_text, (text_x, rect.y + 32))
+        self.app.screen.blit(status_text, (text_x, rect.bottom - status_text.get_height() - 8))
+
+    def _draw_recipe_scrollbar(self):
+        if self.recipe_scroll_area is None or self.recipe_content_height <= self.recipe_scroll_area.height:
+            return
+
+        track_rect = pygame.Rect(
+            self.recipe_scroll_area.right + 6,
+            self.recipe_scroll_area.y,
+            8,
+            self.recipe_scroll_area.height,
+        )
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT"], track_rect, border_radius=4)
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], track_rect, width=1, border_radius=4)
+
+        thumb_height = max(28, int(self.recipe_scroll_area.height * (self.recipe_scroll_area.height / self.recipe_content_height)))
+        max_scroll = max(1, self._max_recipe_scroll())
+        thumb_range = track_rect.height - thumb_height
+        thumb_offset = int((self.recipe_scroll_offset / max_scroll) * thumb_range)
+        thumb_rect = pygame.Rect(track_rect.x, track_rect.y + thumb_offset, track_rect.width, thumb_height)
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_SELECTED"], thumb_rect, border_radius=4)
 
     def _draw_right_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.right_panel, border_radius=12)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.right_panel, width=2, border_radius=12)
-
-        shards = self.text_font.render(
-            self.localizer.t("ui.crafting.knowledge_shards", count=self.player.knowledge_shards),
-            True,
-            COLORS["WHITE"],
-        )
-        self.app.screen.blit(shards, (self.right_panel.x + 16, self.right_panel.y + 14))
 
         recipe = self._selected_recipe()
         if recipe is None:
@@ -352,6 +399,7 @@ class CraftingScene(Scene):
         if self.selected_recipe_id not in {recipe.id for recipe in recipes}:
             self.selected_recipe_id = recipes[0].id
         self._ensure_active_category_visible()
+        self._ensure_selected_recipe_visible()
 
     def _move_selection(self, direction):
         recipes = self._visible_recipes()
@@ -360,9 +408,11 @@ class CraftingScene(Scene):
         ids = [recipe.id for recipe in recipes]
         if self.selected_recipe_id not in ids:
             self.selected_recipe_id = ids[0]
+            self._ensure_selected_recipe_visible()
             return
         index = ids.index(self.selected_recipe_id)
         self.selected_recipe_id = ids[(index + direction) % len(ids)]
+        self._ensure_selected_recipe_visible()
 
     def _switch_category(self, direction):
         categories = self._available_categories()
@@ -469,6 +519,42 @@ class CraftingScene(Scene):
 
     def _scroll_categories(self, delta):
         self.category_scroll_offset = max(0, min(self.category_scroll_offset + delta, self._max_category_scroll()))
+
+    def _max_recipe_scroll(self):
+        if self.recipe_scroll_area is None:
+            return 0
+        return max(0, self.recipe_content_height - self.recipe_scroll_area.height)
+
+    def _recipe_scroll_step(self):
+        return 68
+
+    def _scroll_recipes(self, delta):
+        self.recipe_scroll_offset = max(0, min(self.recipe_scroll_offset + delta, self._max_recipe_scroll()))
+
+    def _ensure_selected_recipe_visible(self):
+        recipes = self._visible_recipes()
+        if not recipes or self.selected_recipe_id is None:
+            return
+        recipe_ids = [recipe.id for recipe in recipes]
+        if self.selected_recipe_id not in recipe_ids:
+            return
+        if self.recipe_scroll_area is None:
+            return
+
+        index = recipe_ids.index(self.selected_recipe_id)
+        row_height = self.recipe_row_height
+        row_gap = self.recipe_row_gap
+        top = index * (row_height + row_gap)
+        bottom = top + row_height
+        visible_top = self.recipe_scroll_offset
+        visible_bottom = self.recipe_scroll_offset + self.recipe_scroll_area.height
+
+        if top < visible_top:
+            self.recipe_scroll_offset = top
+        elif bottom > visible_bottom:
+            self.recipe_scroll_offset = bottom - self.recipe_scroll_area.height
+
+        self.recipe_scroll_offset = max(0, min(self.recipe_scroll_offset, self._max_recipe_scroll()))
 
     def _ensure_active_category_visible(self):
         if self.category_scroll_area is None:

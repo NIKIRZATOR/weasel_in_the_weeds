@@ -68,7 +68,8 @@
       "title": "Хранилище",
       "close_hint": "E / Esc — закрыть",
       "player_inventory": "Рюкзак",
-      "drag_hint": "Перетаскивайте предметы между хранилищем и рюкзаком."
+      "drag_hint": "Перетаскивайте предметы между хранилищем и рюкзаком.",
+      "take_all": "Взять все"
     },
     "crafting": {
       "title": "Крафт",
@@ -115,6 +116,37 @@
     "hud": {
       "controls": "WASD | SHIFT | SPACE | ALT | ЛКМ | ПКМ | ЛКМ+ПКМ 1.5с | E | I | K | M",
       "map_hint": "M - карта | K - крафт"
+    },
+    "effects": {
+      "tooltip_stats": "Сила: {value} | Осталось: {duration}с",
+      "health_regeneration": {
+        "name": "Регенерация HP",
+        "description": "Постепенно восстанавливает здоровье."
+      },
+      "stamina_regeneration": {
+        "name": "Регенерация ST",
+        "description": "Постепенно восстанавливает выносливость."
+      },
+      "armor_increased": {
+        "name": "Броня",
+        "description": "Повышает защиту персонажа."
+      },
+      "damage_increased": {
+        "name": "Урон",
+        "description": "Повышает наносимый урон."
+      },
+      "slowed": {
+        "name": "Замедление",
+        "description": "Снижает скорость передвижения."
+      },
+      "damage_reduced": {
+        "name": "Ослабление",
+        "description": "Снижает наносимый урон."
+      },
+      "fatigue": {
+        "name": "Усталость",
+        "description": "Повышает затраты выносливости."
+      }
     },
     "progression": {
       "title": "Прогресс",
@@ -221,6 +253,7 @@
       "game_title": "Weales in the weeds RPG - {level}"
     },
     "levels": {
+      "level_00": "Тестовые комнаты",
       "level_01": "Уровень 01",
       "level_02": "Опушка леса"
     },
