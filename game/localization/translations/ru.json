@@ -64,6 +64,12 @@
       "slot_accessory_1": "Акс 1",
       "slot_accessory_2": "Акс 2"
     },
+    "container": {
+      "title": "Хранилище",
+      "close_hint": "E / Esc — закрыть",
+      "player_inventory": "Рюкзак",
+      "drag_hint": "Перетаскивайте предметы между хранилищем и рюкзаком."
+    },
     "crafting": {
       "title": "Крафт",
       "close_hint": "Esc / K - закрыть",

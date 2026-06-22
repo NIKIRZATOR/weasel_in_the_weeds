@@ -1,4 +1,5 @@
 from game.objects.checkpoint_object import CheckpointObject
+from game.objects.container_object import CONTAINER_CAPACITIES, ContainerObject
 from game.objects.factory import create_world_object
 from game.objects.gatherable_object import GatherableObject
 from game.objects.grass_hide_zone import GrassHideZone
@@ -15,6 +16,8 @@ __all__ = [
     "InteractableObject",
     "GatherableObject",
     "CheckpointObject",
+    "ContainerObject",
+    "CONTAINER_CAPACITIES",
     "GrassHideZone",
     "LevelTransition",
     "NpcObject",

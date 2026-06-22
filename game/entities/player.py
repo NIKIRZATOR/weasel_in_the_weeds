@@ -160,6 +160,7 @@ class Player(Entity):
         self.unlocked_recipe_ids = set()
         self.explored_tiles_by_level: dict[str, list[list[bool]]] = {}
         self.claimed_dialogue_rewards_by_npc: dict[str, set[str]] = {}
+        self.container_states: dict[str, dict] = {}
         self.awarded_xp_sources = set()
         self.level = 1
         self.xp = 0

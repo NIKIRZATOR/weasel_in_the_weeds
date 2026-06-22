@@ -110,13 +110,78 @@
       }
     },
     {
-      "type": "interactable_object",
-      "name": "Training Chest",
+      "type": "container_object",
+      "id": "training_crate_01",
+      "name": "Training Crate",
       "x": 6,
       "y": 6,
       "width": 1,
       "height": 1,
-      "solid": false
+      "solid": true,
+      "properties": {
+        "container_type": "crate",
+        "fixed_items": [
+          { "item_id": "berry", "quantity": 2 }
+        ],
+        "random_loot": {
+          "rolls": 1,
+          "entries": [
+            { "item_id": "stick", "weight": 3, "min_quantity": 1, "max_quantity": 3 },
+            { "item_id": "grass_blade", "weight": 2, "min_quantity": 1, "max_quantity": 2 }
+          ]
+        }
+      }
+    },
+    {
+      "type": "container_object",
+      "id": "training_chest_01",
+      "name": "Training Chest",
+      "x": 7,
+      "y": 6,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "properties": {
+        "container_type": "chest",
+        "fixed_items": [
+          { "item_id": "healing_tonic", "quantity": 1 },
+          { "item_id": "stamina_tonic", "quantity": 1 }
+        ],
+        "random_loot": {
+          "rolls": 2,
+          "entries": [
+            { "item_id": "berry", "weight": 5, "min_quantity": 1, "max_quantity": 4 },
+            { "item_id": "mushroom", "weight": 3, "min_quantity": 1, "max_quantity": 2 },
+            { "item_id": "forest_bandage", "weight": 1, "min_quantity": 1, "max_quantity": 1 }
+          ]
+        }
+      }
+    },
+    {
+      "type": "container_object",
+      "id": "training_large_chest_01",
+      "name": "Training Large Chest",
+      "x": 8,
+      "y": 6,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "properties": {
+        "container_type": "large_chest",
+        "fixed_items": [
+          { "item_id": "healing_infusion", "quantity": 1 },
+          { "item_id": "stamina_infusion", "quantity": 1 }
+        ],
+        "random_loot": {
+          "rolls": 3,
+          "entries": [
+            { "item_id": "bone", "weight": 4, "min_quantity": 1, "max_quantity": 3 },
+            { "item_id": "feather", "weight": 3, "min_quantity": 1, "max_quantity": 2 },
+            { "item_id": "beetle_shell", "weight": 2, "min_quantity": 1, "max_quantity": 2 },
+            { "item_id": "knowledge_shard", "weight": 1, "min_quantity": 1, "max_quantity": 1, "chance": 0.5 }
+          ]
+        }
+      }
     },
     {
       "type": "gatherable_object",

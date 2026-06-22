@@ -64,6 +64,12 @@
       "slot_accessory_1": "Acc 1",
       "slot_accessory_2": "Acc 2"
     },
+    "container": {
+      "title": "Container",
+      "close_hint": "E / Esc - close",
+      "player_inventory": "Backpack",
+      "drag_hint": "Drag items between the container and your backpack."
+    },
     "crafting": {
       "title": "Crafting",
       "close_hint": "Esc / K - close",

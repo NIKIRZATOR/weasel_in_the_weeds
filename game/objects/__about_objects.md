@@ -7,6 +7,7 @@
 - `world_object.py` — базовый объект мира.
 - `solid_object.py` — твердый объект, который блокирует движение.
 - `interactable_object.py` — объект, с которым можно взаимодействовать.
+- `container_object.py` — ящики и сундуки с собственным инвентарем.
 - `pickable_object.py` — объект, который можно поднять.
 - `gatherable_object.py` — объект-сборщик ресурсов.
 - `checkpoint_object.py` — чекпоинт/камень воскрешения.

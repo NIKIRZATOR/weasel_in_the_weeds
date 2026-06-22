@@ -1,4 +1,5 @@
 from game.objects.checkpoint_object import CheckpointObject
+from game.objects.container_object import ContainerObject
 from game.objects.gatherable_catalog import get_gatherable_template
 from game.objects.gatherable_object import GatherableObject
 from game.objects.grass_hide_zone import GrassHideZone
@@ -25,6 +26,9 @@ def create_world_object(raw_object, tile_size):
     x, y, width, height = _resolve_dimensions(raw_object, tile_size)
     name = raw_object.get("name", object_type or "object")
     properties = raw_object.get("properties", {})
+    properties = dict(properties)
+    if raw_object.get("id"):
+        properties.setdefault("object_id", str(raw_object["id"]))
     if object_type == "gatherable_object":
         properties = _resolve_gatherable_properties(name, properties)
 
@@ -40,6 +44,17 @@ def create_world_object(raw_object, tile_size):
             height,
             name=name,
             is_solid=is_solid,
+            properties=properties,
+        )
+
+    if object_type == "container_object":
+        return ContainerObject(
+            x,
+            y,
+            width,
+            height,
+            name=name,
+            is_solid=raw_object.get("solid", True),
             properties=properties,
         )
 

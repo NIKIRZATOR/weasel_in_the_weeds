@@ -118,6 +118,14 @@ class GameScene(Scene):
 
             world_object = create_world_object(raw_object, self.level.tile_size)
             if world_object is not None:
+                if getattr(world_object, "is_container", False):
+                    object_id = world_object.object_id or (
+                        f"{int(world_object.position.x)}:{int(world_object.position.y)}"
+                    )
+                    world_object.bind_state_store(
+                        self.player.container_states,
+                        f"{self.level_key}:{object_id}",
+                    )
                 world_objects.append(world_object)
         return world_objects, enemies
 
@@ -213,6 +221,11 @@ class GameScene(Scene):
         from game.scenes.inventory_scene import InventoryScene
 
         self.app.set_scene(InventoryScene(self.app, self))
+
+    def open_container(self, container):
+        from game.scenes.container_inventory_scene import ContainerInventoryScene
+
+        self.app.set_scene(ContainerInventoryScene(self.app, self, container))
 
     def open_map(self):
         from game.scenes.map_scene import MapScene

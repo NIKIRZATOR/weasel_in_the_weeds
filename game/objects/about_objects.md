@@ -125,6 +125,42 @@ JSON:
 
 Позже этот класс можно расширить или заменить наследниками: сундук, дверь, рычаг, NPC-объект.
 
+## ContainerObject
+
+Контейнер с собственным инвентарем. Поддерживаются типы `crate` (5 слотов),
+`chest` (8 слотов) и `large_chest` (10 слотов). При взаимодействии открывается
+экран переноса предметов между контейнером и обычным инвентарем игрока.
+
+```json
+{
+  "type": "container_object",
+  "id": "forest_chest_01",
+  "name": "Forest Chest",
+  "x": 7,
+  "y": 6,
+  "solid": true,
+  "properties": {
+    "container_type": "chest",
+    "fixed_items": [
+      { "item_id": "berry", "quantity": 2 }
+    ],
+    "random_loot": {
+      "rolls": 2,
+      "entries": [
+        { "item_id": "stick", "weight": 3, "min_quantity": 1, "max_quantity": 3 },
+        { "item_id": "healing_tonic", "weight": 1, "min_quantity": 1, "max_quantity": 1, "chance": 0.5 }
+      ]
+    }
+  }
+}
+```
+
+`fixed_items` всегда добавляются в указанном количестве. `random_loot.rolls`
+задает число попыток генерации, `weight` — относительный вес записи, а `chance`
+— дополнительную вероятность выпадения от 0 до 1. Уникальный `id` нужен для
+сохранения содержимого при переходах между уровнями. Случайный лут генерируется
+только при первом открытии контейнера.
+
 ## PickableObject
 
 Файл: `pickable_object.py`
