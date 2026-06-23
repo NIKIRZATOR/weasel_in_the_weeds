@@ -93,7 +93,7 @@ class InventoryScene(Scene):
         hotbar_width = HOTBAR_SIZE * self.inventory_slot_size
         hotbar_width += (HOTBAR_SIZE - 1) * self.inventory_gap + 16
         self.hotbar_panel = pygame.Rect(
-            self.center_panel.x + 16,
+            self.center_panel.centerx - hotbar_width // 2,
             self.center_panel.y + 42,
             hotbar_width,
             72 if compact else 92,
@@ -293,8 +293,18 @@ class InventoryScene(Scene):
 
         title = self.title_font.render(self.localizer.t("ui.inventory.title"), True, COLORS["WHITE"])
         self.app.screen.blit(title, (self.panel_rect.x + 28, self.panel_rect.y + 12))
-        hint = self.text_font.render(self.localizer.t("ui.inventory.close_hint"), True, COLORS["UI_TEXT_DIM"])
-        self.app.screen.blit(hint, (self.panel_rect.right - hint.get_width() - 28, self.panel_rect.y + 22))
+
+        header_stats = [
+            f"{self.localizer.t('ui.inventory.stat_coins')}: {self.player.coins}",
+            f"{self.localizer.t('ui.inventory.stat_shards')}: {self.player.knowledge_shards}",
+        ]
+        header_y = self.panel_rect.y + 16
+        for index, line in enumerate(header_stats):
+            text = self.text_font.render(line, True, COLORS["WHITE"])
+            self.app.screen.blit(
+                text,
+                (self.panel_rect.right - text.get_width() - 28, header_y + index * 24),
+            )
 
         self._draw_character_panel()
         self._draw_inventory_grid()
@@ -327,9 +337,6 @@ class InventoryScene(Scene):
             f"{self.localizer.t('ui.inventory.stat_atk')}: {stats.attack}",
             f"{self.localizer.t('ui.inventory.stat_def')}: {stats.defense}",
             f"{self.localizer.t('ui.inventory.stat_spd')}: {stats.speed}",
-            f"{self.localizer.t('ui.inventory.stat_slots')}: {self.player.inventory.capacity}",
-            f"{self.localizer.t('ui.inventory.stat_coins')}: {self.player.coins}",
-            f"{self.localizer.t('ui.inventory.stat_shards')}: {self.player.knowledge_shards}",
         ]
         stats_start_y = body_rect.bottom + 14
         for index, line in enumerate(stat_lines):
