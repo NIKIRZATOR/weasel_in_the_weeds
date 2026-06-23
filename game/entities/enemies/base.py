@@ -184,6 +184,7 @@ class Enemy(Entity):
         self.hurt_flash_timer = 0.0
         self.stun_timer = 0.0
         self.knockback_velocity = Vector2(0, 0)
+        self.background_update_accumulator = 0.0
 
     def take_damage(self, damage, attack_kind=None):
         amount = max(1, int(damage))

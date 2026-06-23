@@ -16,7 +16,14 @@ from game.ui.hud import HUD
 from game.world.collision import CollisionSystem
 from game.world.level import load_level
 from game.world.tilemap import TileMap
-from settings import COLORS, LEVELS_DIR
+from settings import (
+    COLORS,
+    ENEMY_BACKGROUND_UPDATE_INTERVAL,
+    ENEMY_BACKGROUND_UPDATE_MARGIN,
+    ENEMY_FULL_UPDATE_MARGIN,
+    LEVELS_DIR,
+    RENDER_CULL_MARGIN,
+)
 
 
 TRANSITION_FADE_DURATION = 0.45
@@ -651,8 +658,30 @@ class GameScene(Scene):
 
     def _update_enemies(self, dt):
         alive_enemies = []
+        full_update_rect = self._camera_world_rect(ENEMY_FULL_UPDATE_MARGIN)
+        background_update_rect = self._camera_world_rect(ENEMY_BACKGROUND_UPDATE_MARGIN)
         for enemy in self.enemies:
-            enemy.update(dt, self)
+            if self._enemy_needs_full_update(enemy, full_update_rect):
+                accumulated_dt = min(
+                    enemy.background_update_accumulator + dt,
+                    ENEMY_BACKGROUND_UPDATE_INTERVAL,
+                )
+                enemy.background_update_accumulator = 0.0
+                enemy.update(accumulated_dt, self)
+            elif background_update_rect.colliderect(enemy.get_hitbox_rect()):
+                enemy.background_update_accumulator += dt
+                if enemy.background_update_accumulator >= ENEMY_BACKGROUND_UPDATE_INTERVAL:
+                    accumulated_dt = min(
+                        enemy.background_update_accumulator,
+                        ENEMY_BACKGROUND_UPDATE_INTERVAL,
+                    )
+                    enemy.background_update_accumulator = 0.0
+                    enemy.update(accumulated_dt, self)
+            else:
+                enemy.background_update_accumulator = min(
+                    enemy.background_update_accumulator + dt,
+                    ENEMY_BACKGROUND_UPDATE_INTERVAL,
+                )
             if enemy.is_dead:
                 self._spawn_enemy_drops(enemy)
                 if not enemy.xp_awarded and enemy.xp_reward > 0:
@@ -661,6 +690,41 @@ class GameScene(Scene):
                 continue
             alive_enemies.append(enemy)
         self.enemies = alive_enemies
+
+    def _enemy_needs_full_update(self, enemy, full_update_rect):
+        if full_update_rect.colliderect(enemy.get_hitbox_rect()):
+            return True
+        if getattr(enemy, "encounter_started", False):
+            return True
+        if getattr(enemy, "behavior_state", None) in {"chase", "linger"}:
+            return True
+        return bool(getattr(enemy, "projectiles", ()))
+
+    def _camera_world_rect(self, margin=0):
+        screen_width, screen_height = self.app.get_screen_size()
+        return pygame.Rect(
+            int(self.camera.position.x - margin),
+            int(self.camera.position.y - margin),
+            int(screen_width + margin * 2),
+            int(screen_height + margin * 2),
+        )
+
+    def _enemy_is_visible(self, enemy, visible_rect):
+        if visible_rect.colliderect(enemy.get_hitbox_rect()):
+            return True
+        for projectile in getattr(enemy, "projectiles", ()):
+            if projectile.is_dead:
+                continue
+            radius = max(1, int(getattr(projectile, "radius", 1)))
+            projectile_rect = pygame.Rect(
+                int(projectile.position.x - radius),
+                int(projectile.position.y - radius),
+                radius * 2,
+                radius * 2,
+            )
+            if visible_rect.colliderect(projectile_rect):
+                return True
+        return False
 
     def _spawn_enemy_drops(self, enemy):
         if getattr(enemy, "loot_dropped", False):
@@ -954,11 +1018,14 @@ class GameScene(Scene):
         shake_offset = self._current_screen_shake_offset()
         self.camera.position.x += shake_offset.x
         self.camera.position.y += shake_offset.y
+        visible_rect = self._camera_world_rect(RENDER_CULL_MARGIN)
         self.tilemap.draw(self.app.screen, self.camera)
         for world_object in self.world_objects:
-            world_object.draw(self.app.screen, self.camera)
+            if visible_rect.colliderect(world_object.get_hitbox_rect()):
+                world_object.draw(self.app.screen, self.camera)
         for enemy in self.enemies:
-            enemy.draw(self.app.screen, self.camera)
+            if self._enemy_is_visible(enemy, visible_rect):
+                enemy.draw(self.app.screen, self.camera)
         self._draw_player_projectiles()
         self._draw_damage_numbers()
         self.player.draw(self.app.screen, self.camera)

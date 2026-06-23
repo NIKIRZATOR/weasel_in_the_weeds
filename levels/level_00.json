@@ -5359,6 +5359,58 @@
       "attack_cooldown": 0.9
     },
     {
+      "type": "enemy_melee",
+      "name": "Test Goblin B",
+      "x": 34,
+      "y": 10,
+      "width": 1,
+      "height": 1,
+      "health": 28,
+      "speed": 86,
+      "damage": 7,
+      "melee_range": 28,
+      "attack_cooldown": 0.9
+    },
+    {
+      "type": "enemy_melee",
+      "name": "Test Goblin B",
+      "x": 36,
+      "y": 10,
+      "width": 1,
+      "height": 1,
+      "health": 28,
+      "speed": 86,
+      "damage": 7,
+      "melee_range": 28,
+      "attack_cooldown": 0.9
+    },
+    {
+      "type": "enemy_melee",
+      "name": "Test Goblin B",
+      "x": 35,
+      "y": 11,
+      "width": 1,
+      "height": 1,
+      "health": 28,
+      "speed": 86,
+      "damage": 7,
+      "melee_range": 28,
+      "attack_cooldown": 0.9
+    },
+    {
+      "type": "enemy_melee",
+      "name": "Test Goblin B",
+      "x": 35,
+      "y": 12,
+      "width": 1,
+      "height": 1,
+      "health": 28,
+      "speed": 86,
+      "damage": 7,
+      "melee_range": 28,
+      "attack_cooldown": 0.9
+    },
+    {
       "type": "enemy_ranged",
       "name": "Test Archer A",
       "x": 39,
