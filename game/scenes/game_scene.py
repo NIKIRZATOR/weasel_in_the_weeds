@@ -13,6 +13,7 @@ from game.entities.player import Player
 from game.items import create_item_stack
 from game.localization import get_localizer
 from game.objects import create_world_object
+from game.quests import QuestManager
 from game.scenes.base import Scene
 from game.ui.hud import HUD
 from game.world.collision import CollisionSystem
@@ -83,6 +84,7 @@ class GameScene(Scene):
         world_height = self.tilemap.height * self.tilemap.tile_size
         self.camera = Camera(world_width, world_height)
         self.hud = HUD()
+        self.quest_manager = QuestManager(self.player)
         self.info_font = pygame.font.Font(None, 28)
         self.interaction_font = pygame.font.Font(None, 30)
         self.last_interaction_message = ""
@@ -294,6 +296,11 @@ class GameScene(Scene):
 
         self.app.set_scene(ProgressionScene(self.app, self))
 
+    def open_quest_log(self):
+        from game.scenes.quest_log_scene import QuestLogScene
+
+        self.app.set_scene(QuestLogScene(self.app, self))
+
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.QUIT:
@@ -315,6 +322,8 @@ class GameScene(Scene):
                     self.open_crafting()
                 elif event.key == pygame.K_o:
                     self.open_progression()
+                elif event.key == pygame.K_j:
+                    self.open_quest_log()
                 elif event.key == pygame.K_e:
                     self.try_interact()
                 elif event.key == pygame.K_f:
@@ -325,7 +334,7 @@ class GameScene(Scene):
                     else:
                         self.last_interaction_message = self.localizer.t("ui.consumables.cannot_use")
                     self.last_interaction_timer = 1.5
-                elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4):
+                elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5):
                     self.player.select_hotbar_slot(event.key - pygame.K_1)
                 elif event.key == pygame.K_SPACE and not self.player.is_jumping:
                     keys = pygame.key.get_pressed()
@@ -937,8 +946,10 @@ class GameScene(Scene):
         self.hud.draw(
             self.app.screen,
             self.player,
+            quest_manager=self.quest_manager,
             combat_state=self._build_hud_combat_state(),
             fps=self.app.current_fps,
+            show_fps=self.app.show_fps,
         )
         if self.current_interaction_target is not None:
             self._draw_interaction_prompt(self.current_interaction_target)

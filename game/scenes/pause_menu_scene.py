@@ -27,6 +27,7 @@ class PauseMenuScene(Scene):
         labels = [
             (self.localizer.t("ui.pause.resume"), self.resume_game, False),
             (self.localizer.t("ui.pause.inventory"), self.open_inventory, False),
+            (self.localizer.t("ui.pause.quests"), self.open_quest_log, False),
             (self.localizer.t("ui.pause.progression"), self.open_progression, False),
             (self.localizer.t("ui.pause.settings"), self.open_settings, False),
             (self.localizer.t("ui.pause.exit_to_menu"), self.exit_to_menu, False),
@@ -83,6 +84,11 @@ class PauseMenuScene(Scene):
 
         self.app.set_scene(ProgressionScene(self.app, self.game_scene))
 
+    def open_quest_log(self):
+        from game.scenes.quest_log_scene import QuestLogScene
+
+        self.app.set_scene(QuestLogScene(self.app, self.game_scene))
+
     def exit_to_menu(self):
         from game.scenes.menu_scene import MenuScene
         from game.scenes.splash_scene import SplashScene
@@ -108,6 +114,8 @@ class PauseMenuScene(Scene):
                 from game.scenes.crafting_scene import CraftingScene
 
                 self.app.set_scene(CraftingScene(self.app, self.game_scene))
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_j:
+                self.open_quest_log()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_o:
                 self.open_progression()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -150,7 +158,6 @@ class PauseMenuScene(Scene):
 
             label = self.button_font.render(button["label"], True, COLORS["WHITE"])
             self.app.screen.blit(label, label.get_rect(center=rect.center))
-
         if self.message:
             message = self.info_font.render(self.message, True, (255, 220, 120))
             self.app.screen.blit(

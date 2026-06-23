@@ -90,6 +90,9 @@ class EnemyManager:
 
     def _handle_enemy_death(self, enemy):
         self._spawn_drops(enemy)
+        defeat_flag = getattr(enemy, "defeat_flag", None)
+        if defeat_flag:
+            self.game_scene.player.set_flag(defeat_flag)
         if not enemy.xp_awarded and enemy.xp_reward > 0:
             enemy.xp_awarded = True
             self.game_scene._award_player_xp(enemy.xp_reward, append=True)

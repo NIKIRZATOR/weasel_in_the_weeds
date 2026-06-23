@@ -8,8 +8,6 @@ from settings import ASSETS_DIR, COLORS, HOTBAR_SIZE, PLAYER_MAX_HEALTH, PLAYER_
 
 
 class HUD:
-    
-
     def __init__(self):
         self.localizer = get_localizer()
         self.font = pygame.font.Font(None, 30)
@@ -257,7 +255,7 @@ class HUD:
             True,
             COLORS['GOLD'],
         )
-        screen.blit(text, (screen_width - text.get_width() - 16, 10))
+        screen.blit(text, (screen_width - text.get_width() - 16, 72))
 
     def draw_knowledge_shards(self, screen, player):
         screen_width, _ = screen.get_size()
@@ -266,12 +264,12 @@ class HUD:
             True,
             COLORS['WHITE'],
         )
-        screen.blit(text, (screen_width - text.get_width() - 16, 42))
+        screen.blit(text, (screen_width - text.get_width() - 16, 102))
 
     def draw_fps(self, screen, fps):
         screen_width, _ = screen.get_size()
         text = self.small_font.render(f"FPS: {int(round(max(0.0, float(fps))))}", True, COLORS["WHITE"])
-        screen.blit(text, (screen_width - text.get_width() - 16, 90))
+        screen.blit(text, (screen_width - text.get_width() - 16, 130))
 
     def draw_hotbar(self, screen, player, combat_state=None):
         screen_width, screen_height = screen.get_size()
@@ -344,6 +342,26 @@ class HUD:
         text = self.small_font.render(self.localizer.t("ui.hud.map_hint"), True, COLORS["WHITE"])
         screen.blit(text, (screen_width - text.get_width() - 16, 66))
 
+    def draw_active_quest(self, screen, quest_manager):
+        if quest_manager is None:
+            return
+
+        quest = quest_manager.get_active_main_quest()
+        if quest is None:
+            return
+
+        screen_width, _ = screen.get_size()
+        panel_width = min(320, screen_width - 24)
+        panel_height = 54
+        panel_rect = pygame.Rect(screen_width - panel_width - 16, 10, panel_width, panel_height)
+        pygame.draw.rect(screen, COLORS["UI_PANEL"], panel_rect, border_radius=10)
+        pygame.draw.rect(screen, COLORS["UI_SLOT_BORDER"], panel_rect, width=2, border_radius=10)
+
+        title = self.tiny_font.render(self.localizer.t("ui.quests.active_label"), True, COLORS["UI_TEXT_DIM"])
+        text = self.small_font.render(self.localizer.t(quest.title_key), True, COLORS["WHITE"])
+        screen.blit(title, (panel_rect.x + 10, panel_rect.y + 7))
+        screen.blit(text, (panel_rect.x + 10, panel_rect.y + 24))
+
     def draw_combat_status(self, screen, combat_state):
         if combat_state is None:
             return
@@ -379,15 +397,17 @@ class HUD:
                 warning.get_rect(center=(screen_width // 2, screen_height - 104)),
             )
 
-    def draw(self, screen, player, combat_state=None, fps=0.0):
+    def draw(self, screen, player, quest_manager=None, combat_state=None, fps=0.0, show_fps=True):
         self.draw_portrait(screen, player)
         self.draw_active_effects(screen, player)
         self.draw_health_bar(screen, player)
         self.draw_stamina_bar(screen, player)
         self.draw_progression_bar(screen, player)
+        self.draw_active_quest(screen, quest_manager)
         self.draw_coins(screen, player)
         self.draw_knowledge_shards(screen, player)
-        self.draw_fps(screen, fps)
+        if show_fps:
+            self.draw_fps(screen, fps)
         self.draw_map_hint(screen, player)
         self.draw_hotbar(screen, player, combat_state=combat_state)
         self.draw_combat_status(screen, combat_state)

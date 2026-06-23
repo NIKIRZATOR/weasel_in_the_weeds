@@ -40,6 +40,7 @@ class BaseBossEnemy(Enemy):
         self.strafe_swap_timer = random.uniform(1.1, 2.4)
         self.phase_transition_timer = 0.0
         self.velocity_intent = Vector2(0, 0)
+        self.defeat_flag = "boss_defeated"
 
     def update(self, dt, game_scene):
         if self.is_dead:

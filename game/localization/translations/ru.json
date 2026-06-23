@@ -11,6 +11,7 @@
       "new_game_loading": "Новая игра..."
     },
     "pause": {
+      "quests": "Задания",
       "progression": "Дерево навыков",
       "title": "Пауза",
       "resume": "Вернуться в игру",
@@ -21,6 +22,9 @@
     "settings": {
       "title": "Настройки",
       "window_mode": "Режим окна",
+      "show_fps": "Показывать FPS",
+      "option_on": "Да",
+      "option_off": "Нет",
       "back": "Назад",
       "close_hint": "Esc - назад",
       "current_mode": "Текущий режим: {mode}",
@@ -114,8 +118,41 @@
       "close_hint": "Enter/E - дальше | 1-9 - выбор | Esc - закрыть"
     },
     "hud": {
-      "controls": "WASD | SHIFT | SPACE | ALT | ЛКМ | ПКМ | ЛКМ+ПКМ 1.5с | E | I | K | M",
+      "controls": "WASD | SHIFT | SPACE | ALT | ЛКМ | ПКМ | ЛКМ+ПКМ 1.5с | E | 1-5 | I | J | K | M",
       "map_hint": "M - карта | K - крафт"
+    },
+    "quests": {
+      "title": "Задания",
+      "list_title": "Список",
+      "details_title": "Подробности",
+      "close_hint": "Esc / J - закрыть",
+      "active_label": "Текущее задание",
+      "status_active": "В процессе",
+      "status_next": "Следующее",
+      "status_completed": "Выполнено",
+      "empty": "Сейчас нет доступных заданий.",
+      "main": {
+        "meet_hermit": {
+          "title": "Найти отшельника",
+          "description": "Осмотреть опушку леса и поговорить с местным отшельником.",
+          "objective": "Поговорите с мышью-отшельником."
+        },
+        "enter_forest_edge": {
+          "title": "Пройти к опушке",
+          "description": "После разговора с отшельником двигайтесь дальше по тропе.",
+          "objective": "Доберитесь до опушки леса."
+        },
+        "enter_deep_forest": {
+          "title": "Войти в дремучий лес",
+          "description": "Пройдите дальше вглубь леса и найдите путь к боссу.",
+          "objective": "Войдите в дремучий лес."
+        },
+        "defeat_guardian": {
+          "title": "Победить стража",
+          "description": "Одолейте лесного стража, чтобы путь дальше открылся.",
+          "objective": "Победите лесного стража."
+        }
+      }
     },
     "effects": {
       "tooltip_stats": "Сила: {value} | Осталось: {duration}с",

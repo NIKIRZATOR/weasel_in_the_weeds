@@ -14,6 +14,7 @@
       "title": "Pause",
       "resume": "Resume",
       "inventory": "Inventory",
+      "quests": "Quests",
       "progression": "Progression",
       "settings": "Settings",
       "exit_to_menu": "Exit to Menu"
@@ -21,6 +22,9 @@
     "settings": {
       "title": "Settings",
       "window_mode": "Window Mode",
+      "show_fps": "Show FPS",
+      "option_on": "On",
+      "option_off": "Off",
       "back": "Back",
       "close_hint": "Esc - back",
       "current_mode": "Current mode: {mode}",
@@ -114,8 +118,41 @@
       "close_hint": "Enter/E - next | 1-9 - choice | Esc - close"
     },
     "hud": {
-      "controls": "WASD | SHIFT | SPACE | ALT | LMB | RMB | LMB+RMB 1.5s | E | F | 1-4 | I | O | K | M",
+      "controls": "WASD | SHIFT | SPACE | ALT | LMB | RMB | LMB+RMB 1.5s | E | 1-5 | I | J | O | K | M",
       "map_hint": "M - map | K - craft"
+    },
+    "quests": {
+      "title": "Quests",
+      "list_title": "List",
+      "details_title": "Details",
+      "close_hint": "Esc / J - close",
+      "active_label": "Current quest",
+      "status_active": "Active",
+      "status_next": "Next",
+      "status_completed": "Completed",
+      "empty": "No available quests right now.",
+      "main": {
+        "meet_hermit": {
+          "title": "Find the Hermit",
+          "description": "Search the forest edge and speak with the local hermit.",
+          "objective": "Speak with the hermit mouse."
+        },
+        "enter_forest_edge": {
+          "title": "Reach the Forest Edge",
+          "description": "After meeting the hermit, continue along the trail.",
+          "objective": "Reach the forest edge."
+        },
+        "enter_deep_forest": {
+          "title": "Enter the Deep Forest",
+          "description": "Push deeper into the woods and find the boss path.",
+          "objective": "Enter the deep forest."
+        },
+        "defeat_guardian": {
+          "title": "Defeat the Guardian",
+          "description": "Bring down the Forest Guardian to open the way forward.",
+          "objective": "Defeat the Forest Guardian."
+        }
+      }
     },
     "effects": {
       "tooltip_stats": "Power: {value} | Remaining: {duration}s",

@@ -11,6 +11,7 @@ class GameApp:
     def __init__(self):
         pygame.init()
         self.display_mode = "windowed"
+        self.show_fps = True
         self.screen = None
         self._apply_display_mode()
         self.clock = pygame.time.Clock()
@@ -40,6 +41,10 @@ class GameApp:
         localizer.set_language(language)
         if self.scene is not None:
             self.scene.on_language_changed()
+        return True
+
+    def set_show_fps(self, value):
+        self.show_fps = bool(value)
         return True
 
     def _apply_display_mode(self):

@@ -31,7 +31,7 @@ class SettingsScene(Scene):
         ]
 
         panel_width = min(760, screen_width - 48)
-        panel_height = min(420, screen_height - 48)
+        panel_height = min(500, screen_height - 48)
         self.panel_rect = pygame.Rect(
             (screen_width - panel_width) // 2,
             (screen_height - panel_height) // 2,
@@ -50,6 +50,7 @@ class SettingsScene(Scene):
 
         self.mode_row_rect = pygame.Rect(content_left, self.panel_rect.y + 122, content_width, row_height)
         self.language_row_rect = pygame.Rect(content_left, self.mode_row_rect.bottom + 26, content_width, row_height)
+        self.fps_row_rect = pygame.Rect(content_left, self.language_row_rect.bottom + 26, content_width, row_height)
 
         self.mode_buttons = self._build_option_row(
             self.mode_row_rect,
@@ -65,11 +66,22 @@ class SettingsScene(Scene):
             label_width=label_width,
             options_width=options_width,
         )
+        fps_options = [
+            (self.localizer.t("ui.settings.option_on"), True),
+            (self.localizer.t("ui.settings.option_off"), False),
+        ]
+        self.fps_buttons = self._build_option_row(
+            self.fps_row_rect,
+            fps_options,
+            key_name="fps",
+            label_width=label_width,
+            options_width=options_width,
+        )
 
         back_width = min(220, self.panel_rect.width - 56)
         self.back_button = pygame.Rect(
             self.panel_rect.centerx - back_width // 2,
-            self.language_row_rect.bottom + 42,
+            self.fps_row_rect.bottom + 42,
             back_width,
             44,
         )
@@ -127,6 +139,10 @@ class SettingsScene(Scene):
                         self.app.set_language(button["language"])
                         self._build_buttons()
                         return
+                for button in self.fps_buttons:
+                    if button["rect"].collidepoint(mouse_pos):
+                        self.app.set_show_fps(button["fps"])
+                        return
                 if self.back_button.collidepoint(mouse_pos):
                     self.go_back()
 
@@ -178,6 +194,27 @@ class SettingsScene(Scene):
             rect = button["rect"]
             hovered = rect.collidepoint(mouse_pos)
             active = current_language == button["language"]
+
+            fill = (55, 55, 65)
+            border = (100, 100, 120)
+            if active:
+                fill = (64, 90, 120)
+                border = COLORS["UI_SLOT_SELECTED"]
+            elif hovered:
+                fill = (75, 75, 95)
+                border = (120, 180, 255)
+
+            pygame.draw.rect(self.app.screen, fill, rect, border_radius=8)
+            pygame.draw.rect(self.app.screen, border, rect, width=2, border_radius=8)
+
+            label = self.button_font.render(button["label"], True, COLORS["WHITE"])
+            self.app.screen.blit(label, label.get_rect(center=rect.center))
+
+        self._draw_row_label(self.fps_row_rect, self.localizer.t("ui.settings.show_fps"))
+        for button in self.fps_buttons:
+            rect = button["rect"]
+            hovered = rect.collidepoint(mouse_pos)
+            active = self.app.show_fps == button["fps"]
 
             fill = (55, 55, 65)
             border = (100, 100, 120)
