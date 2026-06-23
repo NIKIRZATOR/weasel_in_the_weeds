@@ -49,6 +49,8 @@ class WorldObject(Entity):
         self.is_interactable = is_interactable
         self.properties = {} if properties is None else properties
         self.is_active = False
+        self._label_cache_key = None
+        self._label_surface = None
 
     def interact(self, player, game_scene):
         return False
@@ -76,10 +78,22 @@ class WorldObject(Entity):
     def draw_name_label(self, screen, rect, text=None):
         label = (self.properties.get("display_name") or text or self.name or "").strip()
         if not label:
+            self._label_cache_key = None
+            self._label_surface = None
             return
 
-        max_width = max(18, rect.width - 8)
-        max_height = max(16, rect.height - 8)
+        cache_key = (label, rect.width, rect.height)
+        if self._label_cache_key != cache_key:
+            self._label_surface = self._build_label_surface(label, rect.width, rect.height)
+            self._label_cache_key = cache_key
+        if self._label_surface is not None:
+            screen.blit(self._label_surface, rect.topleft)
+
+    def _build_label_surface(self, label, width, height):
+        surface = pygame.Surface((max(1, width), max(1, height)), pygame.SRCALPHA)
+
+        max_width = max(18, width - 8)
+        max_height = max(16, height - 8)
 
         best_font = None
         best_lines = None
@@ -98,17 +112,18 @@ class WorldObject(Entity):
                 break
 
         if best_font is None or best_lines is None:
-            return
+            return None
 
         total_height = best_line_height * len(best_lines)
-        start_y = rect.y + (rect.height - total_height) / 2
+        start_y = (height - total_height) / 2
         for index, line in enumerate(best_lines):
             text_surface = best_font.render(line, True, COLORS["WHITE"])
             outline_surface = best_font.render(line, True, COLORS["BLACK"])
-            text_rect = text_surface.get_rect(center=(rect.centerx, start_y + best_line_height * index + best_line_height / 2))
+            text_rect = text_surface.get_rect(center=(width / 2, start_y + best_line_height * index + best_line_height / 2))
             for offset_x, offset_y in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-                screen.blit(outline_surface, text_rect.move(offset_x, offset_y))
-            screen.blit(text_surface, text_rect)
+                surface.blit(outline_surface, text_rect.move(offset_x, offset_y))
+            surface.blit(text_surface, text_rect)
+        return surface
 
     @classmethod
     def _get_label_font(cls, font_size):

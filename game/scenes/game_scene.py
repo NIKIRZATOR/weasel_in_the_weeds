@@ -6,11 +6,13 @@ import pygame
 
 from game.core.camera import Camera
 from game.core.vector import Vector2
-from game.entities.enemies import BeetleEnemy, ForestGuardianBoss, MeleeEnemy, RangedEnemy, SpiderEnemy
+from game.effects import DamageNumber
+from game.entities.enemies import BeetleEnemy, EnemyManager, ForestGuardianBoss, MeleeEnemy, RangedEnemy, SpiderEnemy
+from game.entities.projectiles import PlayerProjectile
 from game.entities.player import Player
 from game.items import create_item_stack
 from game.localization import get_localizer
-from game.objects import PickableObject, create_world_object
+from game.objects import create_world_object
 from game.scenes.base import Scene
 from game.ui.hud import HUD
 from game.world.collision import CollisionSystem
@@ -18,17 +20,12 @@ from game.world.level import load_level
 from game.world.tilemap import TileMap
 from settings import (
     COLORS,
-    ENEMY_BACKGROUND_UPDATE_INTERVAL,
-    ENEMY_BACKGROUND_UPDATE_MARGIN,
-    ENEMY_FULL_UPDATE_MARGIN,
     LEVELS_DIR,
     RENDER_CULL_MARGIN,
 )
 
 
 TRANSITION_FADE_DURATION = 0.45
-DAMAGE_NUMBER_DURATION = 0.75
-DAMAGE_NUMBER_RISE_SPEED = 52
 CHARGED_ATTACK_THRESHOLD = 1.5
 HIT_STOP_DURATION = 0.055
 SCREEN_SHAKE_DURATION = 0.12
@@ -66,7 +63,8 @@ class GameScene(Scene):
         else:
             self.player = player
             self.player.move_to_spawn(spawn_world_x, spawn_world_y)
-        self.world_objects, self.enemies = self._load_world_objects()
+        self.world_objects, enemies = self._load_world_objects()
+        self.enemy_manager = EnemyManager(self, enemies)
         self.collision_system.set_objects(self.world_objects)
         self._player_attack_applied = False
         self.transition_target_level = None
@@ -90,6 +88,11 @@ class GameScene(Scene):
         self.last_interaction_message = ""
         self.last_interaction_timer = 0.0
         self.current_interaction_target = None
+
+    @property
+    def enemies(self):
+        """Compatibility view for combat and projectile code."""
+        return self.enemy_manager.enemies
 
     def on_language_changed(self):
         self._update_window_caption()
@@ -531,7 +534,7 @@ class GameScene(Scene):
         self._update_map_reveal()
         self._update_grass_hide_zones()
         self._update_checkpoints()
-        self._update_enemies(dt)
+        self.enemy_manager.update(dt)
         self._update_auto_pickups()
         self._update_player_projectiles(dt)
         self._resolve_player_enemy_overlaps()
@@ -656,50 +659,6 @@ class GameScene(Scene):
             )
         )
 
-    def _update_enemies(self, dt):
-        alive_enemies = []
-        full_update_rect = self._camera_world_rect(ENEMY_FULL_UPDATE_MARGIN)
-        background_update_rect = self._camera_world_rect(ENEMY_BACKGROUND_UPDATE_MARGIN)
-        for enemy in self.enemies:
-            if self._enemy_needs_full_update(enemy, full_update_rect):
-                accumulated_dt = min(
-                    enemy.background_update_accumulator + dt,
-                    ENEMY_BACKGROUND_UPDATE_INTERVAL,
-                )
-                enemy.background_update_accumulator = 0.0
-                enemy.update(accumulated_dt, self)
-            elif background_update_rect.colliderect(enemy.get_hitbox_rect()):
-                enemy.background_update_accumulator += dt
-                if enemy.background_update_accumulator >= ENEMY_BACKGROUND_UPDATE_INTERVAL:
-                    accumulated_dt = min(
-                        enemy.background_update_accumulator,
-                        ENEMY_BACKGROUND_UPDATE_INTERVAL,
-                    )
-                    enemy.background_update_accumulator = 0.0
-                    enemy.update(accumulated_dt, self)
-            else:
-                enemy.background_update_accumulator = min(
-                    enemy.background_update_accumulator + dt,
-                    ENEMY_BACKGROUND_UPDATE_INTERVAL,
-                )
-            if enemy.is_dead:
-                self._spawn_enemy_drops(enemy)
-                if not enemy.xp_awarded and enemy.xp_reward > 0:
-                    enemy.xp_awarded = True
-                    self._award_player_xp(enemy.xp_reward, append=True)
-                continue
-            alive_enemies.append(enemy)
-        self.enemies = alive_enemies
-
-    def _enemy_needs_full_update(self, enemy, full_update_rect):
-        if full_update_rect.colliderect(enemy.get_hitbox_rect()):
-            return True
-        if getattr(enemy, "encounter_started", False):
-            return True
-        if getattr(enemy, "behavior_state", None) in {"chase", "linger"}:
-            return True
-        return bool(getattr(enemy, "projectiles", ()))
-
     def _camera_world_rect(self, margin=0):
         screen_width, screen_height = self.app.get_screen_size()
         return pygame.Rect(
@@ -708,60 +667,6 @@ class GameScene(Scene):
             int(screen_width + margin * 2),
             int(screen_height + margin * 2),
         )
-
-    def _enemy_is_visible(self, enemy, visible_rect):
-        if visible_rect.colliderect(enemy.get_hitbox_rect()):
-            return True
-        for projectile in getattr(enemy, "projectiles", ()):
-            if projectile.is_dead:
-                continue
-            radius = max(1, int(getattr(projectile, "radius", 1)))
-            projectile_rect = pygame.Rect(
-                int(projectile.position.x - radius),
-                int(projectile.position.y - radius),
-                radius * 2,
-                radius * 2,
-            )
-            if visible_rect.colliderect(projectile_rect):
-                return True
-        return False
-
-    def _spawn_enemy_drops(self, enemy):
-        if getattr(enemy, "loot_dropped", False):
-            return
-        enemy.loot_dropped = True
-        drops = enemy.roll_loot() if hasattr(enemy, "roll_loot") else []
-        if not drops:
-            return
-
-        tile_size = max(12, int(self.level.tile_size * 0.6))
-        center = enemy.get_center()
-        start_x = center.x - tile_size / 2
-        start_y = center.y - tile_size / 2
-        for index, drop in enumerate(drops):
-            offset_x = (index % 2) * (tile_size + 4) - (tile_size + 4) / 2
-            offset_y = (index // 2) * (tile_size + 4) - (tile_size + 4) / 2
-            properties = {}
-            if "item_id" in drop:
-                properties["item_id"] = drop["item_id"]
-                properties["quantity"] = int(drop.get("quantity", 1))
-            if "coins" in drop:
-                properties["coins"] = int(drop.get("coins", 0))
-            if "knowledge_shards" in drop:
-                properties["knowledge_shards"] = int(drop.get("knowledge_shards", 0))
-            if not properties:
-                continue
-            self.world_objects.append(
-                PickableObject(
-                    start_x + offset_x,
-                    start_y + offset_y,
-                    tile_size,
-                    tile_size,
-                    name=properties.get("item_id", "enemy_drop"),
-                    properties={**properties, "auto_pickup": True},
-                )
-            )
-        self.collision_system.set_objects(self.world_objects)
 
     def _collides_with_enemies(self, x, y, entity, ignored_enemy=None):
         hitbox = entity.get_hitbox_at(x, y)
@@ -1023,9 +928,7 @@ class GameScene(Scene):
         for world_object in self.world_objects:
             if visible_rect.colliderect(world_object.get_hitbox_rect()):
                 world_object.draw(self.app.screen, self.camera)
-        for enemy in self.enemies:
-            if self._enemy_is_visible(enemy, visible_rect):
-                enemy.draw(self.app.screen, self.camera)
+        self.enemy_manager.draw(self.app.screen, self.camera)
         self._draw_player_projectiles()
         self._draw_damage_numbers()
         self.player.draw(self.app.screen, self.camera)
@@ -1158,104 +1061,6 @@ def _distance_point_to_segment(point, start, end):
     closest_x = start.x + t * dx
     closest_y = start.y + t * dy
     return ((point.x - closest_x) ** 2 + (point.y - closest_y) ** 2) ** 0.5
-
-
-class DamageNumber:
-    def __init__(self, text, x, y):
-        self.text = text
-        self.position = Vector2(x, y)
-        self.age = 0.0
-        self.duration = DAMAGE_NUMBER_DURATION
-        self.is_dead = False
-
-    def update(self, dt):
-        self.age += dt
-        self.position.y -= DAMAGE_NUMBER_RISE_SPEED * dt
-        if self.age >= self.duration:
-            self.is_dead = True
-
-    def draw(self, screen, camera, font):
-        progress = min(1.0, self.age / self.duration)
-        alpha = int(255 * (1.0 - progress))
-        scale_offset = -8 * progress
-        text_surface = font.render(self.text, True, (255, 235, 120))
-        outline_surface = font.render(self.text, True, COLORS["BLACK"])
-        text_surface.set_alpha(alpha)
-        outline_surface.set_alpha(alpha)
-
-        x = self.position.x - camera.position.x
-        y = self.position.y - camera.position.y + scale_offset
-        rect = text_surface.get_rect(center=(x, y))
-        for offset_x, offset_y in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-            screen.blit(outline_surface, rect.move(offset_x, offset_y))
-        screen.blit(text_surface, rect)
-
-
-class PlayerProjectile:
-    def __init__(self, x, y, dir_x, dir_y, speed, damage, radius=5, max_distance=520.0):
-        self.position = Vector2(x, y)
-        self.direction = Vector2(dir_x, dir_y).normalize() if Vector2(dir_x, dir_y).length() > 0 else Vector2(1, 0)
-        self.speed = float(speed)
-        self.damage = max(1, int(damage))
-        self.radius = max(2, int(radius))
-        self.max_distance = float(max_distance)
-        self.travelled_distance = 0.0
-        self.is_dead = False
-
-    def update(self, dt, game_scene):
-        if self.is_dead:
-            return
-
-        step = self.direction * (self.speed * dt)
-        next_x = self.position.x + step.x
-        next_y = self.position.y + step.y
-        probe = _ProjectileProbe(self.radius)
-
-        if game_scene.collision_system.check_collision(next_x - self.radius, next_y - self.radius, probe):
-            self.is_dead = True
-            return
-
-        self.position.x = next_x
-        self.position.y = next_y
-        self.travelled_distance += step.length()
-
-        projectile_rect = (
-            self.position.x - self.radius,
-            self.position.y - self.radius,
-            self.radius * 2,
-            self.radius * 2,
-        )
-        for enemy in game_scene.enemies:
-            if enemy.is_dead:
-                continue
-            if not _rects_intersect(projectile_rect, enemy.get_hurtbox_rect()):
-                continue
-            if enemy.take_damage(self.damage, "ranged"):
-                enemy.apply_hit_reaction(self.direction, 18.0, 0.08)
-                game_scene._spawn_damage_number(enemy, self.damage)
-                fake_attack = type("Attack", (), {"kind": "light"})()
-                game_scene._trigger_hit_feedback(fake_attack)
-            self.is_dead = True
-            return
-
-        if self.travelled_distance >= self.max_distance:
-            self.is_dead = True
-
-    def draw(self, screen, camera):
-        if self.is_dead:
-            return
-        x = int(self.position.x - camera.position.x)
-        y = int(self.position.y - camera.position.y)
-        pygame.draw.circle(screen, (150, 220, 255), (x, y), self.radius)
-        pygame.draw.circle(screen, COLORS["BLACK"], (x, y), self.radius, width=1)
-
-
-class _ProjectileProbe:
-    def __init__(self, radius):
-        self.radius = radius * 2
-
-    def get_hitbox_at(self, x, y):
-        return (x, y, self.radius, self.radius)
 
 
 def _arc_hits_rect(origin, aim_direction, radius, arc_degrees, rect):

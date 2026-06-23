@@ -1,5 +1,6 @@
 from game.entities.enemies.base import Enemy
 from game.entities.enemies.bosses import BaseBossEnemy, ForestGuardianBoss
+from game.entities.enemies.manager import EnemyManager
 from game.entities.enemies.projectiles import RangedProjectile
 from game.entities.enemies.types.archer import ArcherEnemy
 from game.entities.enemies.types.beetle import BeetleEnemy
@@ -18,6 +19,7 @@ __all__ = [
     "BeetleEnemy",
     "ChargerEnemy",
     "Enemy",
+    "EnemyManager",
     "ForestGuardianBoss",
     "MeleeEnemy",
     "MeleeGruntEnemy",
