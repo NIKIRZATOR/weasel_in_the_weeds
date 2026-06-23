@@ -27,8 +27,8 @@ class PauseMenuScene(Scene):
         labels = [
             (self.localizer.t("ui.pause.resume"), self.resume_game, False),
             (self.localizer.t("ui.pause.inventory"), self.open_inventory, False),
-            (self.localizer.t("ui.pause.quests"), self.open_quest_log, False),
-            (self.localizer.t("ui.pause.progression"), self.open_progression, False),
+            #(self.localizer.t("ui.pause.quests"), self.open_quest_log, False),
+            #(self.localizer.t("ui.pause.progression"), self.open_progression, False),
             (self.localizer.t("ui.pause.settings"), self.open_settings, False),
             (self.localizer.t("ui.pause.exit_to_menu"), self.exit_to_menu, False),
         ]

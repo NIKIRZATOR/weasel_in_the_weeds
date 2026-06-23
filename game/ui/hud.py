@@ -62,12 +62,12 @@ class HUD:
         pygame.draw.rect(screen, COLORS['HEALTH_BG'], (x, y, width, height), border_radius=6)
         pygame.draw.rect(screen, COLORS['HEALTH'], (x, y, width * percent, height), border_radius=6)
 
-        text = self.font.render(
-            f"{self.localizer.t('ui.inventory.stat_hp')}: {current_health}/{max_health}",
-            True,
-            COLORS['WHITE'],
-        )
-        screen.blit(text, (x + width + 8, y - 4))
+        # text = self.font.render(
+        #     f"{self.localizer.t('ui.inventory.stat_hp')}: {current_health}/{max_health}",
+        #     True,
+        #     COLORS['WHITE'],
+        # )
+        #screen.blit(text, (x + width + 8, y - 4))
 
     def draw_stamina_bar(self, screen, player):
         width = 188
@@ -82,12 +82,12 @@ class HUD:
         pygame.draw.rect(screen, COLORS['STAMINA_BG'], (x, y, width, height), border_radius=6)
         pygame.draw.rect(screen, COLORS['STAMINA'], (x, y, width * percent, height), border_radius=6)
 
-        text = self.font.render(
-            f"{self.localizer.t('ui.inventory.stat_st')}: {current_stamina}/{max_stamina}",
-            True,
-            COLORS['WHITE'],
-        )
-        screen.blit(text, (x + width + 8, y - 4))
+        # text = self.font.render(
+        #     f"{self.localizer.t('ui.inventory.stat_st')}: {current_stamina}/{max_stamina}",
+        #     True,
+        #     COLORS['WHITE'],
+        # )
+        # screen.blit(text, (x + width + 8, y - 4))
 
     def draw_progression_bar(self, screen, player):
         width = 188
@@ -408,7 +408,7 @@ class HUD:
         self.draw_knowledge_shards(screen, player)
         if show_fps:
             self.draw_fps(screen, fps)
-        self.draw_map_hint(screen, player)
+        #self.draw_map_hint(screen, player)
         self.draw_hotbar(screen, player, combat_state=combat_state)
         self.draw_combat_status(screen, combat_state)
-        self.draw_controls(screen)
+        #self.draw_controls(screen)
