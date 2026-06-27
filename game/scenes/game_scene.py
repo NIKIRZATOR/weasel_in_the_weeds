@@ -164,9 +164,16 @@ class GameScene(Scene):
             speed=int(properties.get("speed", raw_object.get("speed", 80))),
             damage=int(properties.get("damage", raw_object.get("damage", 4))),
             xp_reward=int(properties.get("xp_reward", raw_object.get("xp_reward", 10))),
+            **self._enemy_resistance_kwargs(properties),
             **self._enemy_hitbox_kwargs(properties),
             **self._enemy_specific_kwargs(raw_object, enemy_class),
         )
+
+    def _enemy_resistance_kwargs(self, properties):
+        raw_resistances = properties.get("resistances")
+        if not isinstance(raw_resistances, dict) or not raw_resistances:
+            return {}
+        return {"resistances": raw_resistances}
 
     def _enemy_hitbox_kwargs(self, properties):
         result = {}
@@ -769,7 +776,7 @@ class GameScene(Scene):
                     continue
                 if enemy.take_damage(damage, attack.kind):
                     enemy.apply_hit_reaction(attack.aim_direction, attack.knockback, attack.stagger)
-                    self._spawn_damage_number(enemy, damage)
+                    self._spawn_damage_number(enemy, enemy.last_damage_taken)
                     self._trigger_hit_feedback(attack)
             self._player_attack_applied = True
             return

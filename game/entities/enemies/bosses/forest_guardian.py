@@ -5,37 +5,52 @@ import random
 
 import pygame
 
+from game.core.assets import load_image
 from game.core.vector import Vector2
 from game.entities.enemies.ai.steering import rects_intersect
 from game.entities.enemies.bosses.base_boss import BaseBossEnemy
 from game.entities.enemies.projectiles import SpikeProjectile
-from settings import COLORS, SHOW_ENEMY_ATTACK_RADII, SHOW_INTERACTION_ZONES
+from settings import ASSETS_DIR, COLORS, SHOW_ENEMY_ATTACK_RADII, SHOW_INTERACTION_ZONES
 
 
 class ForestGuardianBoss(BaseBossEnemy):
+    PHASE_TWO_RANGED_RESISTANCE = 0.85
+    SPRITE_FRAME_SIZE = (64, 64)
+    SPRITE_ASSETS = {
+        "idle": ("forest_guardian_idle.png", 1, 0.5),
+        "move": ("forest_guardian_steps.png", 4, 0.14),
+        "charge": ("forest_guardian_dash.png", 4, 0.09),
+        "melee": ("forest_guardian_meele_attack.png", 5, 0.08),
+    }
+    SPRITE_NATIVE_FACING_LEFT = {
+        "idle": False,
+        "move": True,
+        "charge": False,
+        "melee": False,
+    }
     BODY_HITBOX = {
-        "width": 48,
-        "height": 34,
-        "offset_x": 14,
-        "offset_y": 24,
+        "width": 100,
+        "height": 100,
+        "offset_x": 16,
+        "offset_y": 16,
     }
     HURTBOX = {
-        "width": 44,
-        "height": 30,
+        "width": 100,
+        "height": 100,
         "offset_x": 16,
-        "offset_y": 23,
+        "offset_y": 16,
     }
     ATTACK_HITBOX = {
-        "width": 28,
-        "height": 20,
-        "offset_x": 44,
-        "offset_y": 22,
+        "width": 90,
+        "height": 90,
+        "offset_x": 16,
+        "offset_y": 16,
         "mirror_with_facing": True,
     }
     COLLISION_CIRCLE = {
         "radius": 16,
-        "offset_x": 38,
-        "offset_y": 41,
+        "offset_x": 64,
+        "offset_y": 64,
     }
     LOOT_TABLE = (
         {"item_id": "feather", "min_quantity": 2, "max_quantity": 4, "chance": 1.0},
@@ -108,6 +123,18 @@ class ForestGuardianBoss(BaseBossEnemy):
         self.shockwave_trigger_time = 1.5
         self.shockwave_windup_duration = 0.24
         self.shockwave_burst_duration = 0.12
+        self.sprite_asset_dir = ASSETS_DIR / "bosses" / "forest_guardian"
+        self.sprite_animations = self._load_sprite_animations()
+        self.current_animation = "idle"
+        self.current_frame_index = 0
+        self.animation_frame_timer = 0.0
+        self.current_sprite = self._get_animation_frame("idle", 0)
+
+    def update(self, dt, game_scene):
+        previous_position = Vector2(self.position.x, self.position.y)
+        super().update(dt, game_scene)
+        moved = (self.position.x != previous_position.x) or (self.position.y != previous_position.y)
+        self._update_animation(dt, moved)
 
     def on_phase_changed(self, new_phase):
         self.set_action("phase_shift", 0.95)
@@ -116,6 +143,13 @@ class ForestGuardianBoss(BaseBossEnemy):
         self.set_cooldown("spikes", 0.8)
         self.strafe_clockwise = not self.strafe_clockwise
         self.phase_glow_timer = 1.2
+
+    def get_resistance(self, resistance_type):
+        resistance = super().get_resistance(resistance_type)
+        normalized_type = str(resistance_type).strip().lower()
+        if self.phase >= 2 and normalized_type == "ranged":
+            return max(resistance, self.PHASE_TWO_RANGED_RESISTANCE)
+        return resistance
 
     def _update_boss(self, dt, game_scene, player, distance_to_player):
         self.phase_glow_timer = max(0.0, self.phase_glow_timer - dt)
@@ -379,7 +413,104 @@ class ForestGuardianBoss(BaseBossEnemy):
                 alive_projectiles.append(projectile)
         self.projectiles = alive_projectiles
 
+    def _load_sprite_animations(self):
+        animations = {}
+        frame_width, frame_height = self.SPRITE_FRAME_SIZE
+        target_size = (int(self.width), int(self.height))
+        for name, (filename, frame_count, frame_duration) in self.SPRITE_ASSETS.items():
+            path = self.sprite_asset_dir / filename
+            frames = self._load_animation_frames(path, frame_count, frame_width, frame_height, target_size)
+            animations[name] = {
+                "frames": frames,
+                "frame_duration": frame_duration,
+            }
+        return animations
+
+    def _load_animation_frames(self, path, frame_count, frame_width, frame_height, target_size):
+        sheet = load_image(path)
+        if sheet is None:
+            return []
+        frames = []
+        for index in range(frame_count):
+            source_rect = pygame.Rect(index * frame_width, 0, frame_width, frame_height)
+            if source_rect.right > sheet.get_width() or source_rect.bottom > sheet.get_height():
+                break
+            frame = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
+            frame.blit(sheet, (0, 0), source_rect)
+            if target_size != (frame_width, frame_height):
+                frame = pygame.transform.scale(frame, target_size)
+            frames.append(frame)
+        return frames
+
+    def _resolve_animation_name(self, moved):
+        if self.action_state in {"charge_windup", "charge"}:
+            return "charge"
+        if self.action_state in {"melee_windup", "shockwave_windup", "shockwave_burst"}:
+            return "melee"
+        if moved or self.action_state in {"approach", "retreat", "orbit", "evade", "recover", "phase_shift", "spike_windup", "spike_volley"}:
+            return "move"
+        return "idle"
+
+    def _get_animation_frame(self, animation_name, frame_index):
+        animation = self.sprite_animations.get(animation_name, {})
+        frames = animation.get("frames", [])
+        if frames:
+            return frames[frame_index % len(frames)]
+        fallback = self.sprite_animations.get("idle", {})
+        fallback_frames = fallback.get("frames", [])
+        if fallback_frames:
+            return fallback_frames[0]
+        return None
+
+    def _update_animation(self, dt, moved):
+        animation_name = self._resolve_animation_name(moved)
+        animation = self.sprite_animations.get(animation_name, {})
+        frames = animation.get("frames", [])
+        if not frames:
+            self.current_animation = animation_name
+            self.current_frame_index = 0
+            self.current_sprite = self._get_animation_frame(animation_name, 0)
+            return
+        if self.current_animation != animation_name:
+            self.current_animation = animation_name
+            self.current_frame_index = 0
+            self.animation_frame_timer = 0.0
+        frame_duration = max(0.01, float(animation.get("frame_duration", 0.12)))
+        if len(frames) > 1:
+            self.animation_frame_timer += dt
+            while self.animation_frame_timer >= frame_duration:
+                self.animation_frame_timer -= frame_duration
+                self.current_frame_index = (self.current_frame_index + 1) % len(frames)
+        else:
+            self.current_frame_index = 0
+            self.animation_frame_timer = 0.0
+        self.current_sprite = frames[self.current_frame_index]
+
     def _draw_body(self, screen, camera):
+        x = self.position.x - camera.position.x
+        y = self.position.y - camera.position.y
+        sprite = self.current_sprite
+        if sprite is None:
+            self._draw_fallback_body(screen, camera)
+            return
+        native_facing_left = self.SPRITE_NATIVE_FACING_LEFT.get(self.current_animation, False)
+        if self.facing_left != native_facing_left:
+            sprite = pygame.transform.flip(sprite, True, False)
+        if self.phase >= 2:
+            sprite = sprite.copy()
+            sprite.fill((20, 45, 70, 0), special_flags=pygame.BLEND_RGB_ADD)
+        if self.hurt_flash_timer > 0:
+            sprite = sprite.copy()
+            sprite.fill((100, 100, 100, 0), special_flags=pygame.BLEND_RGB_ADD)
+        screen.blit(sprite, (x, y))
+
+        if self.phase_glow_timer > 0:
+            alpha = int(90 * min(1.0, self.phase_glow_timer / 1.2))
+            glow = pygame.Surface((int(self.width + 32), int(self.height + 28)), pygame.SRCALPHA)
+            pygame.draw.ellipse(glow, (120, 210, 255, alpha), glow.get_rect(), width=4)
+            screen.blit(glow, (x - 16, y - 10))
+
+    def _draw_fallback_body(self, screen, camera):
         x = self.position.x - camera.position.x
         y = self.position.y - camera.position.y
         flash = self.hurt_flash_timer > 0
@@ -406,12 +537,6 @@ class ForestGuardianBoss(BaseBossEnemy):
             pygame.draw.rect(screen, body_color, (leg_x, y + 38, 6, 18), border_radius=3)
             pygame.draw.rect(screen, COLORS["BLACK"], (leg_x, y + 38, 6, 18), width=1, border_radius=3)
         pygame.draw.circle(screen, COLORS["BLACK"], (head_center[0] + antler_dir * 3, head_center[1] - 2), 2)
-
-        if self.phase_glow_timer > 0:
-            alpha = int(90 * min(1.0, self.phase_glow_timer / 1.2))
-            glow = pygame.Surface((int(self.width + 32), int(self.height + 28)), pygame.SRCALPHA)
-            pygame.draw.ellipse(glow, (120, 210, 255, alpha), glow.get_rect(), width=4)
-            screen.blit(glow, (x - 16, y - 10))
 
     def _draw_charge_telegraph(self, screen, camera):
         if self.action_state != "charge_windup":

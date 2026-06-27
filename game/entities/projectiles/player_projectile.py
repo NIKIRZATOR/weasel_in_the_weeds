@@ -50,7 +50,7 @@ class PlayerProjectile:
                 continue
             if enemy.take_damage(self.damage, "ranged"):
                 enemy.apply_hit_reaction(self.direction, 18.0, 0.08)
-                game_scene._spawn_damage_number(enemy, self.damage)
+                game_scene._spawn_damage_number(enemy, enemy.last_damage_taken)
                 game_scene._trigger_hit_feedback(SimpleNamespace(kind="light"))
             self.is_dead = True
             return

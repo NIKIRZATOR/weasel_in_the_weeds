@@ -22,6 +22,14 @@ class Enemy(Entity):
     ATTACK_HITBOX = None
     COLLISION_CIRCLE = None
     LOOT_TABLE = ()
+    BASE_RESISTANCES = {
+        "melee": 0.0,
+        "ranged": 0.0,
+        "fire": 0.0,
+        "cold": 0.0,
+        "slow": 0.0,
+        "poison": 0.0,
+    }
 
     def __init__(
         self,
@@ -54,6 +62,7 @@ class Enemy(Entity):
         attack_hitbox_offset_x=None,
         attack_hitbox_offset_y=None,
         attack_hitbox_mirror_with_facing=None,
+        resistances=None,
     ):
         hitbox_size = int(min(width, height) * 0.66)
         body_hitbox = dict(self.BODY_HITBOX or {})
@@ -161,6 +170,8 @@ class Enemy(Entity):
         self.attack_hitbox_active = False
         self.attack_hitbox_timer = Timer(0.0)
         self.loot_table = [dict(entry) for entry in self.LOOT_TABLE]
+        self.resistances = self._build_resistances(resistances)
+        self.last_damage_taken = 0
         self.home_position = Vector2(x, y)
         self.patrol_radius = max(self.width, int(patrol_radius))
         self.patrol_idle_min = max(0.0, float(patrol_idle_min))
@@ -186,8 +197,46 @@ class Enemy(Entity):
         self.knockback_velocity = Vector2(0, 0)
         self.background_update_accumulator = 0.0
 
-    def take_damage(self, damage, attack_kind=None):
+    def _build_resistances(self, overrides=None):
+        resistances = dict(self.BASE_RESISTANCES)
+        for key, value in (overrides or {}).items():
+            normalized_key = str(key).strip().lower()
+            if normalized_key not in resistances:
+                continue
+            resistances[normalized_key] = min(1.0, max(0.0, float(value)))
+        return resistances
+
+    def get_resistance(self, resistance_type):
+        normalized_type = str(resistance_type).strip().lower()
+        return float(self.resistances.get(normalized_type, 0.0))
+
+    def get_effect_value_after_resistance(self, resistance_type, value):
+        return float(value) * max(0.0, 1.0 - self.get_resistance(resistance_type))
+
+    def _resolve_damage_resistance_type(self, attack_kind):
+        if attack_kind is None:
+            return None
+        normalized_kind = str(attack_kind).strip().lower()
+        if normalized_kind in {"light", "heavy", "charged", "melee"}:
+            return "melee"
+        if normalized_kind in {"ranged", "fire", "cold", "poison"}:
+            return normalized_kind
+        return None
+
+    def _apply_damage_resistance(self, damage, attack_kind=None):
         amount = max(1, int(damage))
+        resistance_type = self._resolve_damage_resistance_type(attack_kind)
+        if resistance_type is None:
+            return amount
+        resistance = self.get_resistance(resistance_type)
+        mitigated = int(round(amount * (1.0 - resistance)))
+        return max(0, mitigated)
+
+    def take_damage(self, damage, attack_kind=None):
+        amount = self._apply_damage_resistance(damage, attack_kind=attack_kind)
+        self.last_damage_taken = amount
+        if amount <= 0:
+            return False
         self.health = max(0, self.health - amount)
         self.hurt_flash_timer = 0.12
         if self.health <= 0:
