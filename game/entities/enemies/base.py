@@ -6,17 +6,22 @@ from collections import deque
 
 import pygame
 
+from game.core.assets import load_image
 from game.core.timer import Timer
 from game.core.vector import Vector2
 from game.entities.enemies.ai.behaviors import can_detect_player, pick_patrol_target, start_chase
 from game.entities.enemies.ai.states import CHASE, LINGER, PATROL_IDLE, PATROL_MOVE, RETURN_HOME
 from game.entities.enemies.ai.steering import point_distance
 from game.entities.entity import Entity
-from settings import COLORS, SHOW_ENEMY_ATTACK_RADII, SHOW_INTERACTION_ZONES
+from settings import ASSETS_DIR, COLORS, SHOW_ENEMY_ATTACK_RADII, SHOW_INTERACTION_ZONES
 
 
 class Enemy(Entity):
     HIDDEN_REVEAL_RADIUS = 42.0
+    DEATH_SPRITE_FRAME_SIZE = (64, 64)
+    DEATH_SPRITE_FRAME_COUNT = 5
+    DEATH_SPRITE_FRAME_DURATION = 0.08
+    DEATH_SPRITE_PATH = ASSETS_DIR / "enemies" / "death_sprite" / "base_death_entities.png"
     BODY_HITBOX = None
     HURTBOX = None
     ATTACK_HITBOX = None
@@ -63,32 +68,39 @@ class Enemy(Entity):
         attack_hitbox_offset_y=None,
         attack_hitbox_mirror_with_facing=None,
         resistances=None,
+        scale=1.0,
     ):
+        self.scale = max(0.1, float(scale))
+        width = max(1, int(round(float(width) * self.scale)))
+        height = max(1, int(round(float(height) * self.scale)))
         hitbox_size = int(min(width, height) * 0.66)
         body_hitbox = dict(self.BODY_HITBOX or {})
         hurtbox = dict(self.HURTBOX or {})
         attack_hitbox = dict(self.ATTACK_HITBOX or {})
         collision_circle = dict(self.COLLISION_CIRCLE or {})
 
+        def scaled_value(value):
+            return float(value) * self.scale
+
         resolved_hitbox_width = (
-            float(hitbox_width)
+            scaled_value(hitbox_width)
             if hitbox_width is not None
-            else float(body_hitbox.get("width", hitbox_size))
+            else scaled_value(body_hitbox.get("width", hitbox_size))
         )
         resolved_hitbox_height = (
-            float(hitbox_height)
+            scaled_value(hitbox_height)
             if hitbox_height is not None
-            else float(body_hitbox.get("height", hitbox_size))
+            else scaled_value(body_hitbox.get("height", hitbox_size))
         )
         resolved_hitbox_offset_x = (
-            float(hitbox_offset_x)
+            scaled_value(hitbox_offset_x)
             if hitbox_offset_x is not None
-            else float(body_hitbox.get("offset_x", (width - resolved_hitbox_width) / 2))
+            else scaled_value(body_hitbox.get("offset_x", (width / self.scale - resolved_hitbox_width / self.scale) / 2))
         )
         resolved_hitbox_offset_y = (
-            float(hitbox_offset_y)
+            scaled_value(hitbox_offset_y)
             if hitbox_offset_y is not None
-            else float(body_hitbox.get("offset_y", (height - resolved_hitbox_height) / 2))
+            else scaled_value(body_hitbox.get("offset_y", (height / self.scale - resolved_hitbox_height / self.scale) / 2))
         )
         super().__init__(
             x,
@@ -100,13 +112,13 @@ class Enemy(Entity):
             hitbox_offset_x=resolved_hitbox_offset_x,
             hitbox_offset_y=resolved_hitbox_offset_y,
             collision_circle_radius=float(
-                collision_circle.get("radius", min(resolved_hitbox_width, resolved_hitbox_height) / 2)
+                scaled_value(collision_circle.get("radius", min(resolved_hitbox_width, resolved_hitbox_height) / 2 / self.scale))
             ),
             collision_circle_offset_x=float(
-                collision_circle.get("offset_x", resolved_hitbox_offset_x + resolved_hitbox_width / 2)
+                scaled_value(collision_circle.get("offset_x", (resolved_hitbox_offset_x + resolved_hitbox_width / 2) / self.scale))
             ),
             collision_circle_offset_y=float(
-                collision_circle.get("offset_y", resolved_hitbox_offset_y + resolved_hitbox_height / 2)
+                scaled_value(collision_circle.get("offset_y", (resolved_hitbox_offset_y + resolved_hitbox_height / 2) / self.scale))
             ),
         )
         self.name = name
@@ -123,44 +135,44 @@ class Enemy(Entity):
         self.xp_reward = max(0, int(xp_reward))
         self.xp_awarded = False
         self.hurtbox_width = (
-            float(hurtbox_width)
+            scaled_value(hurtbox_width)
             if hurtbox_width is not None
-            else float(hurtbox.get("width", self.hitbox_width))
+            else scaled_value(hurtbox.get("width", self.hitbox_width / self.scale))
         )
         self.hurtbox_height = (
-            float(hurtbox_height)
+            scaled_value(hurtbox_height)
             if hurtbox_height is not None
-            else float(hurtbox.get("height", self.hitbox_height))
+            else scaled_value(hurtbox.get("height", self.hitbox_height / self.scale))
         )
         self.hurtbox_offset_x = (
-            float(hurtbox_offset_x)
+            scaled_value(hurtbox_offset_x)
             if hurtbox_offset_x is not None
-            else float(hurtbox.get("offset_x", self.hitbox_offset_x))
+            else scaled_value(hurtbox.get("offset_x", self.hitbox_offset_x / self.scale))
         )
         self.hurtbox_offset_y = (
-            float(hurtbox_offset_y)
+            scaled_value(hurtbox_offset_y)
             if hurtbox_offset_y is not None
-            else float(hurtbox.get("offset_y", self.hitbox_offset_y))
+            else scaled_value(hurtbox.get("offset_y", self.hitbox_offset_y / self.scale))
         )
         self.attack_hitbox_width = (
-            float(attack_hitbox_width)
+            scaled_value(attack_hitbox_width)
             if attack_hitbox_width is not None
-            else (float(attack_hitbox["width"]) if "width" in attack_hitbox else None)
+            else (scaled_value(attack_hitbox["width"]) if "width" in attack_hitbox else None)
         )
         self.attack_hitbox_height = (
-            float(attack_hitbox_height)
+            scaled_value(attack_hitbox_height)
             if attack_hitbox_height is not None
-            else (float(attack_hitbox["height"]) if "height" in attack_hitbox else None)
+            else (scaled_value(attack_hitbox["height"]) if "height" in attack_hitbox else None)
         )
         self.attack_hitbox_offset_x = (
-            float(attack_hitbox_offset_x)
+            scaled_value(attack_hitbox_offset_x)
             if attack_hitbox_offset_x is not None
-            else float(attack_hitbox.get("offset_x", 0))
+            else scaled_value(attack_hitbox.get("offset_x", 0))
         )
         self.attack_hitbox_offset_y = (
-            float(attack_hitbox_offset_y)
+            scaled_value(attack_hitbox_offset_y)
             if attack_hitbox_offset_y is not None
-            else float(attack_hitbox.get("offset_y", 0))
+            else scaled_value(attack_hitbox.get("offset_y", 0))
         )
         self.attack_hitbox_mirror_with_facing = (
             bool(attack_hitbox_mirror_with_facing)
@@ -172,6 +184,11 @@ class Enemy(Entity):
         self.loot_table = [dict(entry) for entry in self.LOOT_TABLE]
         self.resistances = self._build_resistances(resistances)
         self.last_damage_taken = 0
+        self.death_animation_frames = self._load_death_animation_frames()
+        self.death_animation_frame_index = 0
+        self.death_animation_timer = 0.0
+        self.death_animation_finished = False
+        self.ready_for_removal = False
         self.home_position = Vector2(x, y)
         self.patrol_radius = max(self.width, int(patrol_radius))
         self.patrol_idle_min = max(0.0, float(patrol_idle_min))
@@ -242,7 +259,57 @@ class Enemy(Entity):
         if self.health <= 0:
             self.is_dead = True
             self.attack_hitbox_active = False
+            self.death_animation_frame_index = 0
+            self.death_animation_timer = 0.0
+            self.death_animation_finished = False
+            self.ready_for_removal = False
         return True
+
+    def _load_death_animation_frames(self):
+        sheet = load_image(self.DEATH_SPRITE_PATH)
+        if sheet is None:
+            return []
+        frame_width, frame_height = self.DEATH_SPRITE_FRAME_SIZE
+        target_size = (int(self.width), int(self.height))
+        frames = []
+        for index in range(self.DEATH_SPRITE_FRAME_COUNT):
+            source_rect = pygame.Rect(index * frame_width, 0, frame_width, frame_height)
+            if source_rect.right > sheet.get_width() or source_rect.bottom > sheet.get_height():
+                break
+            frame = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
+            frame.blit(sheet, (0, 0), source_rect)
+            if target_size != (frame_width, frame_height):
+                frame = pygame.transform.scale(frame, target_size)
+            frames.append(frame)
+        return frames
+
+    def update_death_animation(self, dt):
+        if self.death_animation_finished:
+            self.ready_for_removal = True
+            return
+        if not self.death_animation_frames:
+            self.death_animation_finished = True
+            self.ready_for_removal = True
+            return
+        if self.death_animation_frame_index >= len(self.death_animation_frames) - 1:
+            self.death_animation_finished = True
+            self.ready_for_removal = True
+            return
+        self.death_animation_timer += dt
+        while self.death_animation_timer >= self.DEATH_SPRITE_FRAME_DURATION:
+            self.death_animation_timer -= self.DEATH_SPRITE_FRAME_DURATION
+            self.death_animation_frame_index += 1
+            if self.death_animation_frame_index >= len(self.death_animation_frames) - 1:
+                self.death_animation_frame_index = len(self.death_animation_frames) - 1
+                self.death_animation_finished = True
+                self.ready_for_removal = True
+                break
+
+    def draw_death(self, screen, camera):
+        if not self.death_animation_frames:
+            return
+        frame = self.death_animation_frames[min(self.death_animation_frame_index, len(self.death_animation_frames) - 1)]
+        screen.blit(frame, (self.position.x - camera.position.x, self.position.y - camera.position.y))
 
     def apply_hit_reaction(self, direction, force=0.0, stun=0.0):
         if direction.length() > 0 and force > 0:

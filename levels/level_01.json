@@ -326,14 +326,17 @@
       "type": "enemy_melee",
       "name": "Goblin",
       "x": 8,
-      "y": 8,
+      "y": 10,
       "width": 1,
       "height": 1,
       "health": 18,
       "speed": 70,
       "damage": 5,
-      "melee_range": 20,
-      "attack_cooldown": 1.0
+      "melee_range": 10,
+      "attack_cooldown": 1.0,
+      "properties": {
+        "scale": 2
+      }
     },
     {
       "type": "enemy_ranged",

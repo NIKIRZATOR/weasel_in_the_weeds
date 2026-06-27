@@ -164,6 +164,7 @@ class GameScene(Scene):
             speed=int(properties.get("speed", raw_object.get("speed", 80))),
             damage=int(properties.get("damage", raw_object.get("damage", 4))),
             xp_reward=int(properties.get("xp_reward", raw_object.get("xp_reward", 10))),
+            scale=float(properties.get("scale", raw_object.get("scale", 1.0))),
             **self._enemy_resistance_kwargs(properties),
             **self._enemy_hitbox_kwargs(properties),
             **self._enemy_specific_kwargs(raw_object, enemy_class),

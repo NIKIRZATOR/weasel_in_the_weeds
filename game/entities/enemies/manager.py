@@ -25,6 +25,8 @@ class EnemyManager:
             self._update_enemy(enemy, dt, full_update_rect, background_update_rect)
             if enemy.is_dead:
                 self._handle_enemy_death(enemy)
+                if not getattr(enemy, "ready_for_removal", True):
+                    alive_enemies.append(enemy)
                 continue
             alive_enemies.append(enemy)
 
@@ -34,9 +36,15 @@ class EnemyManager:
         visible_rect = self.game_scene._camera_world_rect(RENDER_CULL_MARGIN)
         for enemy in self.enemies:
             if self._is_visible(enemy, visible_rect):
-                enemy.draw(screen, camera)
+                if enemy.is_dead:
+                    enemy.draw_death(screen, camera)
+                else:
+                    enemy.draw(screen, camera)
 
     def _update_enemy(self, enemy, dt, full_update_rect, background_update_rect):
+        if enemy.is_dead:
+            enemy.update_death_animation(dt)
+            return
         if self._needs_full_update(enemy, full_update_rect):
             accumulated_dt = min(
                 enemy.background_update_accumulator + dt,
