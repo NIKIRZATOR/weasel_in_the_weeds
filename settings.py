@@ -9,7 +9,13 @@ ASSETS_DIR = BASE_DIR / "assets"
 CHARACTERS_DIR = ASSETS_DIR / "characters"
 TILES_DIR = ASSETS_DIR / "tiles"
 PLAYER_ASSETS_DIR = CHARACTERS_DIR / "player"
-PLAYER_IDLE_SPRITE = PLAYER_ASSETS_DIR / "idle.png"
+PLAYER_IDLE_SPRITE = PLAYER_ASSETS_DIR / "weasel_hero_idle.png"
+PLAYER_RUN_RIGHT_SPRITE = PLAYER_ASSETS_DIR / "weasel_hero_run_right.png"
+PLAYER_DASH_RIGHT_SPRITE = PLAYER_ASSETS_DIR / "weasel_hero_dash_right.png"
+PLAYER_JUMP_RIGHT_SPRITE = PLAYER_ASSETS_DIR / "weasel_hero_jump_right.png"
+PLAYER_WALK_RIGHT_SPRITE = PLAYER_ASSETS_DIR / "weasel_walk_right.png"
+PLAYER_WALK_UP_SPRITE = PLAYER_ASSETS_DIR / "weasel_walk_up.png"
+PLAYER_WALK_DOWN_SPRITE = PLAYER_ASSETS_DIR / "weasel_walk_down.png"
 
 # Размеры экрана
 SCREEN_WIDTH = 800

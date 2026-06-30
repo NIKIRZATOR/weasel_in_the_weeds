@@ -25,6 +25,7 @@ from settings import (
     HURT_DURATION,
     JUMP_DURATION,
     JUMP_HEIGHT,
+    PLAYER_DASH_RIGHT_SPRITE,
     PLAYER_IDLE_SPRITE,
     PLAYER_HITBOX_HEIGHT,
     PLAYER_HITBOX_OFFSET_X,
@@ -35,11 +36,16 @@ from settings import (
     PLAYER_INTERACTION_OFFSET_X,
     PLAYER_INTERACTION_OFFSET_Y,
     PLAYER_INTERACTION_WIDTH,
+    PLAYER_JUMP_RIGHT_SPRITE,
     PLAYER_MAX_HEALTH,
     PLAYER_MAX_STAMINA,
     PLAYER_RUN_SPEED,
+    PLAYER_RUN_RIGHT_SPRITE,
     PLAYER_SIZE,
     PLAYER_SPEED,
+    PLAYER_WALK_DOWN_SPRITE,
+    PLAYER_WALK_RIGHT_SPRITE,
+    PLAYER_WALK_UP_SPRITE,
     STAMINA_JUMP_COST,
     STAMINA_DASH_COST,
     STAMINA_REGEN,
@@ -117,6 +123,15 @@ DEFAULT_ATTACK_PROFILES = {
 
 class Player(Entity):
     QUEST_INVENTORY_CAPACITY = 10
+    ANIMATION_FPS = {
+        "idle": 8.0,
+        "walk_side": 8.0,
+        "walk_up": 8.0,
+        "walk_down": 8.0,
+        "run_side": 12.0,
+        "jump": 10.0,
+        "dash": 14.0,
+    }
     """Класс игрока с состояниями, движением и базовой отрисовкой."""
 
     def __init__(self, x, y, spawn_x=None, spawn_y=None):
@@ -138,7 +153,13 @@ class Player(Entity):
             x if spawn_x is None else spawn_x,
             y if spawn_y is None else spawn_y,
         )
-        self.sprite = load_image(PLAYER_IDLE_SPRITE, (self.width, self.height))
+        self.sprite_animations = self._load_sprite_animations()
+        self.sprite = None
+        self.current_animation_key = "idle"
+        self.current_animation_flip_x = False
+        self.animation_frame_index = 0
+        self.animation_frame_timer = 0.0
+        self.animation_motion = Vector2()
 
         self.base_stats = CharacterStats(
             max_health=PLAYER_MAX_HEALTH,
@@ -202,6 +223,7 @@ class Player(Entity):
         self.knockback_velocity = Vector2()
         self.control_stun_timer = Timer(0.0)
         self._sync_inventory_capacities()
+        self._update_sprite_animation(0.0)
 
     def get_effective_stats(self):
         return self.base_stats + self.equipment.get_stat_bonuses() + self.get_progression_bonuses().stats
@@ -758,6 +780,7 @@ class Player(Entity):
         if self.health <= 0:
             self.respawn()
 
+        previous_position = Vector2(self.position.x, self.position.y)
         self.update_timers(dt)
 
         if self._update_knockback(dt, world):
@@ -779,6 +802,11 @@ class Player(Entity):
         self.handle_health_regen(dt)
         self.update_active_effects(dt)
         self._sync_resource_limits()
+        self.animation_motion = Vector2(
+            self.position.x - previous_position.x,
+            self.position.y - previous_position.y,
+        )
+        self._update_sprite_animation(dt)
 
     def update_timers(self, dt):
         if self.jump_timer.update(dt):
@@ -1051,6 +1079,8 @@ class Player(Entity):
         self.last_attack_fail_reason = ""
         self.knockback_velocity = Vector2()
         self.active_effects.clear()
+        self.animation_motion = Vector2()
+        self._update_sprite_animation(0.0)
 
     def set_respawn_point(self, spawn_x, spawn_y):
         self.spawn_position = Vector2(spawn_x, spawn_y)
@@ -1075,6 +1105,8 @@ class Player(Entity):
         self.recovery_timer.active = False
         self.last_attack_fail_reason = ""
         self.knockback_velocity = Vector2()
+        self.animation_motion = Vector2()
+        self._update_sprite_animation(0.0)
 
     def get_visual_position(self):
         return Vector2(
@@ -1125,6 +1157,99 @@ class Player(Entity):
 
         return Vector2(dx, dy)
 
+    def _load_sprite_animations(self):
+        animations = {
+            "idle": self._load_animation_frames(PLAYER_IDLE_SPRITE),
+            "walk_side": self._load_animation_frames(PLAYER_WALK_RIGHT_SPRITE),
+            "walk_up": self._load_animation_frames(PLAYER_WALK_UP_SPRITE),
+            "walk_down": self._load_animation_frames(PLAYER_WALK_DOWN_SPRITE),
+            "run_side": self._load_animation_frames(PLAYER_RUN_RIGHT_SPRITE),
+            "jump": self._load_animation_frames(PLAYER_JUMP_RIGHT_SPRITE),
+            "dash": self._load_animation_frames(PLAYER_DASH_RIGHT_SPRITE),
+        }
+        idle_frames = animations["idle"]
+        for key, frames in animations.items():
+            if frames or not idle_frames:
+                continue
+            animations[key] = idle_frames
+        return animations
+
+    def _load_animation_frames(self, path):
+        sprite_sheet = load_image(path)
+        if sprite_sheet is None:
+            return []
+
+        frame_height = sprite_sheet.get_height()
+        if frame_height <= 0:
+            return []
+
+        frame_width = frame_height
+        frame_count = max(1, sprite_sheet.get_width() // frame_width)
+        frames = []
+        for index in range(frame_count):
+            frame = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
+            frame.blit(
+                sprite_sheet,
+                (0, 0),
+                pygame.Rect(index * frame_width, 0, frame_width, frame_height),
+            )
+            if (frame_width, frame_height) != (self.width, self.height):
+                frame = pygame.transform.scale(frame, (self.width, self.height))
+            frames.append(frame)
+        return frames
+
+    def _get_animation_direction(self):
+        if self.is_dashing and self.dash_direction.length() > 0:
+            direction = self.dash_direction
+        elif self.is_jumping:
+            direction = self.jump_end_pos - self.jump_start_pos
+        elif self.animation_motion.length() > 0.01:
+            direction = self.animation_motion
+        else:
+            direction = self.direction
+
+        if abs(direction.x) > 0.01:
+            return "side", direction.x < 0
+        return ("up", False) if direction.y < 0 else ("down", False)
+
+    def _select_animation(self):
+        direction, flip_x = self._get_animation_direction()
+
+        if self.is_dashing:
+            return "dash", flip_x and direction == "side"
+        if self.is_jumping:
+            return "jump", flip_x and direction == "side"
+        if self.animation_motion.length() > 0.01:
+            if direction == "up":
+                return "walk_up", False
+            if direction == "down":
+                return "walk_down", False
+            if self.is_running:
+                return "run_side", flip_x
+            return "walk_side", flip_x
+        return "idle", self.facing_left
+
+    def _update_sprite_animation(self, dt):
+        animation_key, flip_x = self._select_animation()
+        frames = self.sprite_animations.get(animation_key) or self.sprite_animations.get("idle", [])
+        if not frames:
+            self.sprite = None
+            return
+
+        if animation_key != self.current_animation_key:
+            self.current_animation_key = animation_key
+            self.animation_frame_index = 0
+            self.animation_frame_timer = 0.0
+
+        frame_duration = 1.0 / self.ANIMATION_FPS.get(animation_key, 8.0)
+        self.animation_frame_timer += max(0.0, dt)
+        while len(frames) > 1 and self.animation_frame_timer >= frame_duration:
+            self.animation_frame_timer -= frame_duration
+            self.animation_frame_index = (self.animation_frame_index + 1) % len(frames)
+
+        self.current_animation_flip_x = flip_x
+        self.sprite = frames[self.animation_frame_index % len(frames)]
+
     def _draw_body(self, screen, screen_pos):
         color = (180, 220, 255) if self.is_dashing else (255, 255, 255) if self.is_hurt else COLOR_PLAYER
 
@@ -1134,7 +1259,7 @@ class Player(Entity):
             return
 
         sprite = self.sprite
-        if self.facing_left:
+        if self.current_animation_flip_x:
             sprite = pygame.transform.flip(sprite, True, False)
         if self.is_hidden:
             sprite = sprite.copy()

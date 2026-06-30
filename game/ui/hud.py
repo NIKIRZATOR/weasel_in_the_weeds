@@ -8,6 +8,8 @@ from settings import ASSETS_DIR, COLORS, HOTBAR_SIZE, PLAYER_MAX_HEALTH, PLAYER_
 
 
 class HUD:
+    PORTRAIT_IDLE_FPS = 8.0
+
     def __init__(self):
         self.localizer = get_localizer()
         self.font = pygame.font.Font(None, 30)
@@ -19,6 +21,16 @@ class HUD:
 
     def on_language_changed(self):
         return None
+
+    def _get_portrait_sprite(self, player):
+        if hasattr(player, "sprite_animations"):
+            idle_frames = player.sprite_animations.get("idle", [])
+            if idle_frames:
+                fps = float(getattr(player, "ANIMATION_FPS", {}).get("idle", self.PORTRAIT_IDLE_FPS))
+                frame_duration_ms = max(1, int(1000 / max(0.1, fps)))
+                frame_index = (pygame.time.get_ticks() // frame_duration_ms) % len(idle_frames)
+                return idle_frames[frame_index]
+        return player.sprite
 
     def draw_portrait(self, screen, player):
         radius = self.portrait_radius
@@ -33,15 +45,17 @@ class HUD:
         clip_circle = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
         pygame.draw.circle(clip_circle, (255, 255, 255, 255), (radius, radius), radius)
 
-        if player.sprite is not None:
-            head_crop_height = max(1, int(player.sprite.get_height() * 0.56))
-            crop_rect = pygame.Rect(0, 0, player.sprite.get_width(), head_crop_height)
+        portrait_sprite = self._get_portrait_sprite(player)
+
+        if portrait_sprite is not None:
+            head_crop_height = max(1, int(portrait_sprite.get_height() * 0.56))
+            crop_rect = pygame.Rect(0, 0, portrait_sprite.get_width(), head_crop_height)
             head = pygame.Surface((crop_rect.width, crop_rect.height), pygame.SRCALPHA)
-            head.blit(player.sprite, (0, 0), crop_rect)
-            scale_width = int(radius * 1.4)
-            scale_height = int(radius * 1.4)
+            head.blit(portrait_sprite, (0, 0), crop_rect)
+            scale_width = int(radius * 1.7)
+            scale_height = int(radius * 1.7)
             head = pygame.transform.smoothscale(head, (scale_width, scale_height))
-            head_rect = head.get_rect(center=(radius, radius + 6))
+            head_rect = head.get_rect(center=(radius, radius + 10))
             portrait.blit(head, head_rect)
         else:
             pygame.draw.circle(portrait, COLORS["PLAYER"], (radius, radius + 4), int(radius * 0.72))
