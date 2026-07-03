@@ -817,6 +817,11 @@ class GameScene(Scene):
         center = self.player.get_center()
         spawn_x = center.x + attack.aim_direction.x * 16
         spawn_y = center.y + attack.aim_direction.y * 16
+        sprite_scale = 1.0
+        if attack.kind == "heavy":
+            sprite_scale = 1.35
+        elif attack.kind == "charged":
+            sprite_scale = 1.55
         self.player_projectiles.append(
             PlayerProjectile(
                 spawn_x,
@@ -827,6 +832,7 @@ class GameScene(Scene):
                 damage=attack.damage,
                 radius=attack.projectile_radius,
                 max_distance=attack.projectile_distance,
+                sprite_scale=sprite_scale,
             )
         )
 

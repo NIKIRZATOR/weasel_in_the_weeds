@@ -16,6 +16,7 @@ from settings import (
     ATTACK_COOLDOWN,
     ATTACK_COST,
     ATTACK_DURATION,
+    ASSETS_DIR,
     COLOR_PLAYER,
     DASH_COOLDOWN,
     DASH_DISTANCE,
@@ -123,6 +124,23 @@ DEFAULT_ATTACK_PROFILES = {
 
 class Player(Entity):
     QUEST_INVENTORY_CAPACITY = 10
+    ATTACK_FRAME_SIZE = (96, 96)
+    ATTACK_SPRITE_DIR = ASSETS_DIR / "characters" / "player" / "attack_sprites"
+    ATTACK_SPRITE_OFFSET = (8, -14)
+    ATTACK_SPRITE_PATHS = {
+        (None, "light"): ("hands_attach_1.png",),
+        (None, "heavy"): ("hands_attach_1.png",),
+        (None, "charged"): ("hands_attach_1.png",),
+        ("blade", "light"): ("sword_attack_1.png",),
+        ("blade", "heavy"): ("sword_attack_2.png",),
+        ("blade", "charged"): ("sword_attack_2.png",),
+        ("spear", "light"): ("speak_attack_1.png", "spear_attack_1.png"),
+        ("spear", "heavy"): ("speak_attack_2.png", "spear_attack_2.png"),
+        ("spear", "charged"): ("speak_attack_2.png", "spear_attack_2.png"),
+        ("bow", "light"): ("bow_attack_1.png",),
+        ("bow", "heavy"): ("bow_attack_1.png",),
+        ("bow", "charged"): ("bow_attack_1.png",),
+    }
     ANIMATION_FPS = {
         "idle": 8.0,
         "walk_side": 8.0,
@@ -160,6 +178,7 @@ class Player(Entity):
         self.animation_frame_index = 0
         self.animation_frame_timer = 0.0
         self.animation_motion = Vector2()
+        self.attack_sprite_animations = self._load_attack_sprite_animations()
 
         self.base_stats = CharacterStats(
             max_health=PLAYER_MAX_HEALTH,
@@ -1127,10 +1146,10 @@ class Player(Entity):
             visual_pos.x - camera.position.x,
             visual_pos.y - camera.position.y,
         )
+        has_attack_sprite = self.is_attacking and self._get_attack_animation_frame() is not None
 
-        self._draw_body(screen, screen_pos)
-        self._draw_weapon_marker(screen, screen_pos)
-
+        if not has_attack_sprite:
+            self._draw_body(screen, screen_pos)
         if self.is_attacking:
             self._draw_attack(screen, screen_pos)
 
@@ -1197,6 +1216,50 @@ class Player(Entity):
                 frame = pygame.transform.scale(frame, (self.width, self.height))
             frames.append(frame)
         return frames
+
+    def _load_attack_sprite_animations(self):
+        animations = {}
+        frame_width, frame_height = self.ATTACK_FRAME_SIZE
+        for key, candidates in self.ATTACK_SPRITE_PATHS.items():
+            frames = []
+            for candidate in candidates:
+                path = self.ATTACK_SPRITE_DIR / candidate
+                frames = self._load_fixed_frame_animation(path, frame_width, frame_height)
+                if frames:
+                    break
+            animations[key] = frames
+        return animations
+
+    def _load_fixed_frame_animation(self, path, frame_width, frame_height):
+        sprite_sheet = load_image(path)
+        if sprite_sheet is None or frame_width <= 0 or frame_height <= 0:
+            return []
+
+        frame_count = max(1, sprite_sheet.get_width() // frame_width)
+        frames = []
+        for index in range(frame_count):
+            source_rect = pygame.Rect(index * frame_width, 0, frame_width, frame_height)
+            if source_rect.right > sprite_sheet.get_width() or source_rect.bottom > sprite_sheet.get_height():
+                break
+            frame = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
+            frame.blit(sprite_sheet, (0, 0), source_rect)
+            frames.append(frame)
+        return frames
+
+    def _get_attack_animation_frames(self):
+        active_attack = self.get_current_attack_context()
+        if active_attack is None:
+            return []
+        weapon_class = active_attack.weapon_class
+        return self.attack_sprite_animations.get((weapon_class, active_attack.kind), [])
+
+    def _get_attack_animation_frame(self):
+        frames = self._get_attack_animation_frames()
+        if not frames:
+            return None
+        progress = min(1.0, max(0.0, self.attack_timer.get_progress()))
+        frame_index = min(len(frames) - 1, int(progress * len(frames)))
+        return frames[frame_index]
 
     def _get_animation_direction(self):
         if self.is_dashing and self.dash_direction.length() > 0:
@@ -1275,6 +1338,30 @@ class Player(Entity):
         screen.blit(sprite, (screen_pos.x, screen_pos.y))
 
     def _draw_attack(self, screen, screen_pos):
+        attack_sprite = self._get_attack_animation_frame()
+        if attack_sprite is not None:
+            sprite = attack_sprite
+            if self.facing_left:
+                sprite = pygame.transform.flip(sprite, True, False)
+            if self.is_hidden:
+                sprite = sprite.copy()
+                sprite.fill((90, 90, 90, 0), special_flags=pygame.BLEND_RGB_SUB)
+                sprite.fill((35, 35, 35, 0), special_flags=pygame.BLEND_RGB_ADD)
+            if self.is_hurt:
+                sprite = sprite.copy()
+                sprite.fill((255, 255, 255, 0), special_flags=pygame.BLEND_RGB_ADD)
+            aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(-1 if self.facing_left else 1, 0)
+            offset_x = -self.ATTACK_SPRITE_OFFSET[0] if self.facing_left else self.ATTACK_SPRITE_OFFSET[0]
+            rect = sprite.get_rect(
+                center=(
+                    int(screen_pos.x + self.width / 2 + offset_x + aim.x * 8),
+                    int(screen_pos.y + self.height / 2 + self.ATTACK_SPRITE_OFFSET[1] + aim.y * 4),
+                )
+            )
+            screen.blit(sprite, rect.topleft)
+            return
+
+        self._draw_weapon_marker(screen, screen_pos)
         center_x = screen_pos.x + self.width // 2
         center_y = screen_pos.y + self.height // 2
         active_attack = self.get_current_attack_context()

@@ -1,14 +1,26 @@
+import math
 from types import SimpleNamespace
 
 import pygame
 
+from game.core.assets import load_image
 from game.core.vector import Vector2
 from game.entities.enemies.ai.steering import rects_intersect
-from settings import COLORS
+from settings import ASSETS_DIR, COLORS
+
+
+_ARROW_SPRITE: pygame.Surface | None = None
+
+
+def _get_arrow_sprite(size: tuple[int, int]) -> pygame.Surface | None:
+    global _ARROW_SPRITE
+    if _ARROW_SPRITE is None:
+        _ARROW_SPRITE = load_image(ASSETS_DIR / "items" / "weapons" / "arrow.png", size=size)
+    return _ARROW_SPRITE
 
 
 class PlayerProjectile:
-    def __init__(self, x, y, dir_x, dir_y, speed, damage, radius=5, max_distance=520.0):
+    def __init__(self, x, y, dir_x, dir_y, speed, damage, radius=5, max_distance=520.0, sprite_scale=1.0):
         self.position = Vector2(x, y)
         direction = Vector2(dir_x, dir_y)
         self.direction = direction.normalize() if direction.length() > 0 else Vector2(1, 0)
@@ -16,9 +28,15 @@ class PlayerProjectile:
         self.damage = max(1, int(damage))
         self.radius = max(2, int(radius))
         self.max_distance = float(max_distance)
+        self.sprite_scale = max(0.5, float(sprite_scale))
         self.travelled_distance = 0.0
         self.is_dead = False
         self.collision_probe = _ProjectileProbe(self.radius)
+        sprite_size = (
+            max(int(self.radius * 8 * self.sprite_scale), 16),
+            max(int(self.radius * 3 * self.sprite_scale), 8),
+        )
+        self.sprite = _get_arrow_sprite(sprite_size)
 
     def update(self, dt, game_scene):
         if self.is_dead:
@@ -63,6 +81,12 @@ class PlayerProjectile:
             return
         x = int(self.position.x - camera.position.x)
         y = int(self.position.y - camera.position.y)
+        if self.sprite is not None:
+            angle = -math.degrees(math.atan2(self.direction.y, self.direction.x))
+            sprite = pygame.transform.rotate(self.sprite, angle)
+            rect = sprite.get_rect(center=(x, y))
+            screen.blit(sprite, rect.topleft)
+            return
         pygame.draw.circle(screen, (150, 220, 255), (x, y), self.radius)
         pygame.draw.circle(screen, COLORS["BLACK"], (x, y), self.radius, width=1)
 

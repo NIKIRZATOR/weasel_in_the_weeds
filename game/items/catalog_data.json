@@ -74,7 +74,7 @@
       "attack": 2
     },
     "price": 15,
-    "icon_path": "items/weapons/training_blade.png",
+    "icon_path": "items/weapons/sword.png",
     "description": "A simple testing blade."
   },
   "forest_bandage": {
@@ -158,7 +158,7 @@
     "stackable": true,
     "max_stack": 20,
     "price": 5,
-    "icon_path": "items/materials/web_wrap.png",
+    "icon_path": "items/materials/web.png",
     "description": "Sticky binding made from spider silk."
   },
   "beetle_charm": {
@@ -171,7 +171,7 @@
       "defense": 1
     },
     "price": 8,
-    "icon_path": "items/accessories/beetle_charm.png",
+    "icon_path": "items/materials/bettle_shell.png",
     "description": "A small charm from beetle shell and bone."
   },
   "stick": {
@@ -180,7 +180,7 @@
     "stackable": true,
     "max_stack": 999999,
     "price": 1,
-    "icon_path": "items/materials/stick.png",
+    "icon_path": "items/materials/wooden_stick.png",
     "description": "A simple stick."
   },
   "grass_blade": {
@@ -261,7 +261,7 @@
     "stackable": true,
     "max_stack": 999999,
     "price": 3,
-    "icon_path": "items/materials/beetle_shell.png",
+    "icon_path": "items/materials/bettle_shell.png",
     "description": "A hard piece of beetle shell."
   },
   "web": {
@@ -344,7 +344,7 @@
       "attack": 2
     },
     "price": 10,
-    "icon_path": "items/weapons/rusty_knife.png",
+    "icon_path": "items/weapons/sword.png",
     "description": "A light knife for quick strikes."
   },
   "stone_spear": {
