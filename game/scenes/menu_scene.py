@@ -75,7 +75,7 @@ class MenuScene(Scene):
         self.app.set_scene(
             SplashScene(
                 self.app,
-                lambda: GameScene(self.app, LEVELS_DIR / "level_01.json"),
+                lambda: GameScene(self.app, LEVELS_DIR / "level_01"),
                 title=self.localizer.t("ui.menu.new_game_loading"),
             )
         )

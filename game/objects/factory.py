@@ -30,6 +30,12 @@ PICKABLE_SPRITES = {
 SOLID_OBJECT_SPRITES = {
     "stone block": "world_objects/solid_object/stone_block.png",
     "bush": "world_objects/solid_object/bush.png",
+    "blue flower": "world_objects/solid_object/flower_blue.png",
+    "pink flower": "world_objects/solid_object/flower_pink.png",
+    "red white flower": "world_objects/solid_object/flower_red_white.png",
+    "white flower": "world_objects/solid_object/flower_white.png",
+    "yellow flower": "world_objects/solid_object/flower_yellow.png",
+    "stone pile": "world_objects/solid_object/stone_pile.png",
 }
 
 
@@ -57,7 +63,13 @@ def create_world_object(raw_object, tile_size):
     _assign_default_sprite_path(object_type, name, properties)
 
     if object_type == "solid_object":
-        return SolidObject(x, y, width, height, name=name, properties=properties)
+        world_object = SolidObject(x, y, width, height, name=name, properties=properties)
+        raw_solid = raw_object.get("solid")
+        if raw_solid is not None:
+            world_object.is_solid = bool(raw_solid)
+        elif "solid" in properties:
+            world_object.is_solid = bool(properties.get("solid"))
+        return world_object
 
     if object_type == "interactable_object":
         is_solid = raw_object.get("solid", False)

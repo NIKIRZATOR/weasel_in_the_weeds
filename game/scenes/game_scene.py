@@ -48,6 +48,7 @@ class GameScene(Scene):
             self.level.ground_layer,
             self.level.obstacle_layer,
             tile_size=self.level.tile_size,
+            tileset=self.level.tileset,
         )
         self.collision_system = CollisionSystem(self.tilemap)
 

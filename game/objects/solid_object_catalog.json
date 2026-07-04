@@ -1,0 +1,95 @@
+{
+  "objects": {
+    "flower_blue": {
+      "name": "Blue Flower",
+      "sprite_path": "world_objects/solid_object/flower_blue.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "flower_pink": {
+      "name": "Pink Flower",
+      "sprite_path": "world_objects/solid_object/flower_pink.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "flower_red_white": {
+      "name": "Red White Flower",
+      "sprite_path": "world_objects/solid_object/flower_red_white.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "flower_white": {
+      "name": "White Flower",
+      "sprite_path": "world_objects/solid_object/flower_white.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "flower_yellow": {
+      "name": "Yellow Flower",
+      "sprite_path": "world_objects/solid_object/flower_yellow.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "stone_pile_small": {
+      "name": "Stone Pile",
+      "sprite_path": "world_objects/solid_object/stone_pile.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "bush_small": {
+      "name": "Bush",
+      "sprite_path": "world_objects/solid_object/bush.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "bush_small_2": {
+      "name": "Bush",
+      "sprite_path": "world_objects/solid_object/bush2.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "bush_small_3": {
+      "name": "Bush",
+      "sprite_path": "world_objects/solid_object/bush3.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "stone_block": {
+      "name": "Stone Block",
+      "sprite_path": "world_objects/solid_object/stone_block.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    }
+  },
+  "sets": {
+    "meadow": [
+      { "object_id": "flower_blue", "weight": 2 },
+      { "object_id": "flower_pink", "weight": 2 },
+      { "object_id": "flower_red_white", "weight": 1 },
+      { "object_id": "flower_white", "weight": 2 },
+      { "object_id": "flower_yellow", "weight": 2 },
+      { "object_id": "bush_small", "weight": 1 },
+      { "object_id": "bush_small_2", "weight": 1 },
+      { "object_id": "bush_small_3", "weight": 1 }
+    ],
+    "rocky": [
+      { "object_id": "stone_pile_small", "weight": 3 },
+      { "object_id": "stone_block", "weight": 1 }
+    ],
+    "bushes": [
+      { "object_id": "bush_small", "weight": 2 },
+      { "object_id": "bush_small_2", "weight": 2 },
+      { "object_id": "bush_small_3", "weight": 2 }
+    ]
+  }
+}

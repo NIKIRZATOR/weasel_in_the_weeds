@@ -54,6 +54,8 @@ class WorldObject(Entity):
         self._label_cache_key = None
         self._label_surface = None
         self.sprite_path = self.properties.get("sprite_path")
+        self.pixel_offset_x = int(self.properties.get("pixel_offset_x", 0))
+        self.pixel_offset_y = int(self.properties.get("pixel_offset_y", 0))
 
     def interact(self, player, game_scene):
         return False
@@ -86,7 +88,7 @@ class WorldObject(Entity):
         sprite = self._get_sprite_surface()
         if sprite is None:
             return False
-        screen.blit(sprite, rect.topleft)
+        screen.blit(sprite, (rect.x + self.pixel_offset_x, rect.y + self.pixel_offset_y))
         return True
 
     def _get_sprite_surface(self):
