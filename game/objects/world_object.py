@@ -1,11 +1,13 @@
 import pygame
 
+from game.core.assets import load_image
 from game.entities.entity import Entity
-from settings import COLORS
+from settings import ASSETS_DIR, COLORS
 
 
 class WorldObject(Entity):
     _LABEL_FONT_CACHE: dict[int, pygame.font.Font] = {}
+    _SPRITE_CACHE: dict[tuple[str, int, int], pygame.Surface | None] = {}
 
     """Базовый объект мира, загружаемый из уровня."""
 
@@ -51,6 +53,7 @@ class WorldObject(Entity):
         self.is_active = False
         self._label_cache_key = None
         self._label_surface = None
+        self.sprite_path = self.properties.get("sprite_path")
 
     def interact(self, player, game_scene):
         return False
@@ -59,6 +62,10 @@ class WorldObject(Entity):
         screen_x = self.position.x - camera.position.x
         screen_y = self.position.y - camera.position.y
         rect = pygame.Rect(screen_x, screen_y, self.width, self.height)
+        if self._draw_sprite_if_available(screen, rect):
+            self.draw_name_label(screen, rect)
+            self.draw_debug(screen, camera)
+            return
         pygame.draw.rect(
             screen,
             self.color,
@@ -75,7 +82,29 @@ class WorldObject(Entity):
         self.draw_name_label(screen, rect)
         self.draw_debug(screen, camera)
 
+    def _draw_sprite_if_available(self, screen, rect):
+        sprite = self._get_sprite_surface()
+        if sprite is None:
+            return False
+        screen.blit(sprite, rect.topleft)
+        return True
+
+    def _get_sprite_surface(self):
+        if not self.sprite_path:
+            return None
+        cache_key = (str(self.sprite_path), int(self.width), int(self.height))
+        if cache_key not in self._SPRITE_CACHE:
+            self._SPRITE_CACHE[cache_key] = load_image(
+                ASSETS_DIR / str(self.sprite_path),
+                size=(int(self.width), int(self.height)),
+            )
+        return self._SPRITE_CACHE[cache_key]
+
     def draw_name_label(self, screen, rect, text=None):
+        if self.sprite_path and not self.properties.get("show_name_with_sprite", False):
+            self._label_cache_key = None
+            self._label_surface = None
+            return
         label = (self.properties.get("display_name") or text or self.name or "").strip()
         if not label:
             self._label_cache_key = None

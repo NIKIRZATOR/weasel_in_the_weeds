@@ -72,6 +72,10 @@ class LevelTransition(WorldObject):
         screen_x = self.position.x - camera.position.x
         screen_y = self.position.y - camera.position.y
         rect = pygame.Rect(screen_x, screen_y, self.width, self.height)
+        if self._draw_sprite_if_available(screen, rect):
+            self.draw_name_label(screen, rect)
+            self.draw_debug(screen, camera)
+            return
 
         overlay = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
         overlay.fill((90, 130, 230, 70))

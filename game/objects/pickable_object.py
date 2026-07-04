@@ -7,8 +7,14 @@ class PickableObject(WorldObject):
     """Объект мира, который можно поднять."""
 
     def __init__(self, x, y, width, height, name="pickable_object", properties=None):
-        properties = {} if properties is None else properties
-        item_id = properties.get("item_id") or name
+        properties = {} if properties is None else dict(properties)
+        item_id = properties.get("item_id")
+        if not item_id:
+            if int(properties.get("coins", 0)) > 0:
+                item_id = "coin"
+            elif int(properties.get("knowledge_shards", 0)) > 0:
+                item_id = "knowledge_shard"
+        item_id = item_id or name
         definition = get_item_definition(item_id)
         color = COLORS["PICKABLE_OBJECT"]
         if definition is not None:
@@ -16,6 +22,8 @@ class PickableObject(WorldObject):
                 color = COLORS["GOLD"]
             elif definition.kind.value in ("weapon", "armor", "accessory"):
                 color = COLORS["UI_SLOT_SELECTED"]
+            if not properties.get("sprite_path") and definition.icon_path:
+                properties["sprite_path"] = definition.icon_path
 
         super().__init__(
             x,

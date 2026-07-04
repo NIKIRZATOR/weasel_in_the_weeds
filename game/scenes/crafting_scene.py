@@ -34,6 +34,7 @@ class CraftingScene(Scene):
         self.recipe_content_height = 0
         self.recipe_rows = []
         self.action_button = None
+        self.header_currency_targets = []
         self._layout_size = None
         self._build_layout()
         self._ensure_selected_recipe()
@@ -118,12 +119,7 @@ class CraftingScene(Scene):
 
         title = self.title_font.render(self.localizer.t("ui.crafting.title"), True, COLORS["WHITE"])
         self.app.screen.blit(title, (self.panel_rect.x + 24, self.panel_rect.y + 14))
-        shards = self.text_font.render(
-            self.localizer.t("ui.crafting.knowledge_shards", count=self.player.knowledge_shards),
-            True,
-            COLORS["WHITE"],
-        )
-        self.app.screen.blit(shards, (self.panel_rect.right - shards.get_width() - 24, self.panel_rect.y + 24))
+        self._draw_header_currency()
 
         self._draw_left_panel()
         self._draw_right_panel()
@@ -131,6 +127,53 @@ class CraftingScene(Scene):
         if self.message:
             text = self.text_font.render(self.message, True, (255, 220, 120))
             self.app.screen.blit(text, text.get_rect(center=(screen_width // 2, self.panel_rect.bottom - 18)))
+        self._draw_header_currency_tooltip()
+
+    def _draw_header_currency(self):
+        self.header_currency_targets = []
+        icon = get_item_icon("knowledge_shard", (20, 20))
+        amount_text = self.text_font.render(str(self.player.knowledge_shards), True, COLORS["WHITE"])
+        row_y = self.panel_rect.y + 24
+        amount_x = self.panel_rect.right - 24 - amount_text.get_width()
+        self.app.screen.blit(amount_text, (amount_x, row_y))
+        if icon is None:
+            return
+        icon_rect = icon.get_rect(midright=(amount_x - 8, row_y + amount_text.get_height() // 2))
+        self.app.screen.blit(icon, icon_rect.topleft)
+        self.header_currency_targets.append((icon_rect.inflate(6, 6), "knowledge_shard"))
+
+    def _draw_header_currency_tooltip(self):
+        mouse_pos = pygame.mouse.get_pos()
+        hovered_item_id = None
+        for rect, item_id in self.header_currency_targets:
+            if rect.collidepoint(mouse_pos):
+                hovered_item_id = item_id
+                break
+        if hovered_item_id is None:
+            return
+
+        definition = get_item_definition(hovered_item_id)
+        if definition is None:
+            return
+        label = definition.localized_name()
+        text = self.small_font.render(label, True, COLORS["WHITE"])
+        padding_x = 10
+        padding_y = 6
+        tooltip_rect = pygame.Rect(
+            mouse_pos[0] + 14,
+            mouse_pos[1] + 14,
+            text.get_width() + padding_x * 2,
+            text.get_height() + padding_y * 2,
+        )
+        screen_width, screen_height = self.app.get_screen_size()
+        if tooltip_rect.right > screen_width - 8:
+            tooltip_rect.x = mouse_pos[0] - tooltip_rect.width - 14
+        if tooltip_rect.bottom > screen_height - 8:
+            tooltip_rect.y = mouse_pos[1] - tooltip_rect.height - 14
+
+        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], tooltip_rect, border_radius=8)
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], tooltip_rect, width=1, border_radius=8)
+        self.app.screen.blit(text, (tooltip_rect.x + padding_x, tooltip_rect.y + padding_y))
 
     def _draw_left_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.left_panel, border_radius=12)

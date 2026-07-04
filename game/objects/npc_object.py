@@ -67,6 +67,10 @@ class NpcObject(WorldObject):
         screen_x = self.position.x - camera.position.x
         screen_y = self.position.y - camera.position.y
         rect = pygame.Rect(screen_x, screen_y, self.width, self.height)
+        if self._draw_sprite_if_available(screen, rect):
+            self.draw_name_label(screen, rect)
+            self.draw_debug(screen, camera)
+            return
 
         pygame.draw.rect(screen, self.color, rect, border_radius=10)
         pygame.draw.rect(screen, COLORS["BLACK"], rect, width=2, border_radius=10)

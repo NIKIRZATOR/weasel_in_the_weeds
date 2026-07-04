@@ -1,7 +1,7 @@
 import pygame
 from math import ceil
 
-from game.items import get_item_icon
+from game.items import get_item_definition, get_item_icon
 from game.items.types import EquipSlot, ItemKind
 from game.localization import get_localizer
 from game.scenes.base import Scene
@@ -31,6 +31,7 @@ class InventoryScene(Scene):
         self.drag_start_pos = None
         self.dragging = False
         self.drag_threshold = 6
+        self.header_currency_targets = []
         self._layout_size = None
         self._build_layout()
 
@@ -294,17 +295,7 @@ class InventoryScene(Scene):
         title = self.title_font.render(self.localizer.t("ui.inventory.title"), True, COLORS["WHITE"])
         self.app.screen.blit(title, (self.panel_rect.x + 28, self.panel_rect.y + 12))
 
-        header_stats = [
-            f"{self.localizer.t('ui.inventory.stat_coins')}: {self.player.coins}",
-            f"{self.localizer.t('ui.inventory.stat_shards')}: {self.player.knowledge_shards}",
-        ]
-        header_y = self.panel_rect.y + 16
-        for index, line in enumerate(header_stats):
-            text = self.text_font.render(line, True, COLORS["WHITE"])
-            self.app.screen.blit(
-                text,
-                (self.panel_rect.right - text.get_width() - 28, header_y + index * 24),
-            )
+        self._draw_header_currencies()
 
         self._draw_character_panel()
         self._draw_inventory_grid()
@@ -317,6 +308,64 @@ class InventoryScene(Scene):
         if self.message:
             message = self.text_font.render(self.message, True, (255, 220, 120))
             self.app.screen.blit(message, message.get_rect(center=(screen_width // 2, screen_height - 22)))
+        self._draw_header_currency_tooltip()
+
+    def _draw_header_currencies(self):
+        self.header_currency_targets = []
+        entries = [
+            ("coin", self.player.coins),
+            ("knowledge_shard", self.player.knowledge_shards),
+        ]
+        right_edge = self.panel_rect.right - 28
+        top_y = self.panel_rect.y + 18
+        row_height = 28
+        icon_size = 20
+        gap = 8
+
+        for index, (item_id, amount) in enumerate(entries):
+            icon = get_item_icon(item_id, (icon_size, icon_size))
+            amount_text = self.text_font.render(str(amount), True, COLORS["WHITE"])
+            row_y = top_y + index * row_height
+            amount_x = right_edge - amount_text.get_width()
+            self.app.screen.blit(amount_text, (amount_x, row_y))
+
+            if icon is not None:
+                icon_rect = icon.get_rect(midright=(amount_x - gap, row_y + amount_text.get_height() // 2))
+                self.app.screen.blit(icon, icon_rect.topleft)
+                self.header_currency_targets.append((icon_rect.inflate(6, 6), item_id))
+
+    def _draw_header_currency_tooltip(self):
+        mouse_pos = pygame.mouse.get_pos()
+        hovered_item_id = None
+        for rect, item_id in self.header_currency_targets:
+            if rect.collidepoint(mouse_pos):
+                hovered_item_id = item_id
+                break
+        if hovered_item_id is None:
+            return
+
+        definition = get_item_definition(hovered_item_id)
+        if definition is None:
+            return
+        label = definition.localized_name()
+        text = self.small_font.render(label, True, COLORS["WHITE"])
+        padding_x = 10
+        padding_y = 6
+        tooltip_rect = pygame.Rect(
+            mouse_pos[0] + 14,
+            mouse_pos[1] + 14,
+            text.get_width() + padding_x * 2,
+            text.get_height() + padding_y * 2,
+        )
+        screen_width, screen_height = self.app.get_screen_size()
+        if tooltip_rect.right > screen_width - 8:
+            tooltip_rect.x = mouse_pos[0] - tooltip_rect.width - 14
+        if tooltip_rect.bottom > screen_height - 8:
+            tooltip_rect.y = mouse_pos[1] - tooltip_rect.height - 14
+
+        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], tooltip_rect, border_radius=8)
+        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], tooltip_rect, width=1, border_radius=8)
+        self.app.screen.blit(text, (tooltip_rect.x + padding_x, tooltip_rect.y + padding_y))
 
     def _draw_character_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.left_panel, border_radius=12)

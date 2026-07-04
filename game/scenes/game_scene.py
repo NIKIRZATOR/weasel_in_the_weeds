@@ -948,13 +948,20 @@ class GameScene(Scene):
         self.camera.position.y += shake_offset.y
         visible_rect = self._camera_world_rect(RENDER_CULL_MARGIN)
         self.tilemap.draw(self.app.screen, self.camera)
+        overlay_world_objects = []
         for world_object in self.world_objects:
-            if visible_rect.colliderect(world_object.get_hitbox_rect()):
-                world_object.draw(self.app.screen, self.camera)
+            if not visible_rect.colliderect(world_object.get_hitbox_rect()):
+                continue
+            if getattr(world_object, "is_grass_hide_zone", False):
+                overlay_world_objects.append(world_object)
+                continue
+            world_object.draw(self.app.screen, self.camera)
         self.enemy_manager.draw(self.app.screen, self.camera)
         self._draw_player_projectiles()
         self._draw_damage_numbers()
         self.player.draw(self.app.screen, self.camera)
+        for world_object in overlay_world_objects:
+            world_object.draw(self.app.screen, self.camera)
         self.camera.position.x -= shake_offset.x
         self.camera.position.y -= shake_offset.y
         self.hud.draw(

@@ -5164,7 +5164,7 @@
       "name": "Test Large Chest",
       "x": 14,
       "y": 4,
-      "width": 1,
+      "width": 2,
       "height": 1,
       "solid": true,
       "properties": {
@@ -5198,7 +5198,7 @@
     },
     {
       "type": "gatherable_object",
-      "name": "Grass Patch",
+      "name": "Bush",
       "x": 13,
       "y": 8,
       "width": 1,

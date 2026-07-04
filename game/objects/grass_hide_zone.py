@@ -31,6 +31,10 @@ class GrassHideZone(WorldObject):
         screen_x = self.position.x - camera.position.x
         screen_y = self.position.y - camera.position.y
         label_rect = pygame.Rect(screen_x, screen_y, self.width, self.height)
+        if self._draw_sprite_if_available(screen, label_rect):
+            self.draw_name_label(screen, label_rect)
+            self.draw_debug(screen, camera)
+            return
 
         points = [
             (screen_x + self.width / 2, screen_y),
