@@ -549,6 +549,7 @@ class GameScene(Scene):
             self.mouse_hold_time = 0.0
             self.charged_combo_fired = False
         self.player.update(dt, keys, self)
+        self._update_world_objects(dt)
         self._update_map_reveal()
         self._update_grass_hide_zones()
         self._update_checkpoints()
@@ -577,6 +578,10 @@ class GameScene(Scene):
                 f"checkpoint:{self.level_key}:{int(world_object.position.x)}:{int(world_object.position.y)}"
             )
             self._award_player_xp(CHECKPOINT_XP_REWARD, checkpoint_key, append=True)
+
+    def _update_world_objects(self, dt):
+        for world_object in self.world_objects:
+            world_object.update(dt, self)
 
     def _update_auto_pickups(self):
         player_hitbox = self.player.get_hitbox_rect()
@@ -834,6 +839,8 @@ class GameScene(Scene):
                 radius=attack.projectile_radius,
                 max_distance=attack.projectile_distance,
                 sprite_scale=sprite_scale,
+                source_x=center.x,
+                source_y=center.y,
             )
         )
 

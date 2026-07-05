@@ -72,7 +72,7 @@
     }
   },
   "sets": {
-    "meadow": [
+    "grass_decor": [
       { "object_id": "flower_blue", "weight": 2 },
       { "object_id": "flower_pink", "weight": 2 },
       { "object_id": "flower_red_white", "weight": 1 },
@@ -82,11 +82,11 @@
       { "object_id": "bush_small_2", "weight": 1 },
       { "object_id": "bush_small_3", "weight": 1 }
     ],
-    "rocky": [
+    "stone_decor": [
       { "object_id": "stone_pile_small", "weight": 3 },
       { "object_id": "stone_block", "weight": 1 }
     ],
-    "bushes": [
+    "bush_decor": [
       { "object_id": "bush_small", "weight": 2 },
       { "object_id": "bush_small_2", "weight": 2 },
       { "object_id": "bush_small_3", "weight": 2 }

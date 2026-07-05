@@ -4,7 +4,7 @@
 
 Минимальные свойства:
 
-- `decor_set` - набор объектов из каталога. Сейчас доступны: `meadow`, `rocky`, `bushes`.
+- `decor_set` - набор объектов из каталога. Сейчас доступны: `grass_decor`, `stone_decor`, `bush_decor`.
 - `decor_chance` - шанс генерации на каждом тайле от `0.0` до `1.0`.
 
 Или можно указать конкретный объект:
@@ -32,11 +32,11 @@
 
 Пример для травяного тайла:
 
-- `decor_set = meadow`
+- `decor_set = grass_decor`
 - `decor_chance = 0.08`
 - `decor_jitter = 3`
 
 Пример для каменистого тайла:
 
-- `decor_set = rocky`
+- `decor_set = stone_decor`
 - `decor_chance = 0.06`

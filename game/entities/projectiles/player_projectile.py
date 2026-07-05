@@ -20,8 +20,22 @@ def _get_arrow_sprite(size: tuple[int, int]) -> pygame.Surface | None:
 
 
 class PlayerProjectile:
-    def __init__(self, x, y, dir_x, dir_y, speed, damage, radius=5, max_distance=520.0, sprite_scale=1.0):
+    def __init__(
+        self,
+        x,
+        y,
+        dir_x,
+        dir_y,
+        speed,
+        damage,
+        radius=5,
+        max_distance=520.0,
+        sprite_scale=1.0,
+        source_x=None,
+        source_y=None,
+    ):
         self.position = Vector2(x, y)
+        self.source_position = Vector2(x if source_x is None else source_x, y if source_y is None else source_y)
         direction = Vector2(dir_x, dir_y)
         self.direction = direction.normalize() if direction.length() > 0 else Vector2(1, 0)
         self.speed = float(speed)
@@ -68,6 +82,7 @@ class PlayerProjectile:
                 continue
             if enemy.take_damage(self.damage, "ranged"):
                 enemy.apply_hit_reaction(self.direction, 18.0, 0.08)
+                enemy.alert_to_position(self.source_position.x, self.source_position.y)
                 game_scene._spawn_damage_number(enemy, enemy.last_damage_taken)
                 game_scene._trigger_hit_feedback(SimpleNamespace(kind="light"))
             self.is_dead = True

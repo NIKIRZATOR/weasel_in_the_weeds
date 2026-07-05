@@ -7,10 +7,29 @@ from game.core.vector import Vector2
 from game.entities.enemies.ai.states import CHASE
 from game.entities.enemies.ai.steering import entity_distance, rects_intersect
 from game.entities.enemies.base import Enemy
-from settings import COLORS
+from settings import ASSETS_DIR
 
 
 class BeetleEnemy(Enemy):
+    SPRITE_FRAME_SIZE = (64, 64)
+    SPRITE_FRAME_DURATIONS = {
+        "idle": 0.14,
+        "move": 0.11,
+        "attack": 0.09,
+        "heal": 0.1,
+    }
+    SPRITE_NATIVE_FACING_LEFT = {
+        "idle": False,
+        "move": False,
+        "attack": False,
+        "heal": False,
+    }
+    SPRITE_ANIMATIONS = {
+        "idle": (ASSETS_DIR / "enemies" / "beatle" / "beatle_idle.png", 10),
+        "move": (ASSETS_DIR / "enemies" / "beatle" / "beatle_steps.png", 4),
+        "attack": (ASSETS_DIR / "enemies" / "beatle" / "beatle_attact.png", 4),
+        "heal": (ASSETS_DIR / "enemies" / "beatle" / "bealte_healing.png", 8),
+    }
     BODY_HITBOX = {
         "width": 22,
         "height": 18,
@@ -102,6 +121,7 @@ class BeetleEnemy(Enemy):
         self.shell_regen_per_second = max(0.0, float(shell_regen_per_second))
         self.shell_trigger_health_ratio = min(1.0, max(0.05, float(shell_trigger_health_ratio)))
         self.shell_damage_multiplier = min(1.0, max(0.0, float(shell_damage_multiplier)))
+        self.attack_animation_timer = 0.0
 
     def take_damage(self, damage, attack_kind=None):
         if self.shell_timer.is_active():
@@ -109,6 +129,7 @@ class BeetleEnemy(Enemy):
         return super().take_damage(damage, attack_kind=attack_kind)
 
     def update(self, dt, game_scene):
+        previous_position = Vector2(self.position.x, self.position.y)
         super().update(dt, game_scene)
         if self.is_dead:
             return
@@ -117,32 +138,28 @@ class BeetleEnemy(Enemy):
             self.shell_cooldown.update(dt)
         if self.charge_timer.is_active():
             self._update_charge(dt, game_scene)
-            return
-        if self.shell_timer.is_active():
+        elif self.shell_timer.is_active():
             self._update_shell(dt)
-            return
-        if self.behavior_state != CHASE:
-            return
+        elif self.behavior_state == CHASE:
+            if self._should_enter_shell():
+                self._start_shell()
+            else:
+                player = game_scene.player
+                player_center = player.get_center()
+                distance = entity_distance(self, player)
 
-        if self._should_enter_shell():
-            self._start_shell()
-            return
+                if distance <= self.melee_range and not self.attack_cooldown.is_active():
+                    self._bite(player)
+                elif self.charge_min_range <= distance <= self.charge_range and not self.attack_cooldown.is_active():
+                    self._start_charge(player_center)
+                else:
+                    chase_start = Vector2(self.position.x, self.position.y)
+                    self._move_towards(player_center.x, player_center.y, dt, game_scene, use_pathfinding=True)
+                    self._update_stuck_state(dt, chase_start, game_scene)
 
-        player = game_scene.player
-        player_center = player.get_center()
-        distance = entity_distance(self, player)
-
-        if distance <= self.melee_range and not self.attack_cooldown.is_active():
-            self._bite(player)
-            return
-
-        if self.charge_min_range <= distance <= self.charge_range and not self.attack_cooldown.is_active():
-            self._start_charge(player_center)
-            return
-
-        previous_position = Vector2(self.position.x, self.position.y)
-        self._move_towards(player_center.x, player_center.y, dt, game_scene, use_pathfinding=True)
-        self._update_stuck_state(dt, previous_position, game_scene)
+        moved = (self.position.x != previous_position.x) or (self.position.y != previous_position.y)
+        self.attack_animation_timer = max(0.0, self.attack_animation_timer - dt)
+        self._update_animation(dt, moved)
 
     def _should_enter_shell(self):
         return (
@@ -172,6 +189,7 @@ class BeetleEnemy(Enemy):
         self.stun_timer = max(self.stun_timer, self.charge_duration)
         self.attack_cooldown.start(max(self.attack_cooldown.duration, self.charge_duration + 0.5))
         self.charge_hit_applied = False
+        self.attack_animation_timer = max(self.attack_animation_timer, self.charge_duration)
 
     def _update_charge(self, dt, game_scene):
         step = self.charge_direction * (self.charge_speed * dt)
@@ -195,21 +213,13 @@ class BeetleEnemy(Enemy):
         direction = Vector2(player.get_center().x - self.get_center().x, player.get_center().y - self.get_center().y)
         player.take_damage(self.damage, direction=direction, force=95.0, stun_duration=0.14)
         self.attack_cooldown.start()
+        self.attack_animation_timer = max(self.attack_animation_timer, 0.18)
 
-    def _draw_body(self, screen, camera):
-        x = self.position.x - camera.position.x
-        y = self.position.y - camera.position.y
-        shell_active = self.shell_timer.is_active()
-        body_color = (232, 220, 205) if self.hurt_flash_timer > 0 else self.color
-        shell_color = (88, 64, 30) if not shell_active else (60, 92, 118)
-        pygame.draw.ellipse(screen, shell_color, (x + 4, y + 6, self.width - 8, self.height - 8))
-        pygame.draw.ellipse(screen, COLORS["BLACK"], (x + 4, y + 6, self.width - 8, self.height - 8), width=2)
-        pygame.draw.ellipse(screen, body_color, (x + 10, y + 14, self.width - 20, self.height - 16))
-        pygame.draw.ellipse(screen, COLORS["BLACK"], (x + 10, y + 14, self.width - 20, self.height - 16), width=1)
-        horn_color = (210, 190, 120)
-        left_horn = [(x + self.width * 0.3, y + self.height * 0.2), (x + self.width * 0.18, y + self.height * 0.05), (x + self.width * 0.36, y + self.height * 0.16)]
-        right_horn = [(x + self.width * 0.7, y + self.height * 0.2), (x + self.width * 0.82, y + self.height * 0.05), (x + self.width * 0.64, y + self.height * 0.16)]
-        pygame.draw.polygon(screen, horn_color, left_horn)
-        pygame.draw.polygon(screen, horn_color, right_horn)
-        pygame.draw.polygon(screen, COLORS["BLACK"], left_horn, width=1)
-        pygame.draw.polygon(screen, COLORS["BLACK"], right_horn, width=1)
+    def _resolve_animation_name(self, moved):
+        if self.shell_timer.is_active():
+            return "heal"
+        if self.attack_animation_timer > 0.0 or self.charge_timer.is_active():
+            return "attack"
+        if moved:
+            return "move"
+        return "idle"

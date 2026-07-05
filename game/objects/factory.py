@@ -27,6 +27,26 @@ PICKABLE_SPRITES = {
     "stick": "world_objects/pickable_object/stick.png",
 }
 
+NPC_DEFAULT_PROPERTIES_BY_ID = {
+    "hermit_mouse": {
+        "sprite_sheet_path": "npc/hermit_mouse/hermit_mouse_idle.png",
+        "animation_frame_count": 6,
+        "animation_frame_width": 64,
+        "animation_frame_height": 64,
+        "animation_frame_duration": 0.14,
+    },
+}
+
+NPC_DEFAULT_PROPERTIES_BY_NAME = {
+    "hermit mouse": {
+        "sprite_sheet_path": "npc/hermit_mouse/hermit_mouse_idle.png",
+        "animation_frame_count": 6,
+        "animation_frame_width": 64,
+        "animation_frame_height": 64,
+        "animation_frame_duration": 0.14,
+    },
+}
+
 SOLID_OBJECT_SPRITES = {
     "stone block": "world_objects/solid_object/stone_block.png",
     "bush": "world_objects/solid_object/bush.png",
@@ -60,6 +80,8 @@ def create_world_object(raw_object, tile_size):
         properties.setdefault("object_id", str(raw_object["id"]))
     if object_type == "gatherable_object":
         properties = _resolve_gatherable_properties(name, properties)
+    if object_type == "npc_object":
+        properties = _resolve_npc_properties(name, properties)
     _assign_default_sprite_path(object_type, name, properties)
 
     if object_type == "solid_object":
@@ -205,3 +227,18 @@ def _assign_default_sprite_path(object_type, name, properties):
         sprite_path = PICKABLE_SPRITES.get(item_id.lower())
         if sprite_path:
             properties["sprite_path"] = sprite_path
+
+
+def _resolve_npc_properties(name, properties):
+    npc_id = str(properties.get("npc_id", "")).strip().lower()
+    if not npc_id:
+        dialogue_file = str(properties.get("dialogue_file", "")).strip().lower()
+        if dialogue_file.endswith(".json"):
+            npc_id = dialogue_file[:-5]
+    merged = dict(NPC_DEFAULT_PROPERTIES_BY_ID.get(npc_id, {}))
+    if not merged:
+        merged = dict(NPC_DEFAULT_PROPERTIES_BY_NAME.get(str(name or "").strip().lower(), {}))
+    merged.update(properties)
+    if npc_id:
+        merged.setdefault("npc_id", npc_id)
+    return merged

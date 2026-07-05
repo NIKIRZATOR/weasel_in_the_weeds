@@ -11,10 +11,29 @@ from game.entities.enemies.ai.states import CHASE
 from game.entities.enemies.ai.steering import entity_distance, rects_intersect
 from game.entities.enemies.base import Enemy
 from game.entities.enemies.projectiles import EnemyProjectileProbe, RangedProjectile
-from settings import COLORS
+from settings import ASSETS_DIR, COLORS
 
 
 class SpiderEnemy(Enemy):
+    SPRITE_FRAME_SIZE = (64, 64)
+    SPRITE_FRAME_DURATIONS = {
+        "idle": 0.14,
+        "move": 0.12,
+        "attack": 0.08,
+        "web_attack": 0.1,
+    }
+    SPRITE_NATIVE_FACING_LEFT = {
+        "idle": False,
+        "move": False,
+        "attack": False,
+        "web_attack": False,
+    }
+    SPRITE_ANIMATIONS = {
+        "idle": (ASSETS_DIR / "enemies" / "spider" / "spider_idle.png", 8),
+        "move": (ASSETS_DIR / "enemies" / "spider" / "spider_steps.png", 3),
+        "attack": (ASSETS_DIR / "enemies" / "spider" / "spider_attack.png", 4),
+        "web_attack": (ASSETS_DIR / "enemies" / "spider" / "spider_web_attack.png", 2),
+    }
     BODY_HITBOX = {
         "width": 20,
         "height": 16,
@@ -106,8 +125,11 @@ class SpiderEnemy(Enemy):
         self.leap_timer = Timer(self.leap_duration)
         self.leap_direction = Vector2()
         self.leap_damage_applied = False
+        self.attack_animation_timer = 0.0
+        self.web_attack_animation_timer = 0.0
 
     def update(self, dt, game_scene):
+        previous_position = Vector2(self.position.x, self.position.y)
         super().update(dt, game_scene)
         if self.is_dead:
             return
@@ -115,40 +137,38 @@ class SpiderEnemy(Enemy):
         self._update_projectiles(dt, game_scene)
         if self.leap_timer.is_active():
             self._update_leap(dt, game_scene)
-            return
-        if self.behavior_state != CHASE:
-            return
+        elif self.behavior_state == CHASE:
+            player = game_scene.player
+            player_center = player.get_center()
+            distance = entity_distance(self, player)
 
-        player = game_scene.player
-        player_center = player.get_center()
-        distance = entity_distance(self, player)
+            if distance <= self.melee_range and not self.attack_cooldown.is_active():
+                self._bite(player)
+            elif (
+                self.leap_min_range <= distance <= self.leap_range
+                and not self.attack_cooldown.is_active()
+                and self._has_clear_lane(player_center)
+            ):
+                self._start_leap(player_center)
+            elif distance <= self.spit_range and not self.attack_cooldown.is_active():
+                self._spit(player_center.x, player_center.y)
+                self.attack_cooldown.start()
+            else:
+                chase_start = Vector2(self.position.x, self.position.y)
+                self._move_towards(player_center.x, player_center.y, dt, game_scene, use_pathfinding=True)
+                self._update_stuck_state(dt, chase_start, game_scene)
 
-        if distance <= self.melee_range and not self.attack_cooldown.is_active():
-            self._bite(player)
-            return
-
-        if (
-            self.leap_min_range <= distance <= self.leap_range
-            and not self.attack_cooldown.is_active()
-            and self._has_clear_lane(player_center)
-        ):
-            self._start_leap(player_center)
-            return
-
-        if distance <= self.spit_range and not self.attack_cooldown.is_active():
-            self._spit(player_center.x, player_center.y)
-            self.attack_cooldown.start()
-            return
-
-        previous_position = Vector2(self.position.x, self.position.y)
-        self._move_towards(player_center.x, player_center.y, dt, game_scene, use_pathfinding=True)
-        self._update_stuck_state(dt, previous_position, game_scene)
+        moved = (self.position.x != previous_position.x) or (self.position.y != previous_position.y)
+        self.attack_animation_timer = max(0.0, self.attack_animation_timer - dt)
+        self.web_attack_animation_timer = max(0.0, self.web_attack_animation_timer - dt)
+        self._update_animation(dt, moved)
 
     def _bite(self, player):
         self.activate_attack_hitbox(duration=0.12)
         attack_direction = Vector2(player.get_center().x - self.get_center().x, player.get_center().y - self.get_center().y)
         player.take_damage(self.damage, direction=attack_direction, force=75.0, stun_duration=0.12)
         self.attack_cooldown.start()
+        self.attack_animation_timer = max(self.attack_animation_timer, 0.18)
 
     def _spit(self, target_x, target_y):
         origin = self.get_center()
@@ -165,6 +185,7 @@ class SpiderEnemy(Enemy):
                 slow_duration=self.slow_duration,
             )
         )
+        self.web_attack_animation_timer = max(self.web_attack_animation_timer, 0.18)
 
     def _start_leap(self, player_center):
         direction = Vector2(player_center.x - self.get_center().x, player_center.y - self.get_center().y)
@@ -176,6 +197,7 @@ class SpiderEnemy(Enemy):
         self.leap_damage_applied = False
         self.attack_cooldown.start(max(self.attack_cooldown.duration, self.leap_duration + 0.45))
         self._update_facing_from_direction(self.leap_direction)
+        self.attack_animation_timer = max(self.attack_animation_timer, self.leap_duration)
 
     def _update_leap(self, dt, game_scene):
         step = self.leap_direction * (self.leap_speed * dt)
@@ -206,26 +228,14 @@ class SpiderEnemy(Enemy):
             projectile.draw(screen, camera)
         super().draw(screen, camera)
 
-    def _draw_body(self, screen, camera):
-        x = self.position.x - camera.position.x
-        y = self.position.y - camera.position.y
-        body_color = (220, 215, 230) if self.hurt_flash_timer > 0 else self.color
-        pygame.draw.ellipse(screen, body_color, (x + 8, y + 10, self.width - 16, self.height - 14))
-        pygame.draw.ellipse(screen, COLORS["BLACK"], (x + 8, y + 10, self.width - 16, self.height - 14), width=2)
-        head_rect = pygame.Rect(int(x + self.width * 0.22), int(y + self.height * 0.18), int(self.width * 0.3), int(self.height * 0.28))
-        pygame.draw.ellipse(screen, (96, 84, 112), head_rect)
-        pygame.draw.ellipse(screen, COLORS["BLACK"], head_rect, width=2)
-        leg_color = (45, 40, 54)
-        for y_offset in (0.28, 0.42, 0.56, 0.7):
-            left_start = (int(x + self.width * 0.32), int(y + self.height * y_offset))
-            right_start = (int(x + self.width * 0.68), int(y + self.height * y_offset))
-            left_end = (int(x + self.width * 0.06), int(y + self.height * (y_offset - 0.1)))
-            right_end = (int(x + self.width * 0.94), int(y + self.height * (y_offset - 0.1)))
-            pygame.draw.line(screen, leg_color, left_start, left_end, width=2)
-            pygame.draw.line(screen, leg_color, right_start, right_end, width=2)
-        eye_y = int(y + self.height * 0.3)
-        pygame.draw.circle(screen, COLORS["BLACK"], (int(x + self.width * 0.36), eye_y), 2)
-        pygame.draw.circle(screen, COLORS["BLACK"], (int(x + self.width * 0.46), eye_y), 2)
+    def _resolve_animation_name(self, moved):
+        if self.web_attack_animation_timer > 0.0:
+            return "web_attack"
+        if self.attack_animation_timer > 0.0 or self.leap_timer.is_active():
+            return "attack"
+        if moved:
+            return "move"
+        return "idle"
 
 
 class WebProjectile(RangedProjectile):

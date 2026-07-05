@@ -13,14 +13,14 @@
   </tile>
   <tile id="6">
    <properties>
-    <property name="decor_set" value="meadow"/>
+    <property name="decor_set" value="grass_decor"/>
     <property name="decor_chance" type="float" value="0.045"/>
     <property name="decor_jitter" type="int" value="3"/>
    </properties>
   </tile>
   <tile id="23">
    <properties>
-    <property name="decor_set" value="rocky"/>
+    <property name="decor_set" value="stone_decor"/>
     <property name="decor_chance" type="float" value="0.06"/>
     <property name="decor_jitter" type="int" value="2"/>
    </properties>

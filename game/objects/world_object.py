@@ -60,6 +60,9 @@ class WorldObject(Entity):
     def interact(self, player, game_scene):
         return False
 
+    def update(self, dt, game_scene):
+        return None
+
     def draw(self, screen, camera):
         screen_x = self.position.x - camera.position.x
         screen_y = self.position.y - camera.position.y

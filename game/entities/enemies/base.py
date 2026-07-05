@@ -10,13 +10,17 @@ from game.core.assets import load_image
 from game.core.timer import Timer
 from game.core.vector import Vector2
 from game.entities.enemies.ai.behaviors import can_detect_player, pick_patrol_target, start_chase
-from game.entities.enemies.ai.states import CHASE, LINGER, PATROL_IDLE, PATROL_MOVE, RETURN_HOME
+from game.entities.enemies.ai.states import CHASE, INVESTIGATE, LINGER, PATROL_IDLE, PATROL_MOVE, RETURN_HOME
 from game.entities.enemies.ai.steering import point_distance
 from game.entities.entity import Entity
 from settings import ASSETS_DIR, COLORS, SHOW_ENEMY_ATTACK_RADII, SHOW_INTERACTION_ZONES
 
 
 class Enemy(Entity):
+    SPRITE_FRAME_SIZE = None
+    SPRITE_FRAME_DURATIONS = {}
+    SPRITE_NATIVE_FACING_LEFT = {}
+    SPRITE_ANIMATIONS = {}
     HIDDEN_REVEAL_RADIUS = 42.0
     DEATH_SPRITE_FRAME_SIZE = (64, 64)
     DEATH_SPRITE_FRAME_COUNT = 5
@@ -213,6 +217,16 @@ class Enemy(Entity):
         self.stun_timer = 0.0
         self.knockback_velocity = Vector2(0, 0)
         self.background_update_accumulator = 0.0
+        self.encounter_started = False
+        self.investigate_target = None
+        self.investigate_wait_duration = 1.0
+        self.investigate_wait_timer = 0.0
+        self.sprite_animations = {}
+        self.current_animation = "idle"
+        self.current_frame_index = 0
+        self.animation_frame_timer = 0.0
+        self.current_sprite = None
+        self._initialize_sprite_animations()
 
     def _build_resistances(self, overrides=None):
         resistances = dict(self.BASE_RESISTANCES)
@@ -318,6 +332,17 @@ class Enemy(Entity):
         self.current_path = []
         self.current_path_target_tile = None
 
+    def alert_to_position(self, world_x, world_y):
+        if self.is_dead:
+            return
+        self.encounter_started = True
+        self.investigate_target = Vector2(float(world_x), float(world_y))
+        self.investigate_wait_timer = self.investigate_wait_duration
+        self.current_path = []
+        self.current_path_target_tile = None
+        if self.behavior_state != CHASE:
+            self.behavior_state = INVESTIGATE
+
     def update(self, dt, game_scene):
         if self.is_dead:
             return
@@ -339,11 +364,17 @@ class Enemy(Entity):
 
         if can_detect_player(self, player, distance_to_player):
             start_chase(self, player_center)
+            self.encounter_started = True
+            self.investigate_target = None
+            self.investigate_wait_timer = 0.0
             return
         if self.behavior_state == CHASE:
             self.behavior_state = LINGER
         if self.behavior_state == LINGER:
             self._update_linger(dt, game_scene)
+            return
+        if self.behavior_state == INVESTIGATE:
+            self._update_investigate(dt, game_scene)
             return
         if self.behavior_state == RETURN_HOME:
             self._update_return_home(dt, game_scene)
@@ -379,6 +410,9 @@ class Enemy(Entity):
         home_center = self._home_center()
         if point_distance(self.get_center(), home_center) <= max(8.0, self.width * 0.25):
             self.behavior_state = PATROL_IDLE
+            self.encounter_started = False
+            self.investigate_target = None
+            self.investigate_wait_timer = 0.0
             self.patrol_idle_timer = random.uniform(self.patrol_idle_min, self.patrol_idle_max)
             self.patrol_turn_timer = random.uniform(0.25, 0.75)
             self.patrol_target = pick_patrol_target(self)
@@ -386,6 +420,29 @@ class Enemy(Entity):
             return
         previous_position = Vector2(self.position.x, self.position.y)
         self._move_towards(home_center.x, home_center.y, dt, game_scene, speed=self.return_speed, use_pathfinding=True)
+        self._update_stuck_state(dt, previous_position, game_scene)
+
+    def _update_investigate(self, dt, game_scene):
+        if self.investigate_target is None:
+            self.behavior_state = RETURN_HOME
+            return
+        previous_position = Vector2(self.position.x, self.position.y)
+        if point_distance(self.get_center(), self.investigate_target) <= max(10.0, self.width * 0.3):
+            self.investigate_wait_timer = max(0.0, self.investigate_wait_timer - dt)
+            if self.investigate_wait_timer <= 0:
+                self.behavior_state = RETURN_HOME
+                self.current_path = []
+                self.current_path_target_tile = None
+            self._reset_stuck_state()
+            return
+        self._move_towards(
+            self.investigate_target.x,
+            self.investigate_target.y,
+            dt,
+            game_scene,
+            speed=self.return_speed,
+            use_pathfinding=True,
+        )
         self._update_stuck_state(dt, previous_position, game_scene)
 
     def _update_patrol_idle(self, dt):
@@ -565,7 +622,7 @@ class Enemy(Entity):
         if moved_distance > 1.0:
             self._reset_stuck_state()
             return
-        if self.behavior_state not in {PATROL_MOVE, CHASE, LINGER, RETURN_HOME}:
+        if self.behavior_state not in {PATROL_MOVE, CHASE, LINGER, INVESTIGATE, RETURN_HOME}:
             self._reset_stuck_state()
             return
         self.stuck_timer += dt
@@ -580,6 +637,9 @@ class Enemy(Entity):
         self.current_path_target_tile = None
         if self.behavior_state == PATROL_MOVE:
             self.patrol_target = pick_patrol_target(self)
+            return
+        if self.behavior_state == INVESTIGATE and self.investigate_target is not None:
+            self.investigate_wait_timer = max(0.0, self.investigate_wait_timer - 0.2)
             return
         if self.behavior_state == LINGER and self.last_chase_direction.length() > 0:
             angle = random.choice((math.pi / 2, -math.pi / 2))
@@ -619,6 +679,67 @@ class Enemy(Entity):
     def _update_facing_from_direction(self, direction):
         if abs(direction.x) > 0.0001:
             self.facing_left = direction.x < 0
+
+    def _initialize_sprite_animations(self):
+        if not self.SPRITE_ANIMATIONS or self.SPRITE_FRAME_SIZE is None:
+            return
+        animations = {}
+        for animation_name, animation_entry in self.SPRITE_ANIMATIONS.items():
+            path, frame_count = animation_entry
+            resolved_path = path if hasattr(path, "exists") else ASSETS_DIR / str(path)
+            animations[animation_name] = self._load_animation_frames(resolved_path, frame_count)
+        self.sprite_animations = animations
+        idle_frames = self.sprite_animations.get("idle", [])
+        self.current_sprite = idle_frames[0] if idle_frames else None
+
+    def _load_animation_frames(self, path, frame_count):
+        sheet = load_image(path)
+        if sheet is None or self.SPRITE_FRAME_SIZE is None:
+            return []
+        target_size = (int(self.width), int(self.height))
+        frame_width, frame_height = self.SPRITE_FRAME_SIZE
+        frames = []
+        for index in range(frame_count):
+            source_rect = pygame.Rect(index * frame_width, 0, frame_width, frame_height)
+            if source_rect.right > sheet.get_width() or source_rect.bottom > sheet.get_height():
+                break
+            frame = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
+            frame.blit(sheet, (0, 0), source_rect)
+            if target_size != (frame_width, frame_height):
+                frame = pygame.transform.scale(frame, target_size)
+            frames.append(frame)
+        return frames
+
+    def _resolve_animation_name(self, moved):
+        if moved:
+            return "move"
+        return "idle"
+
+    def _update_animation(self, dt, moved):
+        if not self.sprite_animations:
+            self.current_sprite = None
+            return
+        animation_name = self._resolve_animation_name(moved)
+        frames = self.sprite_animations.get(animation_name, [])
+        if not frames:
+            self.current_animation = animation_name
+            self.current_frame_index = 0
+            self.current_sprite = None
+            return
+        if self.current_animation != animation_name:
+            self.current_animation = animation_name
+            self.current_frame_index = 0
+            self.animation_frame_timer = 0.0
+        frame_duration = float(self.SPRITE_FRAME_DURATIONS.get(animation_name, 0.12))
+        if len(frames) > 1:
+            self.animation_frame_timer += dt
+            while self.animation_frame_timer >= frame_duration:
+                self.animation_frame_timer -= frame_duration
+                self.current_frame_index = (self.current_frame_index + 1) % len(frames)
+        else:
+            self.current_frame_index = 0
+            self.animation_frame_timer = 0.0
+        self.current_sprite = frames[self.current_frame_index]
 
     def get_hurtbox_at(self, x, y):
         return (
@@ -691,6 +812,16 @@ class Enemy(Entity):
         pygame.draw.rect(screen, COLORS["BLACK"], (x, y, bar_width, bar_height), width=1, border_radius=3)
 
     def _draw_body(self, screen, camera):
+        sprite = self.current_sprite
+        if sprite is not None:
+            native_facing_left = self.SPRITE_NATIVE_FACING_LEFT.get(self.current_animation, False)
+            if self.facing_left != native_facing_left:
+                sprite = pygame.transform.flip(sprite, True, False)
+            if self.hurt_flash_timer > 0:
+                sprite = sprite.copy()
+                sprite.fill((100, 100, 100, 0), special_flags=pygame.BLEND_RGB_ADD)
+            screen.blit(sprite, (self.position.x - camera.position.x, self.position.y - camera.position.y))
+            return
         x = self.position.x - camera.position.x
         y = self.position.y - camera.position.y
         body_color = (255, 245, 245) if self.hurt_flash_timer > 0 else self.color
