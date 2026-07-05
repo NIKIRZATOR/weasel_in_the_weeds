@@ -30,6 +30,7 @@ class NpcObject(WorldObject):
         self.animation_frame_duration = max(0.05, float(properties.get("animation_frame_duration", 0.16)))
         self.animation_frame_timer = 0.0
         self.animation_frame_index = 0
+        self.sprite_anchor = str(properties.get("sprite_anchor", "bottom_center")).strip().lower()
 
     def update(self, dt, game_scene):
         if len(self.animation_frames) <= 1:
@@ -86,7 +87,7 @@ class NpcObject(WorldObject):
         sheet = load_image(ASSETS_DIR / str(sprite_sheet_path))
         if sheet is None:
             return []
-        target_size = (int(self.width), int(self.height))
+        target_size = self._get_sprite_draw_size()
         frames = []
         for index in range(frame_count):
             source_rect = pygame.Rect(index * frame_width, 0, frame_width, frame_height)
@@ -105,7 +106,7 @@ class NpcObject(WorldObject):
         rect = pygame.Rect(screen_x, screen_y, self.width, self.height)
         if self.animation_frames:
             sprite = self.animation_frames[self.animation_frame_index % len(self.animation_frames)]
-            screen.blit(sprite, rect.topleft)
+            screen.blit(sprite, self._get_sprite_draw_position(rect, sprite))
             self.draw_name_label(screen, rect)
             self.draw_debug(screen, camera)
             return

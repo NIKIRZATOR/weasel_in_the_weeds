@@ -1,0 +1,58 @@
+[
+  {
+    "label": "Gatherable: Stone Pile",
+    "object": {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    }
+  },
+  {
+    "label": "Gatherable: Berry Bush",
+    "object": {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    }
+  },
+  {
+    "label": "Gatherable: Fallen Log",
+    "object": {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    }
+  },
+  {
+    "label": "Gatherable: Stump",
+    "object": {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    }
+  }
+]

@@ -1341,7 +1341,9 @@ class Player(Entity):
         attack_sprite = self._get_attack_animation_frame()
         if attack_sprite is not None:
             sprite = attack_sprite
-            if self.facing_left:
+            aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(-1 if self.facing_left else 1, 0)
+            attack_facing_left = aim.x < 0
+            if attack_facing_left:
                 sprite = pygame.transform.flip(sprite, True, False)
             if self.is_hidden:
                 sprite = sprite.copy()
@@ -1350,8 +1352,7 @@ class Player(Entity):
             if self.is_hurt:
                 sprite = sprite.copy()
                 sprite.fill((255, 255, 255, 0), special_flags=pygame.BLEND_RGB_ADD)
-            aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(-1 if self.facing_left else 1, 0)
-            offset_x = -self.ATTACK_SPRITE_OFFSET[0] if self.facing_left else self.ATTACK_SPRITE_OFFSET[0]
+            offset_x = -self.ATTACK_SPRITE_OFFSET[0] if attack_facing_left else self.ATTACK_SPRITE_OFFSET[0]
             rect = sprite.get_rect(
                 center=(
                     int(screen_pos.x + self.width / 2 + offset_x + aim.x * 8),
@@ -1392,7 +1393,8 @@ class Player(Entity):
 
         weapon_class = weapon.definition.weapon_class or "blade"
         aim = self.aim_direction.normalize() if self.aim_direction.length() > 0 else Vector2(-1 if self.facing_left else 1, 0)
-        hand_x = screen_pos.x + self.width * (0.34 if self.facing_left else 0.66)
+        attack_facing_left = aim.x < 0
+        hand_x = screen_pos.x + self.width * (0.34 if attack_facing_left else 0.66)
         hand_y = screen_pos.y + self.height * 0.58
 
         if weapon_class == "dagger":

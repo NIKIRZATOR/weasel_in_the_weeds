@@ -1,0 +1,148 @@
+[
+  {
+    "label": "Solid: Stone Block",
+    "object": {
+      "type": "solid_object",
+      "name": "Stone Block",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/stone_block.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Bush",
+    "object": {
+      "type": "solid_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bush.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Bush 2",
+    "object": {
+      "type": "solid_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bush2.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Bush 3",
+    "object": {
+      "type": "solid_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bush3.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Blue Flower",
+    "object": {
+      "type": "solid_object",
+      "name": "Blue Flower",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/flower_blue.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Pink Flower",
+    "object": {
+      "type": "solid_object",
+      "name": "Pink Flower",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/flower_pink.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Red White Flower",
+    "object": {
+      "type": "solid_object",
+      "name": "Red White Flower",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/flower_red_white.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: White Flower",
+    "object": {
+      "type": "solid_object",
+      "name": "White Flower",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/flower_white.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Yellow Flower",
+    "object": {
+      "type": "solid_object",
+      "name": "Yellow Flower",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/flower_yellow.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Stone Pile",
+    "object": {
+      "type": "solid_object",
+      "name": "Stone Pile",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/stone_pile.png"
+      }
+    }
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "label": "Container: Crate",
+    "object": {
+      "type": "container_object",
+      "id": "crate_01",
+      "name": "Crate",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "properties": {
+        "container_type": "crate",
+        "fixed_items": [
+          {
+            "item_id": "berry",
+            "quantity": 2
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "Container: Chest",
+    "object": {
+      "type": "container_object",
+      "id": "chest_01",
+      "name": "Chest",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "properties": {
+        "container_type": "chest",
+        "fixed_items": [
+          {
+            "item_id": "healing_tonic",
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "Container: Large Chest",
+    "object": {
+      "type": "container_object",
+      "id": "large_chest_01",
+      "name": "Large Chest",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": true,
+      "properties": {
+        "container_type": "large_chest",
+        "fixed_items": [
+          {
+            "item_id": "knowledge_shard",
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  }
+]

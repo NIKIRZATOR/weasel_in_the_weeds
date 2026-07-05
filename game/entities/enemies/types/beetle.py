@@ -20,8 +20,8 @@ class BeetleEnemy(Enemy):
     }
     SPRITE_NATIVE_FACING_LEFT = {
         "idle": False,
-        "move": False,
-        "attack": False,
+        "move": True,
+        "attack": True,
         "heal": False,
     }
     SPRITE_ANIMATIONS = {

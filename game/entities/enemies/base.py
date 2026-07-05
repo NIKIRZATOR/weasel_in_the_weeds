@@ -71,10 +71,21 @@ class Enemy(Entity):
         attack_hitbox_offset_x=None,
         attack_hitbox_offset_y=None,
         attack_hitbox_mirror_with_facing=None,
+        collision_circle_radius=None,
+        collision_circle_offset_x=None,
+        collision_circle_offset_y=None,
         resistances=None,
         scale=1.0,
+        sprite_scale=1.0,
+        sprite_offset_x=0,
+        sprite_offset_y=0,
+        stationary=False,
     ):
         self.scale = max(0.1, float(scale))
+        self.sprite_scale = max(0.1, float(sprite_scale))
+        self.sprite_offset_x = int(float(sprite_offset_x))
+        self.sprite_offset_y = int(float(sprite_offset_y))
+        self.stationary = bool(stationary)
         width = max(1, int(round(float(width) * self.scale)))
         height = max(1, int(round(float(height) * self.scale)))
         hitbox_size = int(min(width, height) * 0.66)
@@ -116,13 +127,25 @@ class Enemy(Entity):
             hitbox_offset_x=resolved_hitbox_offset_x,
             hitbox_offset_y=resolved_hitbox_offset_y,
             collision_circle_radius=float(
-                scaled_value(collision_circle.get("radius", min(resolved_hitbox_width, resolved_hitbox_height) / 2 / self.scale))
+                scaled_value(
+                    collision_circle_radius
+                    if collision_circle_radius is not None
+                    else collision_circle.get("radius", min(resolved_hitbox_width, resolved_hitbox_height) / 2 / self.scale)
+                )
             ),
             collision_circle_offset_x=float(
-                scaled_value(collision_circle.get("offset_x", (resolved_hitbox_offset_x + resolved_hitbox_width / 2) / self.scale))
+                scaled_value(
+                    collision_circle_offset_x
+                    if collision_circle_offset_x is not None
+                    else collision_circle.get("offset_x", (resolved_hitbox_offset_x + resolved_hitbox_width / 2) / self.scale)
+                )
             ),
             collision_circle_offset_y=float(
-                scaled_value(collision_circle.get("offset_y", (resolved_hitbox_offset_y + resolved_hitbox_height / 2) / self.scale))
+                scaled_value(
+                    collision_circle_offset_y
+                    if collision_circle_offset_y is not None
+                    else collision_circle.get("offset_y", (resolved_hitbox_offset_y + resolved_hitbox_height / 2) / self.scale)
+                )
             ),
         )
         self.name = name
@@ -198,8 +221,8 @@ class Enemy(Entity):
         self.patrol_idle_min = max(0.0, float(patrol_idle_min))
         self.patrol_idle_max = max(self.patrol_idle_min, float(patrol_idle_max))
         self.linger_duration = max(0.0, float(linger_duration))
-        self.behavior_state = PATROL_MOVE
-        self.patrol_target = pick_patrol_target(self)
+        self.behavior_state = PATROL_IDLE if self.stationary else PATROL_MOVE
+        self.patrol_target = None if self.stationary else pick_patrol_target(self)
         self.patrol_idle_timer = 0.0
         self.patrol_turn_timer = random.uniform(0.25, 0.75)
         self.linger_timer = 0.0
@@ -367,6 +390,12 @@ class Enemy(Entity):
             self.encounter_started = True
             self.investigate_target = None
             self.investigate_wait_timer = 0.0
+            if self.stationary:
+                return
+            return
+        if self.stationary:
+            if self.behavior_state in {CHASE, LINGER, INVESTIGATE, RETURN_HOME}:
+                self.behavior_state = PATROL_IDLE
             return
         if self.behavior_state == CHASE:
             self.behavior_state = LINGER
@@ -472,6 +501,8 @@ class Enemy(Entity):
         return Vector2(self.home_position.x + self.width / 2, self.home_position.y + self.height / 2)
 
     def _move_towards(self, target_x, target_y, dt, game_scene, speed=None, use_pathfinding=False):
+        if self.stationary:
+            return
         speed = self.speed if speed is None else speed
         if use_pathfinding:
             waypoint = self._get_path_waypoint(target_x, target_y, dt, game_scene)
@@ -488,6 +519,8 @@ class Enemy(Entity):
         self._update_facing_from_direction(direction)
 
     def _move_away_from(self, target_x, target_y, dt, game_scene, speed=None):
+        if self.stationary:
+            return
         speed = self.speed if speed is None else speed
         dx = self.get_center().x - target_x
         dy = self.get_center().y - target_y
@@ -575,6 +608,8 @@ class Enemy(Entity):
         return Vector2(tile_x * tile_size + tile_size / 2, tile_y * tile_size + tile_size / 2)
 
     def _move_with_collision(self, move_x, move_y, game_scene):
+        if self.stationary:
+            return False
         if move_x == 0 and move_y == 0:
             return False
         if self._try_move(move_x, move_y, game_scene):
@@ -696,7 +731,7 @@ class Enemy(Entity):
         sheet = load_image(path)
         if sheet is None or self.SPRITE_FRAME_SIZE is None:
             return []
-        target_size = (int(self.width), int(self.height))
+        target_size = self._get_sprite_target_size()
         frame_width, frame_height = self.SPRITE_FRAME_SIZE
         frames = []
         for index in range(frame_count):
@@ -805,7 +840,7 @@ class Enemy(Entity):
         bar_width = self.width
         bar_height = 6
         x = self.position.x - camera.position.x
-        y = self.position.y - camera.position.y - 12
+        y = self._get_body_top_world_y() - camera.position.y - 10
         ratio = self.health / self.max_health if self.max_health > 0 else 0
         pygame.draw.rect(screen, (70, 20, 20), (x, y, bar_width, bar_height), border_radius=3)
         pygame.draw.rect(screen, (220, 70, 70), (x, y, bar_width * ratio, bar_height), border_radius=3)
@@ -820,7 +855,7 @@ class Enemy(Entity):
             if self.hurt_flash_timer > 0:
                 sprite = sprite.copy()
                 sprite.fill((100, 100, 100, 0), special_flags=pygame.BLEND_RGB_ADD)
-            screen.blit(sprite, (self.position.x - camera.position.x, self.position.y - camera.position.y))
+            self._blit_body_sprite(screen, camera, sprite)
             return
         x = self.position.x - camera.position.x
         y = self.position.y - camera.position.y
@@ -832,20 +867,38 @@ class Enemy(Entity):
         pygame.draw.circle(screen, dot_color, (int(x + self.width * 0.68), int(y + self.height * 0.34)), 3)
         pygame.draw.circle(screen, dot_color, (int(x + self.width * 0.5), int(y + self.height * 0.68)), 3)
 
-    def _draw_zone(self, screen, camera, radius, fill_color, border_color, alpha, border_width=2):
-        hitbox_x, hitbox_y, hitbox_w, hitbox_h = self.get_hitbox_rect()
-        padding = int(radius)
-        rect = pygame.Rect(
-            int(hitbox_x - padding - camera.position.x),
-            int(hitbox_y - padding - camera.position.y),
-            int(hitbox_w + padding * 2),
-            int(hitbox_h + padding * 2),
+    def _get_sprite_target_size(self):
+        return (
+            max(1, int(round(self.width * self.sprite_scale))),
+            max(1, int(round(self.height * self.sprite_scale))),
         )
-        overlay = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
-        border_radius = min(padding, rect.width // 2, rect.height // 2)
-        pygame.draw.rect(overlay, (*fill_color, alpha), overlay.get_rect(), border_radius=border_radius)
-        pygame.draw.rect(overlay, border_color, overlay.get_rect(), width=border_width, border_radius=border_radius)
-        screen.blit(overlay, rect.topleft)
+
+    def _get_body_top_world_y(self, sprite=None):
+        sprite = sprite or self.current_sprite
+        if sprite is None:
+            return self.position.y
+        return self.position.y + (self.height - sprite.get_height()) + self.sprite_offset_y
+
+    def _get_body_sprite_topleft(self, sprite, camera):
+        return (
+            self.position.x - camera.position.x + (self.width - sprite.get_width()) / 2 + self.sprite_offset_x,
+            self._get_body_top_world_y(sprite) - camera.position.y,
+        )
+
+    def _blit_body_sprite(self, screen, camera, sprite):
+        screen.blit(sprite, self._get_body_sprite_topleft(sprite, camera))
+
+    def _draw_zone(self, screen, camera, radius, fill_color, border_color, alpha, border_width=2):
+        zone_radius = max(1, int(round(float(radius))))
+        center = self.get_center()
+        screen_center_x = int(center.x - camera.position.x)
+        screen_center_y = int(center.y - camera.position.y)
+        diameter = zone_radius * 2 + border_width * 2 + 4
+        overlay = pygame.Surface((diameter, diameter), pygame.SRCALPHA)
+        local_center = (diameter // 2, diameter // 2)
+        pygame.draw.circle(overlay, (*fill_color, alpha), local_center, zone_radius)
+        pygame.draw.circle(overlay, border_color, local_center, zone_radius, width=border_width)
+        screen.blit(overlay, (screen_center_x - diameter // 2, screen_center_y - diameter // 2))
 
     def _draw_rect_debug(self, screen, camera, rect, color, width=2):
         if rect is None:
@@ -879,6 +932,6 @@ class Enemy(Entity):
     def draw(self, screen, camera):
         if self.is_dead:
             return
-        self._draw_health_bar(screen, camera)
         self._draw_body(screen, camera)
+        self._draw_health_bar(screen, camera)
         self.draw_debug(screen, camera)

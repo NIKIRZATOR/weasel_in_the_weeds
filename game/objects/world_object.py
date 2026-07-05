@@ -54,6 +54,8 @@ class WorldObject(Entity):
         self._label_cache_key = None
         self._label_surface = None
         self.sprite_path = self.properties.get("sprite_path")
+        self.sprite_scale = max(0.1, float(self.properties.get("sprite_scale", 1.0)))
+        self.sprite_anchor = str(self.properties.get("sprite_anchor", "top_left")).strip().lower()
         self.pixel_offset_x = int(self.properties.get("pixel_offset_x", 0))
         self.pixel_offset_y = int(self.properties.get("pixel_offset_y", 0))
 
@@ -91,19 +93,35 @@ class WorldObject(Entity):
         sprite = self._get_sprite_surface()
         if sprite is None:
             return False
-        screen.blit(sprite, (rect.x + self.pixel_offset_x, rect.y + self.pixel_offset_y))
+        draw_x, draw_y = self._get_sprite_draw_position(rect, sprite)
+        screen.blit(sprite, (draw_x, draw_y))
         return True
 
     def _get_sprite_surface(self):
         if not self.sprite_path:
             return None
-        cache_key = (str(self.sprite_path), int(self.width), int(self.height))
+        draw_size = self._get_sprite_draw_size()
+        cache_key = (str(self.sprite_path), int(draw_size[0]), int(draw_size[1]))
         if cache_key not in self._SPRITE_CACHE:
             self._SPRITE_CACHE[cache_key] = load_image(
                 ASSETS_DIR / str(self.sprite_path),
-                size=(int(self.width), int(self.height)),
+                size=draw_size,
             )
         return self._SPRITE_CACHE[cache_key]
+
+    def _get_sprite_draw_size(self):
+        return (
+            max(1, int(round(self.width * self.sprite_scale))),
+            max(1, int(round(self.height * self.sprite_scale))),
+        )
+
+    def _get_sprite_draw_position(self, rect, sprite):
+        if self.sprite_anchor == "bottom_center":
+            return (
+                rect.x + (rect.width - sprite.get_width()) / 2 + self.pixel_offset_x,
+                rect.y + (rect.height - sprite.get_height()) + self.pixel_offset_y,
+            )
+        return rect.x + self.pixel_offset_x, rect.y + self.pixel_offset_y
 
     def draw_name_label(self, screen, rect, text=None):
         if self.sprite_path and not self.properties.get("show_name_with_sprite", False):

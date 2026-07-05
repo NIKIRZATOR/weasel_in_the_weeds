@@ -1,0 +1,60 @@
+[
+  {
+    "label": "Checkpoint",
+    "object": {
+      "type": "checkpoint_object",
+      "name": "Meadow Stone",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "activation_radius_tiles": 1
+      }
+    }
+  },
+  {
+    "label": "Grass Hide Zone",
+    "object": {
+      "type": "grass_hide_zone",
+      "name": "Tall Grass",
+      "x": 0,
+      "y": 0,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "concealment": true
+      }
+    }
+  },
+  {
+    "label": "Interactable",
+    "object": {
+      "type": "interactable_object",
+      "name": "Toggle Shrine",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false
+    }
+  },
+  {
+    "label": "Level Transition",
+    "object": {
+      "type": "level_transition",
+      "name": "To Forest Edge",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 3,
+      "properties": {
+        "target_level": "level_02.json",
+        "target_spawn": {
+          "x": 2,
+          "y": 2
+        }
+      }
+    }
+  }
+]

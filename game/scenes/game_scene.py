@@ -165,11 +165,29 @@ class GameScene(Scene):
             speed=int(properties.get("speed", raw_object.get("speed", 80))),
             damage=int(properties.get("damage", raw_object.get("damage", 4))),
             xp_reward=int(properties.get("xp_reward", raw_object.get("xp_reward", 10))),
-            scale=float(properties.get("scale", raw_object.get("scale", 1.0))),
             **self._enemy_resistance_kwargs(properties),
+            **self._enemy_common_kwargs(raw_object, properties),
             **self._enemy_hitbox_kwargs(properties),
             **self._enemy_specific_kwargs(raw_object, enemy_class),
         )
+
+    def _enemy_common_kwargs(self, raw_object, properties):
+        result = {
+            "scale": float(properties.get("scale", raw_object.get("scale", 1.0))),
+            "sprite_scale": float(properties.get("sprite_scale", raw_object.get("sprite_scale", 1.0))),
+            "sprite_offset_x": float(properties.get("sprite_offset_x", raw_object.get("sprite_offset_x", 0))),
+            "sprite_offset_y": float(properties.get("sprite_offset_y", raw_object.get("sprite_offset_y", 0))),
+            "stationary": bool(properties.get("stationary", raw_object.get("stationary", False))),
+        }
+        if "patrol_radius" in properties or "patrol_radius" in raw_object:
+            result["patrol_radius"] = int(properties.get("patrol_radius", raw_object.get("patrol_radius", 140)))
+        if "patrol_idle_min" in properties or "patrol_idle_min" in raw_object:
+            result["patrol_idle_min"] = float(properties.get("patrol_idle_min", raw_object.get("patrol_idle_min", 0.45)))
+        if "patrol_idle_max" in properties or "patrol_idle_max" in raw_object:
+            result["patrol_idle_max"] = float(properties.get("patrol_idle_max", raw_object.get("patrol_idle_max", 1.1)))
+        if "linger_duration" in properties or "linger_duration" in raw_object:
+            result["linger_duration"] = float(properties.get("linger_duration", raw_object.get("linger_duration", 1.0)))
+        return result
 
     def _enemy_resistance_kwargs(self, properties):
         raw_resistances = properties.get("resistances")
@@ -182,6 +200,7 @@ class GameScene(Scene):
         body = properties.get("body_hitbox") or {}
         hurt = properties.get("hurtbox") or {}
         attack = properties.get("attack_hitbox") or {}
+        collision_circle = properties.get("collision_circle") or {}
 
         if body:
             if "width" in body:
@@ -214,6 +233,14 @@ class GameScene(Scene):
                 result["attack_hitbox_offset_y"] = float(attack["offset_y"])
             if "mirror_with_facing" in attack:
                 result["attack_hitbox_mirror_with_facing"] = bool(attack["mirror_with_facing"])
+
+        if collision_circle:
+            if "radius" in collision_circle:
+                result["collision_circle_radius"] = float(collision_circle["radius"])
+            if "offset_x" in collision_circle:
+                result["collision_circle_offset_x"] = float(collision_circle["offset_x"])
+            if "offset_y" in collision_circle:
+                result["collision_circle_offset_y"] = float(collision_circle["offset_y"])
         return result
 
     def _enemy_specific_kwargs(self, raw_object, enemy_class):

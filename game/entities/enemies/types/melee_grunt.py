@@ -128,7 +128,7 @@ class MeleeGruntEnemy(Enemy):
         sheet = load_image(path)
         if sheet is None:
             return []
-        target_size = (int(self.width), int(self.height))
+        target_size = self._get_sprite_target_size()
         frame_width, frame_height = self.SPRITE_FRAME_SIZE
         frames = []
         for index in range(frame_count):
@@ -183,4 +183,4 @@ class MeleeGruntEnemy(Enemy):
         if self.hurt_flash_timer > 0:
             sprite = sprite.copy()
             sprite.fill((100, 100, 100, 0), special_flags=pygame.BLEND_RGB_ADD)
-        screen.blit(sprite, (self.position.x - camera.position.x, self.position.y - camera.position.y))
+        self._blit_body_sprite(screen, camera, sprite)

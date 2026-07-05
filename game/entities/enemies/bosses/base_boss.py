@@ -156,7 +156,7 @@ class BaseBossEnemy(Enemy):
         bar_width = max(self.width * 2.2, 140)
         bar_height = 10
         x = self.position.x + self.width / 2 - bar_width / 2 - camera.position.x
-        y = self.position.y - 24 - camera.position.y
+        y = self._get_body_top_world_y() - 24 - camera.position.y
         ratio = self.health / self.max_health if self.max_health > 0 else 0
         phase_color = (220, 90, 60) if self.phase == 1 else (120, 185, 235)
         pygame.draw.rect(screen, (40, 18, 18), (x, y, bar_width, bar_height), border_radius=5)

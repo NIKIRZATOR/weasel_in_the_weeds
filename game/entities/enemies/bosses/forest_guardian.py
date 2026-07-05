@@ -416,7 +416,7 @@ class ForestGuardianBoss(BaseBossEnemy):
     def _load_sprite_animations(self):
         animations = {}
         frame_width, frame_height = self.SPRITE_FRAME_SIZE
-        target_size = (int(self.width), int(self.height))
+        target_size = self._get_sprite_target_size()
         for name, (filename, frame_count, frame_duration) in self.SPRITE_ASSETS.items():
             path = self.sprite_asset_dir / filename
             frames = self._load_animation_frames(path, frame_count, frame_width, frame_height, target_size)
@@ -502,7 +502,7 @@ class ForestGuardianBoss(BaseBossEnemy):
         if self.hurt_flash_timer > 0:
             sprite = sprite.copy()
             sprite.fill((100, 100, 100, 0), special_flags=pygame.BLEND_RGB_ADD)
-        screen.blit(sprite, (x, y))
+        self._blit_body_sprite(screen, camera, sprite)
 
         if self.phase_glow_timer > 0:
             alpha = int(90 * min(1.0, self.phase_glow_timer / 1.2))
@@ -622,11 +622,11 @@ class ForestGuardianBoss(BaseBossEnemy):
             return
         for projectile in self.projectiles:
             projectile.draw(screen, camera)
-        self._draw_health_bar(screen, camera)
         self._draw_proximity_ring(screen, camera)
         self._draw_charge_telegraph(screen, camera)
         self._draw_spike_telegraph(screen, camera)
         self._draw_shockwave_telegraph(screen, camera)
         self._draw_body(screen, camera)
+        self._draw_health_bar(screen, camera)
         if SHOW_INTERACTION_ZONES:
             self.draw_debug(screen, camera)
