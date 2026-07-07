@@ -4,8 +4,8 @@ import pygame
 
 from game.core.assets import load_image
 from game.objects.world_object import WorldObject
+from game.save_system import save_game
 from settings import ASSETS_DIR, COLORS
-
 
 class CheckpointObject(WorldObject):
     SPRITE_SHEETS = {
@@ -59,10 +59,18 @@ class CheckpointObject(WorldObject):
         player.set_respawn_point(respawn_x, respawn_y)
         self.is_activated = True
         self.activation_started_at_ms = pygame.time.get_ticks()
-        game_scene.last_interaction_message = f"Checkpoint activated: {self.name}"
+        
+        # Сохраняем прогресс при активации чекпоинта
+        level_key = getattr(game_scene, 'level_key', 'unknown')
+        enemies = getattr(game_scene, 'enemies', None)
+        save_success = save_game(player, level_key, enemies)
+        
+        if save_success:
+            game_scene.last_interaction_message = f"Checkpoint activated: {self.name} (Progress saved)"
+        else:
+            game_scene.last_interaction_message = f"Checkpoint activated: {self.name} (Save failed)"
         game_scene.last_interaction_timer = 1.5
         return True
-
     def draw(self, screen, camera):
         screen_x = self.position.x - camera.position.x
         screen_y = self.position.y - camera.position.y
