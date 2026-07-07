@@ -6,6 +6,7 @@ from tkinter import filedialog, messagebox, ttk
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DIALOGUES_DIR = PROJECT_DIR / "dialogues"
+ASSETS_DIR = PROJECT_DIR / "assets"
 
 
 class DialogueEditor(tk.Tk):
@@ -23,6 +24,7 @@ class DialogueEditor(tk.Tk):
         self.start_var = tk.StringVar()
         self.node_id_var = tk.StringVar()
         self.speaker_var = tk.StringVar(value="npc")
+        self.portrait_path_var = tk.StringVar()
         self.next_var = tk.StringVar()
         self.choice_text_var = tk.StringVar()
         self.choice_next_var = tk.StringVar()
@@ -94,6 +96,10 @@ class DialogueEditor(tk.Tk):
         ttk.Label(node_header, text="Следующий").grid(row=0, column=4, sticky="w")
         self.next_combo = ttk.Combobox(node_header, textvariable=self.next_var)
         self.next_combo.grid(row=0, column=5, sticky="ew", padx=(4, 0))
+
+        ttk.Label(node_header, text="Портрет").grid(row=1, column=0, sticky="w", pady=(8, 0))
+        ttk.Entry(node_header, textvariable=self.portrait_path_var).grid(row=1, column=1, columnspan=4, sticky="ew", padx=(4, 12), pady=(8, 0))
+        ttk.Button(node_header, text="Выбрать", command=self._browse_portrait).grid(row=1, column=5, sticky="ew", pady=(8, 0))
 
         text_frame = ttk.LabelFrame(main, text="Текст реплики", padding=8)
         text_frame.grid(row=1, column=0, sticky="nsew", pady=(8, 0))
@@ -271,6 +277,7 @@ class DialogueEditor(tk.Tk):
         node = self.nodes[node_id]
         self.node_id_var.set(node_id)
         self.speaker_var.set(node.get("speaker", "npc"))
+        self.portrait_path_var.set(node.get("portrait_path", ""))
         self.next_var.set(node.get("next") or "")
         self.text_box.insert("1.0", node.get("text", ""))
 
@@ -302,6 +309,9 @@ class DialogueEditor(tk.Tk):
             "speaker": self.speaker_var.get() or "npc",
             "text": self.text_box.get("1.0", tk.END).strip(),
         }
+        portrait_path = self.portrait_path_var.get().strip()
+        if portrait_path:
+            node["portrait_path"] = portrait_path
 
         choices = self._read_choices()
         next_node = self.next_var.get().strip()
@@ -381,6 +391,21 @@ class DialogueEditor(tk.Tk):
         self.coins_var.set("0")
         self.items_box.delete("1.0", tk.END)
         self.flags_box.delete("1.0", tk.END)
+
+    def _browse_portrait(self):
+        path = filedialog.askopenfilename(
+            initialdir=ASSETS_DIR,
+            filetypes=(("Изображения", "*.png;*.jpg;*.jpeg;*.webp"), ("Все файлы", "*.*")),
+        )
+        if not path:
+            return
+        selected_path = Path(path)
+        try:
+            relative_path = selected_path.relative_to(ASSETS_DIR)
+        except ValueError:
+            self.portrait_path_var.set(str(selected_path).replace("\\", "/"))
+            return
+        self.portrait_path_var.set(relative_path.as_posix())
 
     def _validate_dialogue(self):
         self._apply_current_node(silent=True)
@@ -492,6 +517,7 @@ class DialogueEditor(tk.Tk):
     def _clear_form(self):
         self.node_id_var.set("")
         self.speaker_var.set("npc")
+        self.portrait_path_var.set("")
         self.next_var.set("")
         self.text_box.delete("1.0", tk.END)
         self.choice_list.delete(0, tk.END)

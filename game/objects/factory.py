@@ -30,6 +30,7 @@ PICKABLE_SPRITES = {
 NPC_DEFAULT_PROPERTIES_BY_ID = {
     "hermit_mouse": {
         "sprite_sheet_path": "npc/hermit_mouse/hermit_mouse_idle.png",
+        "portrait_path": "npc/hermit_mouse/hermit_mouse_npc_portrait.png",
         "animation_frame_count": 6,
         "animation_frame_width": 64,
         "animation_frame_height": 64,
@@ -40,6 +41,7 @@ NPC_DEFAULT_PROPERTIES_BY_ID = {
 NPC_DEFAULT_PROPERTIES_BY_NAME = {
     "hermit mouse": {
         "sprite_sheet_path": "npc/hermit_mouse/hermit_mouse_idle.png",
+        "portrait_path": "npc/hermit_mouse/hermit_mouse_npc_portrait.png",
         "animation_frame_count": 6,
         "animation_frame_width": 64,
         "animation_frame_height": 64,

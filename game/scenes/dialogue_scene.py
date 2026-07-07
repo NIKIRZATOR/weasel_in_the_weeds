@@ -1,9 +1,12 @@
+from pathlib import Path
+
 import pygame
 
+from game.core.assets import load_image
 from game.items import create_item_stack
 from game.localization import get_localizer
 from game.scenes.base import Scene
-from settings import COLORS
+from settings import ASSETS_DIR, COLORS, PLAYER_PORTRAIT_SPRITE
 
 
 class DialogueScene(Scene):
@@ -22,6 +25,7 @@ class DialogueScene(Scene):
         self.name_font = pygame.font.Font(None, 34)
         self.message = ""
         self.message_timer = 0.0
+        self._portrait_cache = {}
         self._apply_current_node_rewards()
 
     def handle_events(self, events):
@@ -61,7 +65,7 @@ class DialogueScene(Scene):
             return
 
         speaker = node.get("speaker", "npc")
-        self._draw_portrait(panel, speaker)
+        self._draw_portrait(panel, node, speaker)
         self._draw_text(panel, node, speaker)
         self._draw_choices(panel, node)
         self._draw_hint(panel)
@@ -173,22 +177,77 @@ class DialogueScene(Scene):
             self.message = self.localizer.t("ui.dialogue.received", items=", ".join(messages))
             self.message_timer = 2.0
 
-    def _draw_portrait(self, panel, speaker):
-        portrait_size = min(120, panel.height - 80)
-        left_rect = pygame.Rect(panel.x + 28, panel.y + 52, portrait_size, portrait_size)
-        right_rect = pygame.Rect(panel.right - portrait_size - 28, panel.y + 52, portrait_size, portrait_size)
+    def _draw_portrait(self, panel, node, speaker):
+        portrait_size = min(135, max(105, panel.height - 96))
+        left_rect = pygame.Rect(panel.x + 24, panel.y + 28, portrait_size, portrait_size)
+        right_rect = pygame.Rect(panel.right - portrait_size - 24, panel.y + 28, portrait_size, portrait_size)
         rect = left_rect if speaker == "player" else right_rect
         label = self.localizer.t("ui.dialogue.player_name") if speaker == "player" else self.npc.name
         fill = COLORS["PLAYER"] if speaker == "player" else self.npc.color
 
-        pygame.draw.rect(self.app.screen, fill, rect, border_radius=10)
-        pygame.draw.rect(self.app.screen, COLORS["WHITE"], rect, width=2, border_radius=10)
+        portrait = self._get_portrait_surface(node, speaker, portrait_size)
+        if portrait is not None:
+            self.app.screen.blit(portrait, rect.topleft)
+        else:
+            pygame.draw.rect(self.app.screen, fill, rect, border_radius=10)
         name = self.small_font.render(label, True, COLORS["WHITE"])
         self.app.screen.blit(name, name.get_rect(center=(rect.centerx, rect.bottom + 18)))
 
+    def _get_portrait_surface(self, node, speaker, portrait_size):
+        portrait_path = self._resolve_portrait_path(node, speaker)
+        if portrait_path is None:
+            return None
+
+        cache_key = (portrait_path, portrait_size)
+        if cache_key not in self._portrait_cache:
+            surface = load_image(portrait_path)
+            if surface is not None:
+                surface = self._fit_portrait_to_square(surface, portrait_size)
+            self._portrait_cache[cache_key] = surface
+        return self._portrait_cache[cache_key]
+
+    def _resolve_portrait_path(self, node, speaker):
+        node_portrait = str(node.get("portrait_path", "")).strip()
+        if node_portrait:
+            return self._resolve_asset_path(node_portrait)
+
+        if speaker == "player":
+            return PLAYER_PORTRAIT_SPRITE
+
+        npc_portrait = str(self.npc.properties.get("portrait_path", "")).strip()
+        if npc_portrait:
+            return self._resolve_asset_path(npc_portrait)
+        return None
+
+    def _resolve_asset_path(self, raw_path):
+        path = Path(raw_path)
+        if path.is_absolute():
+            return path
+        return ASSETS_DIR / path
+
+    def _fit_portrait_to_square(self, surface, portrait_size):
+        width = surface.get_width()
+        height = surface.get_height()
+        if width <= 0 or height <= 0:
+            return surface
+
+        if width != portrait_size or height != portrait_size:
+            scale = min(portrait_size / width, portrait_size / height)
+            scaled_size = (
+                max(1, int(round(width * scale))),
+                max(1, int(round(height * scale))),
+            )
+            surface = pygame.transform.smoothscale(surface, scaled_size)
+
+        result = pygame.Surface((portrait_size, portrait_size), pygame.SRCALPHA)
+        offset_x = (portrait_size - surface.get_width()) // 2
+        offset_y = (portrait_size - surface.get_height()) // 2
+        result.blit(surface, (offset_x, offset_y))
+        return result
+
     def _draw_text(self, panel, node, speaker):
-        margin = 180
-        text_rect = pygame.Rect(panel.x + margin, panel.y + 50, panel.width - margin * 2, 96)
+        margin = 230
+        text_rect = pygame.Rect(panel.x + margin, panel.y + 48, panel.width - margin * 2, 110)
         speaker_name = self.localizer.t("ui.dialogue.player_name") if speaker == "player" else self.npc.name
         name = self.name_font.render(speaker_name, True, COLORS["WHITE"])
         self.app.screen.blit(name, (text_rect.x, text_rect.y - 30))

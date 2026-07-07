@@ -218,6 +218,7 @@ class Player(Entity):
         self.is_hidden = False
 
         self.direction = Vector2(1, 0)
+        self.last_movement_input = Vector2(1, 0)
         self.aim_direction = Vector2(1, 0)
         self.facing_left = False
 
@@ -852,8 +853,11 @@ class Player(Entity):
         movement = self._read_movement_input(keys)
         dx = movement.x
         dy = movement.y
+        if movement.length() > 0:
+            self.last_movement_input = movement.normalize()
 
-        self.is_running = keys[pygame.K_LSHIFT] and self.stamina > 0 and (dx != 0 or dy != 0)
+        run_pressed = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
+        self.is_running = run_pressed and self.stamina > 0 and (dx != 0 or dy != 0)
         self.current_speed = (
             PLAYER_RUN_SPEED * self.get_movement_speed_multiplier()
             if self.is_running
@@ -888,17 +892,23 @@ class Player(Entity):
             return False
 
         direction_normalized = direction.normalize()
-        new_position = Vector2(
-            self.position.x + direction_normalized.x * self.jump_distance,
-            self.position.y + direction_normalized.y * self.jump_distance,
-        )
-
-        if world.check_collision(new_position.x, new_position.y, self, ignore_jump=True):
+        new_position = self._find_jump_landing_position(direction_normalized, world)
+        if new_position is None:
             return False
 
         self.start_jump(new_position)
         self.stamina -= stamina_cost
         return True
+
+    def _find_jump_landing_position(self, direction, world):
+        for distance_multiplier in (1.0, 0.85, 0.7, 0.55):
+            new_position = Vector2(
+                self.position.x + direction.x * self.jump_distance * distance_multiplier,
+                self.position.y + direction.y * self.jump_distance * distance_multiplier,
+            )
+            if not world.check_collision(new_position.x, new_position.y, self, ignore_jump=True):
+                return new_position
+        return None
 
     def start_jump(self, target_position):
         self.is_jumping = True

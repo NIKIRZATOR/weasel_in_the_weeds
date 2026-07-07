@@ -77,6 +77,8 @@ class GameScene(Scene):
         self.mouse_buttons_held = set()
         self.mouse_hold_time = 0.0
         self.charged_combo_fired = False
+        self.jump_pressed_last_frame = False
+        self.jump_requested = False
         self.hit_stop_timer = 0.0
         self.screen_shake_timer = 0.0
         self.screen_shake_strength = 0.0
@@ -373,11 +375,7 @@ class GameScene(Scene):
                 elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5):
                     self.player.select_hotbar_slot(event.key - pygame.K_1)
                 elif event.key == pygame.K_SPACE and not self.player.is_jumping:
-                    keys = pygame.key.get_pressed()
-                    direction = self._read_movement_direction(keys)
-
-                    if direction.length() > 0:
-                        self.player.try_jump(direction, self)
+                    self.jump_requested = True
                 elif event.key == pygame.K_LALT:
                     keys = pygame.key.get_pressed()
                     self.player.try_dash(self._read_movement_direction(keys))
@@ -575,7 +573,16 @@ class GameScene(Scene):
         else:
             self.mouse_hold_time = 0.0
             self.charged_combo_fired = False
+        jump_pressed = self._is_jump_pressed(keys)
+        if jump_pressed and not self.jump_pressed_last_frame and not self.player.is_jumping:
+            self.jump_requested = True
+        self.jump_pressed_last_frame = jump_pressed
         self.player.update(dt, keys, self)
+        if self.jump_requested and not self.player.is_jumping:
+            direction = self._resolve_jump_direction(keys)
+            if direction.length() > 0:
+                self.player.try_jump(direction, self)
+        self.jump_requested = False
         self._update_world_objects(dt)
         self._update_map_reveal()
         self._update_grass_hide_zones()
@@ -974,6 +981,21 @@ class GameScene(Scene):
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
             dy = 1
         return Vector2(dx, dy)
+
+    def _is_jump_pressed(self, keys):
+        return keys[pygame.K_SPACE]
+
+    def _resolve_jump_direction(self, keys):
+        direction = self._read_movement_direction(keys)
+        if direction.length() > 0:
+            return direction.normalize()
+        if self.player.last_movement_input.length() > 0:
+            return self.player.last_movement_input.normalize()
+        if self.player.animation_motion.length() > 0.01:
+            return self.player.animation_motion.normalize()
+        if self.player.direction.length() > 0:
+            return self.player.direction.normalize()
+        return Vector2()
 
     def draw(self):
         screen_width, _ = self.app.get_screen_size()
