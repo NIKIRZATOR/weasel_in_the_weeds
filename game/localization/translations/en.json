@@ -298,6 +298,30 @@
       "loading": "Loading...",
       "saving": "Saving...",
       "area_loading": "Loading area..."
+    },
+    "saves": {
+      "title_new": "Create Save",
+      "title_continue": "Choose Save",
+      "new_hint": "Type a name and press Enter to start a new run.",
+      "continue_hint": "Select a save slot, then choose an action.",
+      "default_name": "New save",
+      "create_button": "Create Save",
+      "continue_button": "Continue",
+      "delete_button": "Delete",
+      "cancel_button": "Cancel",
+      "confirm_delete_button": "Delete Save",
+      "delete_confirm": "Delete save \"{title}\"?",
+      "delete_success": "Save \"{title}\" deleted.",
+      "delete_failed": "Failed to delete the selected save.",
+      "back_hint": "Esc - back | Wheel/PageUp/PageDown - scroll",
+      "no_slots": "No save slots yet.",
+      "load_failed": "Failed to load the selected save.",
+      "create_failed": "Failed to create a save slot.",
+      "level_unknown": "unknown level",
+      "no_checkpoint": "no checkpoint",
+      "slot_summary": "Level: {level} | Hero Lv {player_level} | Checkpoint: {checkpoint}",
+      "checkpoint_saved": "Checkpoint activated: {name}. Progress saved.",
+      "checkpoint_failed": "Checkpoint activated: {name}. Save failed."
     }
   },
   "pickup": {

@@ -411,7 +411,25 @@ class HUD:
                 warning.get_rect(center=(screen_width // 2, screen_height - 104)),
             )
 
-    def draw(self, screen, player, quest_manager=None, combat_state=None, fps=0.0, show_fps=True):
+    def draw_save_indicator(self, screen, alpha=0):
+        alpha = max(0, min(255, int(alpha)))
+        if alpha <= 0:
+            return
+
+        screen_width, _ = screen.get_size()
+        panel_rect = pygame.Rect(screen_width - 58, 14, 40, 40)
+        panel = pygame.Surface((panel_rect.width, panel_rect.height), pygame.SRCALPHA)
+        pygame.draw.rect(panel, (24, 24, 32, int(alpha * 0.72)), panel.get_rect(), border_radius=10)
+        pygame.draw.rect(panel, (120, 180, 255, alpha), panel.get_rect(), width=2, border_radius=10)
+
+        body_rect = pygame.Rect(9, 8, 22, 24)
+        pygame.draw.rect(panel, (238, 238, 244, alpha), body_rect, border_radius=3)
+        pygame.draw.rect(panel, (48, 88, 132, alpha), pygame.Rect(12, 11, 16, 7), border_radius=2)
+        pygame.draw.rect(panel, (70, 70, 80, alpha), pygame.Rect(14, 22, 12, 6), border_radius=1)
+        panel.set_alpha(alpha)
+        screen.blit(panel, panel_rect.topleft)
+
+    def draw(self, screen, player, quest_manager=None, combat_state=None, fps=0.0, show_fps=True, save_indicator_alpha=0):
         self.draw_portrait(screen, player)
         self.draw_active_effects(screen, player)
         self.draw_health_bar(screen, player)
@@ -425,4 +443,5 @@ class HUD:
         #self.draw_map_hint(screen, player)
         self.draw_hotbar(screen, player, combat_state=combat_state)
         self.draw_combat_status(screen, combat_state)
+        self.draw_save_indicator(screen, save_indicator_alpha)
         #self.draw_controls(screen)

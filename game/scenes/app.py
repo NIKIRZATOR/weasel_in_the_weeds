@@ -3,7 +3,9 @@ import sys
 import pygame
 
 from game.localization import get_localizer
+from game.save_system import SaveManager
 from game.scenes.menu_scene import MenuScene
+from settings import LEVELS_DIR
 from settings import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
@@ -17,6 +19,7 @@ class GameApp:
         self.clock = pygame.time.Clock()
         self.current_fps = 0.0
         self.running = True
+        self.save_manager = SaveManager()
         self.scene = MenuScene(self)
 
     def set_scene(self, scene):
@@ -71,6 +74,41 @@ class GameApp:
 
     def get_screen_size(self):
         return self.screen.get_size()
+
+    def start_new_game(self, slot_id):
+        from game.scenes.game_scene import GameScene
+        from game.scenes.splash_scene import SplashScene
+
+        if not self.save_manager.set_active_slot(slot_id):
+            return False
+        self.set_scene(
+            SplashScene(
+                self,
+                lambda: GameScene(self, LEVELS_DIR / "level_01"),
+                title=get_localizer().t("ui.menu.new_game_loading"),
+            )
+        )
+        return True
+
+    def continue_game(self, slot_id):
+        from game.scenes.game_scene import GameScene
+        from game.scenes.splash_scene import SplashScene
+
+        save_data = self.save_manager.load_slot_data(slot_id)
+        if save_data is None:
+            return False
+        if not self.save_manager.set_active_slot(slot_id):
+            return False
+
+        level_key = save_data.get("current_level") or "level_01"
+        self.set_scene(
+            SplashScene(
+                self,
+                lambda: GameScene(self, LEVELS_DIR / level_key, save_data=save_data),
+                title=get_localizer().t("ui.menu.continue_game"),
+            )
+        )
+        return True
 
     def run(self):
         while self.running:

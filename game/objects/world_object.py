@@ -53,6 +53,7 @@ class WorldObject(Entity):
         self.is_active = False
         self._label_cache_key = None
         self._label_surface = None
+        self.object_id = str(self.properties.get("object_id", "")).strip()
         self.sprite_path = self.properties.get("sprite_path")
         self.sprite_scale = max(0.1, float(self.properties.get("sprite_scale", 1.0)))
         self.sprite_anchor = str(self.properties.get("sprite_anchor", "top_left")).strip().lower()
@@ -122,6 +123,14 @@ class WorldObject(Entity):
                 rect.y + (rect.height - sprite.get_height()) + self.pixel_offset_y,
             )
         return rect.x + self.pixel_offset_x, rect.y + self.pixel_offset_y
+
+    def get_persistence_id(self):
+        if self.object_id:
+            return self.object_id
+        return (
+            f"{self.__class__.__name__.lower()}:"
+            f"{self.name.lower()}:{int(self.position.x)}:{int(self.position.y)}"
+        )
 
     def draw_name_label(self, screen, rect, text=None):
         if self.sprite_path and not self.properties.get("show_name_with_sprite", False):

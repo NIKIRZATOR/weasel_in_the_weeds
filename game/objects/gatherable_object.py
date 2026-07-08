@@ -99,3 +99,6 @@ class GatherableObject(WorldObject):
     def _deplete(self):
         self.is_depleted = True
         self.color = self.depleted_color
+
+    def restore_depleted_state(self):
+        self._deplete()

@@ -93,6 +93,7 @@ class PauseMenuScene(Scene):
         from game.scenes.menu_scene import MenuScene
         from game.scenes.splash_scene import SplashScene
 
+        self.game_scene.save_progress(reason="menu_exit")
         self.app.set_scene(
             SplashScene(
                 self.app,

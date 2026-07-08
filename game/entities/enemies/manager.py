@@ -97,6 +97,7 @@ class EnemyManager:
         return False
 
     def _handle_enemy_death(self, enemy):
+        self.game_scene.mark_enemy_defeated(enemy)
         self._spawn_drops(enemy)
         defeat_flag = getattr(enemy, "defeat_flag", None)
         if defeat_flag:

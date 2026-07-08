@@ -4,8 +4,8 @@ import pygame
 
 from game.core.assets import load_image
 from game.objects.world_object import WorldObject
-from game.save_system import save_game
 from settings import ASSETS_DIR, COLORS
+
 
 class CheckpointObject(WorldObject):
     SPRITE_SHEETS = {
@@ -39,9 +39,6 @@ class CheckpointObject(WorldObject):
         self.activation_radius = max(0.0, radius_tiles * width)
 
     def can_activate(self, player):
-        if self.is_activated:
-            return False
-
         checkpoint_center = self.get_center()
         player_center = player.get_center()
         distance = math.hypot(
@@ -52,25 +49,20 @@ class CheckpointObject(WorldObject):
 
     def activate(self, player, game_scene):
         if not self.can_activate(player):
-            return False
+            return False, False
 
         respawn_x = self.position.x + self.width
         respawn_y = self.position.y
         player.set_respawn_point(respawn_x, respawn_y)
+        was_already_activated = self.is_activated
+        if not self.is_activated:
+            self.restore_activated_state()
+        return True, (not was_already_activated)
+
+    def restore_activated_state(self):
         self.is_activated = True
         self.activation_started_at_ms = pygame.time.get_ticks()
-        
-        # Сохраняем прогресс при активации чекпоинта
-        level_key = getattr(game_scene, 'level_key', 'unknown')
-        enemies = getattr(game_scene, 'enemies', None)
-        save_success = save_game(player, level_key, enemies)
-        
-        if save_success:
-            game_scene.last_interaction_message = f"Checkpoint activated: {self.name} (Progress saved)"
-        else:
-            game_scene.last_interaction_message = f"Checkpoint activated: {self.name} (Save failed)"
-        game_scene.last_interaction_timer = 1.5
-        return True
+
     def draw(self, screen, camera):
         screen_x = self.position.x - camera.position.x
         screen_y = self.position.y - camera.position.y

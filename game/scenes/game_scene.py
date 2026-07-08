@@ -1,5 +1,6 @@
 import math
 import random
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pygame
@@ -14,6 +15,7 @@ from game.items import create_item_stack
 from game.localization import get_localizer
 from game.objects import create_world_object
 from game.quests import QuestManager
+from game.save_system import SAVE_VERSION, load_player_state, serialize_player_state
 from game.scenes.base import Scene
 from game.ui.hud import HUD
 from game.world.collision import CollisionSystem
@@ -36,7 +38,7 @@ TRANSITION_XP_REWARD = 18
 
 
 class GameScene(Scene):
-    def __init__(self, app, level_path, player=None, target_spawn=None):
+    def __init__(self, app, level_path, player=None, target_spawn=None, save_data=None):
         self.app = app
         self.localizer = get_localizer()
         self.level_path = level_path
@@ -62,10 +64,24 @@ class GameScene(Scene):
                 spawn_x=spawn_world_x,
                 spawn_y=spawn_world_y,
             )
+            if save_data is not None:
+                load_player_state(self.player, save_data.get("player", {}))
+                self.player.position = Vector2(
+                    self.player.spawn_position.x,
+                    self.player.spawn_position.y,
+                )
         else:
             self.player = player
-            self.player.move_to_spawn(spawn_world_x, spawn_world_y)
+            if target_spawn is not None:
+                self.player.move_to_spawn(spawn_world_x, spawn_world_y)
         self.world_objects, enemies = self._load_world_objects()
+        self._apply_level_state()
+        defeated_enemy_ids = getattr(self, "_pending_defeated_enemy_ids", set())
+        if defeated_enemy_ids:
+            enemies = [
+                enemy for enemy in enemies
+                if getattr(enemy, "persistence_id", "") not in defeated_enemy_ids
+            ]
         self.enemy_manager = EnemyManager(self, enemies)
         self.collision_system.set_objects(self.world_objects)
         self._player_attack_applied = False
@@ -93,6 +109,9 @@ class GameScene(Scene):
         self.last_interaction_message = ""
         self.last_interaction_timer = 0.0
         self.current_interaction_target = None
+        self.active_checkpoint_contacts = set()
+        self.save_indicator_timer = 0.0
+        self.save_progress(reason="scene_enter")
 
     @property
     def enemies(self):
@@ -115,6 +134,32 @@ class GameScene(Scene):
         key = f"ui.levels.{Path(self.level_path).stem}"
         translated = self.localizer.t(key)
         return translated if translated != key else self.level.name
+
+    def save_progress(self, reason="manual", checkpoint_name=None):
+        slot = self.app.save_manager.get_active_slot_meta()
+        if slot is None:
+            return False
+
+        snapshot = self._build_save_snapshot(reason=reason, checkpoint_name=checkpoint_name)
+        save_success = self.app.save_manager.save_slot(slot.slot_id, snapshot, title=slot.title)
+        if save_success:
+            self.save_indicator_timer = 1.6
+        return save_success
+
+    def _build_save_snapshot(self, reason="manual", checkpoint_name=None):
+        active_slot = self.app.save_manager.get_active_slot_meta()
+        return {
+            "version": SAVE_VERSION,
+            "saved_at": datetime.now(timezone.utc).isoformat(),
+            "current_level": self.level_key,
+            "player": serialize_player_state(self.player),
+            "meta": {
+                "reason": str(reason),
+                "last_checkpoint_name": checkpoint_name or (
+                    active_slot.last_checkpoint_name if active_slot is not None else None
+                ),
+            },
+        }
 
     def _load_world_objects(self):
         world_objects = []
@@ -140,15 +185,81 @@ class GameScene(Scene):
             world_object = create_world_object(raw_object, self.level.tile_size)
             if world_object is not None:
                 if getattr(world_object, "is_container", False):
-                    object_id = world_object.object_id or (
-                        f"{int(world_object.position.x)}:{int(world_object.position.y)}"
-                    )
+                    object_id = world_object.get_persistence_id()
                     world_object.bind_state_store(
                         self.player.container_states,
                         f"{self.level_key}:{object_id}",
                     )
                 world_objects.append(world_object)
         return world_objects, enemies
+
+    def _get_level_state(self, create=True):
+        if not create:
+            return self.player.level_states.get(self.level_key)
+
+        state = self.player.level_states.setdefault(
+            self.level_key,
+            {
+                "picked_object_ids": set(),
+                "depleted_object_ids": set(),
+                "activated_checkpoint_ids": set(),
+                "defeated_enemy_ids": set(),
+                "active_checkpoint_id": None,
+            },
+        )
+        state.setdefault("picked_object_ids", set())
+        state.setdefault("depleted_object_ids", set())
+        state.setdefault("activated_checkpoint_ids", set())
+        state.setdefault("defeated_enemy_ids", set())
+        state.setdefault("active_checkpoint_id", None)
+        return state
+
+    def _apply_level_state(self):
+        level_state = self._get_level_state(create=False)
+        if not level_state:
+            return
+
+        picked_ids = level_state.get("picked_object_ids", set())
+        depleted_ids = level_state.get("depleted_object_ids", set())
+        activated_checkpoint_ids = level_state.get("activated_checkpoint_ids", set())
+        defeated_enemy_ids = level_state.get("defeated_enemy_ids", set())
+
+        filtered_objects = []
+        for world_object in self.world_objects:
+            persistence_id = world_object.get_persistence_id()
+            if persistence_id in picked_ids and hasattr(world_object, "is_picked"):
+                continue
+            if persistence_id in depleted_ids and getattr(world_object, "is_gatherable", False):
+                world_object.restore_depleted_state()
+            if persistence_id in activated_checkpoint_ids and getattr(world_object, "is_checkpoint", False):
+                world_object.restore_activated_state()
+            filtered_objects.append(world_object)
+        self.world_objects = filtered_objects
+        self.collision_system.set_objects(self.world_objects)
+
+        self.player.container_states = {
+            key: value
+            for key, value in self.player.container_states.items()
+            if isinstance(key, str)
+        }
+        self._rebind_container_state()
+
+        self._apply_enemy_level_state(defeated_enemy_ids)
+
+    def _apply_enemy_level_state(self, defeated_enemy_ids):
+        if not defeated_enemy_ids:
+            return
+        self._pending_defeated_enemy_ids = set(defeated_enemy_ids)
+
+    def _rebind_container_state(self):
+        for world_object in self.world_objects:
+            if not getattr(world_object, "is_container", False):
+                continue
+            object_id = world_object.get_persistence_id()
+            world_object.bind_state_store(
+                self.player.container_states,
+                f"{self.level_key}:{object_id}",
+            )
 
     def _create_enemy(self, raw_object, enemy_class):
         width = raw_object.get("width", 1) * self.level.tile_size
@@ -157,7 +268,7 @@ class GameScene(Scene):
         y = raw_object.get("y", 0) * self.level.tile_size
         properties = raw_object.get("properties", {})
 
-        return enemy_class(
+        enemy = enemy_class(
             x,
             y,
             width,
@@ -171,6 +282,18 @@ class GameScene(Scene):
             **self._enemy_common_kwargs(raw_object, properties),
             **self._enemy_hitbox_kwargs(properties),
             **self._enemy_specific_kwargs(raw_object, enemy_class),
+        )
+        enemy.persistence_id = self._build_enemy_persistence_id(raw_object, enemy_class)
+        return enemy
+
+    def _build_enemy_persistence_id(self, raw_object, enemy_class):
+        object_id = raw_object.get("id")
+        if object_id is not None:
+            return str(object_id)
+        return (
+            f"{enemy_class.__name__.lower()}:"
+            f"{raw_object.get('name', enemy_class.__name__).lower()}:"
+            f"{int(raw_object.get('x', 0))}:{int(raw_object.get('y', 0))}"
         )
 
     def _enemy_common_kwargs(self, raw_object, properties):
@@ -446,6 +569,7 @@ class GameScene(Scene):
         pickable_object.is_picked = True
         pickable_object.is_active = True
         pickable_object.color = COLORS["PICKABLE_PICKED"]
+        self.mark_object_picked(pickable_object)
 
         if item_stack is not None and item_stack.kind.value == "currency":
             if currency_wallet == "coins":
@@ -522,10 +646,35 @@ class GameScene(Scene):
             return False
 
         result = target.interact(self.player, self)
+        if getattr(target, "is_gatherable", False) and getattr(target, "is_depleted", False):
+            self.mark_object_depleted(target)
         if result and getattr(target, "is_picked", False):
             self.world_objects = [obj for obj in self.world_objects if obj is not target]
             self.collision_system.set_objects(self.world_objects)
         return result
+
+    def mark_object_picked(self, world_object):
+        if getattr(world_object, "auto_pickup", False):
+            return
+        level_state = self._get_level_state()
+        level_state["picked_object_ids"].add(world_object.get_persistence_id())
+
+    def mark_object_depleted(self, world_object):
+        level_state = self._get_level_state()
+        level_state["depleted_object_ids"].add(world_object.get_persistence_id())
+
+    def mark_checkpoint_activated(self, checkpoint_object):
+        checkpoint_id = checkpoint_object.get_persistence_id()
+        level_state = self._get_level_state()
+        level_state["activated_checkpoint_ids"].add(checkpoint_id)
+        level_state["active_checkpoint_id"] = checkpoint_id
+
+    def mark_enemy_defeated(self, enemy):
+        persistence_id = getattr(enemy, "persistence_id", None)
+        if not persistence_id:
+            return
+        level_state = self._get_level_state()
+        level_state["defeated_enemy_ids"].add(str(persistence_id))
 
     def _find_interaction_target(self):
         player_zone = self.player.get_interaction_rect()
@@ -601,17 +750,34 @@ class GameScene(Scene):
             self.last_interaction_timer = max(0.0, self.last_interaction_timer - dt)
             if self.last_interaction_timer == 0.0:
                 self.last_interaction_message = ""
+        if self.save_indicator_timer > 0:
+            self.save_indicator_timer = max(0.0, self.save_indicator_timer - dt)
 
     def _update_checkpoints(self):
+        checkpoint_contacts = set()
         for world_object in self.world_objects:
             if not getattr(world_object, "is_checkpoint", False):
                 continue
-            if not world_object.activate(self.player, self):
+            checkpoint_id = world_object.get_persistence_id()
+            if not world_object.can_activate(self.player):
                 continue
+            checkpoint_contacts.add(checkpoint_id)
+            if checkpoint_id in self.active_checkpoint_contacts:
+                continue
+            activated, is_new_activation = world_object.activate(self.player, self)
+            if not activated:
+                continue
+            self.mark_checkpoint_activated(world_object)
             checkpoint_key = (
                 f"checkpoint:{self.level_key}:{int(world_object.position.x)}:{int(world_object.position.y)}"
             )
             self._award_player_xp(CHECKPOINT_XP_REWARD, checkpoint_key, append=True)
+            save_success = self.save_progress(reason="checkpoint", checkpoint_name=world_object.name)
+            if is_new_activation:
+                message_key = "ui.saves.checkpoint_saved" if save_success else "ui.saves.checkpoint_failed"
+                self.last_interaction_message = self.localizer.t(message_key, name=world_object.name)
+                self.last_interaction_timer = 1.5
+        self.active_checkpoint_contacts = checkpoint_contacts
 
     def _update_world_objects(self, dt):
         for world_object in self.world_objects:
@@ -688,6 +854,7 @@ class GameScene(Scene):
             self._award_player_xp(TRANSITION_XP_REWARD, transition_key, append=True)
             for flag in world_object.get_flags_to_set():
                 self.player.set_flag(flag)
+            self.save_progress(reason="transition")
             return
 
     def _update_level_transition(self, dt):
@@ -1028,6 +1195,7 @@ class GameScene(Scene):
             combat_state=self._build_hud_combat_state(),
             fps=self.app.current_fps,
             show_fps=self.app.show_fps,
+            save_indicator_alpha=self._save_indicator_alpha(),
         )
         if self.current_interaction_target is not None:
             self._draw_interaction_prompt(self.current_interaction_target)
@@ -1038,6 +1206,11 @@ class GameScene(Scene):
                 message.get_rect(center=(screen_width // 2, 24)),
             )
         self._draw_transition_overlay()
+
+    def _save_indicator_alpha(self):
+        if self.save_indicator_timer <= 0:
+            return 0
+        return int(255 * min(1.0, self.save_indicator_timer / 0.35))
 
     def _draw_damage_numbers(self):
         for damage_number in self.damage_numbers:

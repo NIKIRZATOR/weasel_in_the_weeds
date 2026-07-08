@@ -298,6 +298,30 @@
       "loading": "Загрузка...",
       "saving": "Сохранение...",
       "area_loading": "Загрузка локации..."
+    },
+    "saves": {
+      "title_new": "Новое сохранение",
+      "title_continue": "Выбор сохранения",
+      "new_hint": "Введите название и нажмите Enter, чтобы начать игру.",
+      "continue_hint": "Выберите сохранение, затем выберите действие.",
+      "default_name": "Новое сохранение",
+      "create_button": "Создать сохранение",
+      "continue_button": "Продолжить",
+      "delete_button": "Удалить",
+      "cancel_button": "Отмена",
+      "confirm_delete_button": "Удалить сейв",
+      "delete_confirm": "Удалить сохранение \"{title}\"?",
+      "delete_success": "Сохранение \"{title}\" удалено.",
+      "delete_failed": "Не удалось удалить выбранное сохранение.",
+      "back_hint": "Esc - назад | Колесо/PageUp/PageDown - прокрутка",
+      "no_slots": "Сохранений пока нет.",
+      "load_failed": "Не удалось загрузить выбранное сохранение.",
+      "create_failed": "Не удалось создать сохранение.",
+      "level_unknown": "неизвестный уровень",
+      "no_checkpoint": "без чекпоинта",
+      "slot_summary": "{level} | Герой ур. {player_level} | Чекпоинт: {checkpoint}",
+      "checkpoint_saved": "Чекпоинт активирован: {name}. Прогресс сохранен.",
+      "checkpoint_failed": "Чекпоинт активирован: {name}. Сохранить прогресс не удалось."
     }
   },
   "pickup": {

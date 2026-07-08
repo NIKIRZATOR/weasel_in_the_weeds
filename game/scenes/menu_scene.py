@@ -2,7 +2,7 @@ import pygame
 
 from game.localization import get_localizer
 from game.scenes.base import Scene
-from settings import COLORS, LEVELS_DIR
+from settings import COLORS
 
 
 class MenuScene(Scene):
@@ -23,9 +23,10 @@ class MenuScene(Scene):
         button_width = 300
         button_height = 48
         gap = 14
+        has_slots = self.app.save_manager.has_slots()
         labels = [
             (self.localizer.t("ui.menu.new_game"), self.start_game, False),
-            (self.localizer.t("ui.menu.continue_game"), None, True),
+            (self.localizer.t("ui.menu.continue_game"), self.continue_game, not has_slots),
             (self.localizer.t("ui.menu.settings"), self.open_settings, False),
             (self.localizer.t("ui.menu.about"), self.show_author, False),
             (self.localizer.t("ui.menu.exit"), self.exit_game, False),
@@ -69,16 +70,14 @@ class MenuScene(Scene):
         self.message_timer = 2.0
 
     def start_game(self):
-        from game.scenes.game_scene import GameScene
-        from game.scenes.splash_scene import SplashScene
+        from game.scenes.save_slots_scene import SaveSlotsScene
 
-        self.app.set_scene(
-            SplashScene(
-                self.app,
-                lambda: GameScene(self.app, LEVELS_DIR / "level_01"),
-                title=self.localizer.t("ui.menu.new_game_loading"),
-            )
-        )
+        self.app.set_scene(SaveSlotsScene(self.app, self, mode="new"))
+
+    def continue_game(self):
+        from game.scenes.save_slots_scene import SaveSlotsScene
+
+        self.app.set_scene(SaveSlotsScene(self.app, self, mode="continue"))
 
     def open_settings(self):
         from game.scenes.settings_scene import SettingsScene
