@@ -1,0 +1,134 @@
+{
+  "movement_basics": {
+    "title_key": "ui.quests.main.movement_basics.title",
+    "description_key": "ui.quests.main.movement_basics.description",
+    "category": "main",
+    "sort_order": 10,
+    "required_flags": [],
+    "objectives": [
+      {
+        "id": "walk_the_meadow",
+        "kind": "event",
+        "text_key": "ui.quests.main.movement_basics.objective_walk",
+        "target": "move:tiles_walked",
+        "required": 20
+      },
+      {
+        "id": "dash_the_meadow",
+        "kind": "event",
+        "text_key": "ui.quests.main.movement_basics.objective_dash",
+        "target": "action:dash",
+        "required": 3
+      }
+    ]
+  },
+  "field_supplies": {
+    "title_key": "ui.quests.main.field_supplies.title",
+    "description_key": "ui.quests.main.field_supplies.description",
+    "category": "main",
+    "sort_order": 20,
+    "required_flags": [],
+    "objectives": [
+      {
+        "id": "collect_sticks",
+        "kind": "event",
+        "text_key": "ui.quests.main.field_supplies.objective_sticks",
+        "target": "pickup:stick",
+        "required": 5
+      },
+      {
+        "id": "collect_berries",
+        "kind": "event",
+        "text_key": "ui.quests.main.field_supplies.objective_berries",
+        "target": "pickup:berry",
+        "required": 5
+      },
+      {
+        "id": "collect_stones",
+        "kind": "event",
+        "text_key": "ui.quests.main.field_supplies.objective_stones",
+        "target": "pickup:stone_pebble",
+        "required": 5
+      }
+    ]
+  },
+  "first_weapon": {
+    "title_key": "ui.quests.main.first_weapon.title",
+    "description_key": "ui.quests.main.first_weapon.description",
+    "category": "main",
+    "sort_order": 30,
+    "required_flags": [],
+    "objectives": [
+      {
+        "id": "open_crafting_menu",
+        "kind": "event",
+        "text_key": "ui.quests.main.first_weapon.objective_open_crafting",
+        "target": "ui:crafting_opened",
+        "required": 1
+      },
+      {
+        "id": "craft_stone_spear",
+        "kind": "event",
+        "text_key": "ui.quests.main.first_weapon.objective_craft_spear",
+        "target": "craft:stone_spear",
+        "required": 1
+      }
+    ]
+  },
+  "beetle_cull": {
+    "title_key": "ui.quests.main.beetle_cull.title",
+    "description_key": "ui.quests.main.beetle_cull.description",
+    "category": "main",
+    "sort_order": 40,
+    "required_flags": [],
+    "objectives": [
+      {
+        "id": "defeat_beetles",
+        "kind": "event",
+        "text_key": "ui.quests.main.beetle_cull.objective",
+        "target": "kill:beetle",
+        "required": 5
+      }
+    ]
+  },
+  "predator_cleanup": {
+    "title_key": "ui.quests.main.predator_cleanup.title",
+    "description_key": "ui.quests.main.predator_cleanup.description",
+    "category": "main",
+    "sort_order": 50,
+    "required_flags": [],
+    "objectives": [
+      {
+        "id": "defeat_wasps",
+        "kind": "event",
+        "text_key": "ui.quests.main.predator_cleanup.objective_wasps",
+        "target": "kill:wasp",
+        "required": 3
+      },
+      {
+        "id": "defeat_spiders",
+        "kind": "event",
+        "text_key": "ui.quests.main.predator_cleanup.objective_spiders",
+        "target": "kill:spider",
+        "required": 5
+      }
+    ]
+  },
+  "reach_forest_edge": {
+    "title_key": "ui.quests.main.reach_forest_edge.title",
+    "description_key": "ui.quests.main.reach_forest_edge.description",
+    "category": "main",
+    "sort_order": 60,
+    "required_flags": [],
+    "objectives": [
+      {
+        "id": "enter_forest_edge",
+        "kind": "event",
+        "text_key": "ui.quests.main.reach_forest_edge.objective",
+        "target": "flag:entered_forest_edge",
+        "required": 1,
+        "legacy_flag": "entered_forest_edge"
+      }
+    ]
+  }
+}

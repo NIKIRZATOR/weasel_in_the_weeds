@@ -14,6 +14,7 @@ class CraftingScene(Scene):
         self.app = app
         self.game_scene = game_scene
         self.player = game_scene.player
+        self.player.emit_quest_event("ui:crafting_opened")
         self.localizer = get_localizer()
         self.title_font = pygame.font.Font(None, 56)
         self.section_font = pygame.font.Font(None, 30)
@@ -538,6 +539,7 @@ class CraftingScene(Scene):
             self._set_message(self.localizer.t("ui.crafting.message_crafting_failed"))
             return
 
+        self.player.emit_quest_event(f"recipe:{recipe.id}")
         result_stack = create_item_stack(recipe.result.item_id, recipe.result.quantity)
         result_name = result_stack.name if result_stack is not None else recipe.result.item_id
         self._set_message(self.localizer.t("ui.crafting.message_crafted", name=result_name, quantity=recipe.result.quantity))

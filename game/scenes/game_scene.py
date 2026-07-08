@@ -7,6 +7,7 @@ import pygame
 
 from game.core.camera import Camera
 from game.core.vector import Vector2
+from game.dialogues import load_dialogue
 from game.effects import DamageNumber
 from game.entities.enemies import BeetleEnemy, EnemyManager, ForestGuardianBoss, MeleeEnemy, RangedEnemy, SpiderEnemy
 from game.entities.projectiles import PlayerProjectile
@@ -104,12 +105,15 @@ class GameScene(Scene):
         self.camera = Camera(world_width, world_height)
         self.hud = HUD()
         self.quest_manager = QuestManager(self.player)
+        self.quest_manager.on_quest_activated = self._handle_quest_activated
         self.info_font = pygame.font.Font(None, 28)
         self.interaction_font = pygame.font.Font(None, 30)
         self.last_interaction_message = ""
         self.last_interaction_timer = 0.0
         self.current_interaction_target = None
         self.active_checkpoint_contacts = set()
+        self.pending_quest_activation_ids = []
+        self.quest_walk_distance_buffer = 0.0
         self.save_indicator_timer = 0.0
         self.save_progress(reason="scene_enter")
 
@@ -160,6 +164,39 @@ class GameScene(Scene):
                 ),
             },
         }
+
+    def _handle_quest_activated(self, quest):
+        if quest is None:
+            return
+        if quest.id not in self.pending_quest_activation_ids:
+            self.pending_quest_activation_ids.append(quest.id)
+
+    def _show_next_quest_activation_dialogue(self):
+        if not self.pending_quest_activation_ids:
+            return False
+
+        quest_id = self.pending_quest_activation_ids.pop(0)
+        quest = self.quest_manager.quest_definitions_by_id.get(quest_id)
+        if quest is None or not quest.activation_dialogue_file:
+            return False
+
+        try:
+            dialogue = load_dialogue(quest.activation_dialogue_file, base_dir=LEVELS_DIR / quest.level_key)
+        except (OSError, ValueError) as error:
+            print(f"Quest activation dialogue load failed for {quest.id}: {error}")
+            return False
+
+        from game.scenes.dialogue_scene import DialogueScene
+
+        self.app.set_scene(
+            DialogueScene(
+                self.app,
+                self,
+                dialogue=dialogue,
+                speaker_name=self.localizer.t("ui.quests.activation_speaker"),
+            )
+        )
+        return True
 
     def _load_world_objects(self):
         world_objects = []
@@ -284,7 +321,25 @@ class GameScene(Scene):
             **self._enemy_specific_kwargs(raw_object, enemy_class),
         )
         enemy.persistence_id = self._build_enemy_persistence_id(raw_object, enemy_class)
+        enemy.quest_enemy_type = self._resolve_enemy_quest_type(raw_object)
         return enemy
+
+    def _resolve_enemy_quest_type(self, raw_object):
+        properties = raw_object.get("properties", {})
+        explicit_type = str(properties.get("quest_enemy_type", "")).strip().lower()
+        if explicit_type:
+            return explicit_type
+
+        object_type = str(raw_object.get("type", "")).strip().lower()
+        if object_type == "enemy_beetle":
+            return "beetle"
+        if object_type == "enemy_spider":
+            return "spider"
+        if object_type == "enemy_ranged":
+            return "wasp"
+        if object_type in {"enemy_boss_forest_guardian", "boss_forest_guardian", "enemy_boss_deer"}:
+            return "guardian"
+        return "enemy"
 
     def _build_enemy_persistence_id(self, raw_object, enemy_class):
         object_id = raw_object.get("id")
@@ -726,7 +781,9 @@ class GameScene(Scene):
         if jump_pressed and not self.jump_pressed_last_frame and not self.player.is_jumping:
             self.jump_requested = True
         self.jump_pressed_last_frame = jump_pressed
+        previous_position = Vector2(self.player.position.x, self.player.position.y)
         self.player.update(dt, keys, self)
+        self._track_player_movement(previous_position)
         if self.jump_requested and not self.player.is_jumping:
             direction = self._resolve_jump_direction(keys)
             if direction.length() > 0:
@@ -743,6 +800,8 @@ class GameScene(Scene):
         self._apply_player_attack()
         self._update_damage_numbers(dt)
         self._check_level_transitions()
+        if self.app.scene is self:
+            self._show_next_quest_activation_dialogue()
         screen_width, screen_height = self.app.get_screen_size()
         self.camera.update(self.player, screen_width, screen_height)
         self.current_interaction_target = self._find_interaction_target()
@@ -1135,6 +1194,20 @@ class GameScene(Scene):
             mouse_pos[0] + self.camera.position.x,
             mouse_pos[1] + self.camera.position.y,
         )
+
+    def _track_player_movement(self, previous_position):
+        dx = self.player.position.x - previous_position.x
+        dy = self.player.position.y - previous_position.y
+        distance = math.hypot(dx, dy)
+        if distance <= 0.01:
+            return
+
+        self.quest_walk_distance_buffer += distance
+        traversed_tiles = int(self.quest_walk_distance_buffer // self.level.tile_size)
+        if traversed_tiles <= 0:
+            return
+        self.quest_walk_distance_buffer -= traversed_tiles * self.level.tile_size
+        self.player.emit_quest_event("move:tiles_walked", traversed_tiles)
 
     def _read_movement_direction(self, keys):
         dx = 0

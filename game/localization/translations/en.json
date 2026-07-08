@@ -127,6 +127,7 @@
       "details_title": "Details",
       "close_hint": "Esc / J - close",
       "active_label": "Current quest",
+      "activation_speaker": "Thoughts",
       "status_active": "Active",
       "status_next": "Next",
       "status_completed": "Completed",
@@ -151,6 +152,41 @@
           "title": "Defeat the Guardian",
           "description": "Bring down the Forest Guardian to open the way forward.",
           "objective": "Defeat the Forest Guardian."
+        },
+        "movement_basics": {
+          "title": "Learn the Basics",
+          "description": "Get comfortable with movement around the meadow. Walk the paths, feel the pace, and practice a few dashes.",
+          "objective_walk": "Explore the meadow on foot: {current}/{required}",
+          "objective_dash": "Use dash: {current}/{required}"
+        },
+        "field_supplies": {
+          "title": "Gather Field Supplies",
+          "description": "Try interacting with the world around you. Pick up enough simple materials to prepare for your first real craft.",
+          "objective_sticks": "Collect sticks: {current}/{required}",
+          "objective_berries": "Collect berries: {current}/{required}",
+          "objective_stones": "Collect pebbles: {current}/{required}"
+        },
+        "first_weapon": {
+          "title": "Craft Your First Weapon",
+          "description": "Open the crafting menu, check what you can make, and assemble a stone spear for the road ahead.",
+          "objective_open_crafting": "Open the crafting menu: {current}/{required}",
+          "objective_craft_spear": "Craft a stone spear: {current}/{required}"
+        },
+        "beetle_cull": {
+          "title": "Thin the Beetles",
+          "description": "The meadow is crawling with armored beetles. Clear a handful of them to make the path safer.",
+          "objective": "Defeat beetles: {current}/{required}"
+        },
+        "predator_cleanup": {
+          "title": "Drive Back the Predators",
+          "description": "The deeper trail is watched by hunters from the air and ground. Deal with the wasps and spiders nearby.",
+          "objective_wasps": "Defeat wasps: {current}/{required}",
+          "objective_spiders": "Defeat spiders: {current}/{required}"
+        },
+        "reach_forest_edge": {
+          "title": "Move On to the Forest Edge",
+          "description": "Once you are ready, leave the meadow behind and step into the next area.",
+          "objective": "Enter the forest edge: {current}/{required}"
         }
       }
     },
@@ -448,6 +484,10 @@
     "stone_knife": {
       "name": "Stone Knife",
       "description": "A sharpened pebble fixed to a stick. Simple but useful."
+    },
+    "stone_spear": {
+      "name": "Stone Spear",
+      "description": "A sturdy branch tipped with sharpened stone. Reliable reach for early fights."
     },
     "berry_mix": {
       "name": "Berry Mix",

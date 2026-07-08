@@ -1,0 +1,76 @@
+{
+  "meet_hermit": {
+    "title_key": "ui.quests.main.meet_hermit.title",
+    "description_key": "ui.quests.main.meet_hermit.description",
+    "category": "main",
+    "sort_order": 10,
+    "required_flags": [],
+    "objectives": [
+      {
+        "id": "speak_with_hermit",
+        "kind": "event",
+        "text_key": "ui.quests.main.meet_hermit.objective",
+        "target": "flag:met_mouse_hermit",
+        "required": 1,
+        "legacy_flag": "met_mouse_hermit"
+      }
+    ]
+  },
+  "enter_forest_edge": {
+    "title_key": "ui.quests.main.enter_forest_edge.title",
+    "description_key": "ui.quests.main.enter_forest_edge.description",
+    "category": "main",
+    "sort_order": 20,
+    "required_flags": [
+      "met_mouse_hermit"
+    ],
+    "objectives": [
+      {
+        "id": "reach_forest_edge",
+        "kind": "event",
+        "text_key": "ui.quests.main.enter_forest_edge.objective",
+        "target": "flag:entered_forest_edge",
+        "required": 1,
+        "legacy_flag": "entered_forest_edge"
+      }
+    ]
+  },
+  "enter_deep_forest": {
+    "title_key": "ui.quests.main.enter_deep_forest.title",
+    "description_key": "ui.quests.main.enter_deep_forest.description",
+    "category": "main",
+    "sort_order": 30,
+    "required_flags": [
+      "entered_forest_edge"
+    ],
+    "objectives": [
+      {
+        "id": "enter_deep_forest",
+        "kind": "event",
+        "text_key": "ui.quests.main.enter_deep_forest.objective",
+        "target": "flag:entered_dart_forest",
+        "required": 1,
+        "legacy_flag": "entered_dart_forest"
+      }
+    ]
+  },
+  "defeat_guardian": {
+    "title_key": "ui.quests.main.defeat_guardian.title",
+    "description_key": "ui.quests.main.defeat_guardian.description",
+    "category": "main",
+    "sort_order": 40,
+    "required_flags": [
+      "entered_dart_forest"
+    ],
+    "objectives": [
+      {
+        "id": "defeat_guardian",
+        "kind": "event",
+        "text_key": "ui.quests.main.defeat_guardian.objective",
+        "target": "flag:boss_defeated",
+        "required": 1,
+        "legacy_flag": "boss_defeated"
+      }
+    ]
+  }
+}

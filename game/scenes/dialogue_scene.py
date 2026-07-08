@@ -10,12 +10,14 @@ from settings import ASSETS_DIR, COLORS, PLAYER_PORTRAIT_SPRITE
 
 
 class DialogueScene(Scene):
-    def __init__(self, app, game_scene, npc):
+    def __init__(self, app, game_scene, npc=None, dialogue=None, speaker_name=None):
         self.app = app
         self.game_scene = game_scene
         self.player = game_scene.player
         self.npc = npc
-        self.dialogue = npc.dialogue
+        self.dialogue = dialogue if dialogue is not None else (npc.dialogue if npc is not None else None)
+        if self.dialogue is None:
+            self.dialogue = {}
         self.nodes = self.dialogue.get("nodes", {})
         self.current_node_id = self.dialogue.get("start")
         self.selected_choice = 0
@@ -26,6 +28,7 @@ class DialogueScene(Scene):
         self.message = ""
         self.message_timer = 0.0
         self._portrait_cache = {}
+        self.scripted_speaker_name = speaker_name or self.localizer.t("ui.quests.activation_speaker")
         self._apply_current_node_rewards()
 
     def handle_events(self, events):
@@ -137,6 +140,9 @@ class DialogueScene(Scene):
         if node is None:
             return
 
+        if self.npc is None:
+            return
+
         npc_key = self.npc.persistence_id
         if self.player.has_claimed_dialogue_reward(npc_key, self.current_node_id):
             return
@@ -182,8 +188,8 @@ class DialogueScene(Scene):
         left_rect = pygame.Rect(panel.x + 24, panel.y + 28, portrait_size, portrait_size)
         right_rect = pygame.Rect(panel.right - portrait_size - 24, panel.y + 28, portrait_size, portrait_size)
         rect = left_rect if speaker == "player" else right_rect
-        label = self.localizer.t("ui.dialogue.player_name") if speaker == "player" else self.npc.name
-        fill = COLORS["PLAYER"] if speaker == "player" else self.npc.color
+        label = self.localizer.t("ui.dialogue.player_name") if speaker == "player" else self._npc_display_name()
+        fill = COLORS["PLAYER"] if speaker == "player" else self._npc_color()
 
         portrait = self._get_portrait_surface(node, speaker, portrait_size)
         if portrait is not None:
@@ -213,6 +219,9 @@ class DialogueScene(Scene):
 
         if speaker == "player":
             return PLAYER_PORTRAIT_SPRITE
+
+        if self.npc is None:
+            return None
 
         npc_portrait = str(self.npc.properties.get("portrait_path", "")).strip()
         if npc_portrait:
@@ -248,7 +257,7 @@ class DialogueScene(Scene):
     def _draw_text(self, panel, node, speaker):
         margin = 230
         text_rect = pygame.Rect(panel.x + margin, panel.y + 48, panel.width - margin * 2, 110)
-        speaker_name = self.localizer.t("ui.dialogue.player_name") if speaker == "player" else self.npc.name
+        speaker_name = self.localizer.t("ui.dialogue.player_name") if speaker == "player" else self._npc_display_name()
         name = self.name_font.render(speaker_name, True, COLORS["WHITE"])
         self.app.screen.blit(name, (text_rect.x, text_rect.y - 30))
 
@@ -286,6 +295,16 @@ class DialogueScene(Scene):
 
     def _close(self):
         self.app.set_scene(self.game_scene)
+
+    def _npc_display_name(self):
+        if self.npc is not None:
+            return self.npc.name
+        return self.scripted_speaker_name
+
+    def _npc_color(self):
+        if self.npc is not None:
+            return self.npc.color
+        return COLORS["UI_SLOT_SELECTED"]
 
 
 def _wrap_text(text, font, max_width):

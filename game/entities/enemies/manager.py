@@ -99,6 +99,10 @@ class EnemyManager:
     def _handle_enemy_death(self, enemy):
         self.game_scene.mark_enemy_defeated(enemy)
         self._spawn_drops(enemy)
+        self.game_scene.player.emit_quest_event("kill:any")
+        enemy_type = str(getattr(enemy, "quest_enemy_type", "")).strip().lower()
+        if enemy_type:
+            self.game_scene.player.emit_quest_event(f"kill:{enemy_type}")
         defeat_flag = getattr(enemy, "defeat_flag", None)
         if defeat_flag:
             self.game_scene.player.set_flag(defeat_flag)

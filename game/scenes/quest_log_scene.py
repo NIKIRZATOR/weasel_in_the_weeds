@@ -157,7 +157,7 @@ class QuestLogScene(Scene):
 
         draw_y += 8
         for objective in quest.objectives:
-            objective_status = self.game_scene.quest_manager.build_objective_status(objective, self.localizer)
+            objective_status = self.game_scene.quest_manager.build_objective_status(quest, objective, self.localizer)
             prefix = "[x]" if objective_status["completed"] else "[ ]"
             color = (150, 230, 150) if objective_status["completed"] else COLORS["WHITE"]
             for line in self._wrap_text(f"{prefix} {objective_status['text']}", self.text_font, self.details_panel.width - 28):

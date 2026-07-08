@@ -11,6 +11,18 @@
     "unlock_type": "default",
     "sort_order": 10
   },
+  "stone_spear": {
+    "name": "Stone Spear",
+    "category": "tools",
+    "description": "A sturdy branch tipped with sharpened stone. Reliable reach for early fights.",
+    "ingredients": [
+      { "item_id": "stick", "quantity": 2 },
+      { "item_id": "stone_pebble", "quantity": 3 }
+    ],
+    "result": { "item_id": "stone_spear", "quantity": 1 },
+    "unlock_type": "default",
+    "sort_order": 15
+  },
   "berry_mix": {
     "name": "Berry Mix",
     "category": "healing",

@@ -13,7 +13,8 @@ from game.items import create_item_stack
 from game.items.models import ItemStack
 
 
-SAVE_VERSION = 2
+SAVE_VERSION = 3
+SUPPORTED_SAVE_VERSIONS = {2, SAVE_VERSION}
 SAVE_ROOT_DIR_NAME = "saves"
 INDEX_FILE_NAME = "index.json"
 SAVE_FILE_NAME = "save.json"
@@ -137,6 +138,52 @@ def _deserialize_level_states(raw_level_states: dict[str, dict[str, Any]]) -> di
     return level_states
 
 
+def _serialize_quest_progress(quest_progress: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    serialized: dict[str, dict[str, Any]] = {}
+    for quest_id, quest_state in quest_progress.items():
+        if not isinstance(quest_state, dict):
+            continue
+        serialized_objectives: dict[str, dict[str, Any]] = {}
+        for objective_id, objective_state in quest_state.get("objectives", {}).items():
+            if not isinstance(objective_state, dict):
+                continue
+            serialized_objectives[str(objective_id)] = {
+                "current": max(0, int(objective_state.get("current", 0))),
+                "required": max(1, int(objective_state.get("required", 1))),
+                "completed": bool(objective_state.get("completed", False)),
+            }
+        serialized[str(quest_id)] = {
+            "started": bool(quest_state.get("started", False)),
+            "completed": bool(quest_state.get("completed", False)),
+            "activation_shown": bool(quest_state.get("activation_shown", False)),
+            "objectives": serialized_objectives,
+        }
+    return serialized
+
+
+def _deserialize_quest_progress(raw_quest_progress: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    deserialized: dict[str, dict[str, Any]] = {}
+    for quest_id, quest_state in raw_quest_progress.items():
+        if not isinstance(quest_state, dict):
+            continue
+        objectives: dict[str, dict[str, Any]] = {}
+        for objective_id, objective_state in quest_state.get("objectives", {}).items():
+            if not isinstance(objective_state, dict):
+                continue
+            objectives[str(objective_id)] = {
+                "current": max(0, int(objective_state.get("current", 0))),
+                "required": max(1, int(objective_state.get("required", 1))),
+                "completed": bool(objective_state.get("completed", False)),
+            }
+        deserialized[str(quest_id)] = {
+            "started": bool(quest_state.get("started", False)),
+            "completed": bool(quest_state.get("completed", False)),
+            "activation_shown": bool(quest_state.get("activation_shown", False)),
+            "objectives": objectives,
+        }
+    return deserialized
+
+
 def serialize_player_state(player) -> dict[str, Any]:
     return {
         "position": {
@@ -157,6 +204,7 @@ def serialize_player_state(player) -> dict[str, Any]:
         "selected_hotbar_index": player.selected_hotbar_index,
         "unlocked_skill_ids": sorted(player.unlocked_skill_ids),
         "story_flags": sorted(player.story_flags),
+        "quest_progress": _serialize_quest_progress(player.quest_progress),
         "unlocked_recipe_ids": sorted(player.unlocked_recipe_ids),
         "awarded_xp_sources": sorted(player.awarded_xp_sources),
         "explored_tiles_by_level": {
@@ -193,6 +241,7 @@ def load_player_state(player, player_data: dict[str, Any]) -> None:
     player.knowledge_shards = player_data.get("knowledge_shards", player.knowledge_shards)
     player.unlocked_skill_ids = set(player_data.get("unlocked_skill_ids", []))
     player.story_flags = set(player_data.get("story_flags", []))
+    player.quest_progress = _deserialize_quest_progress(player_data.get("quest_progress", {}))
     player.unlocked_recipe_ids = set(player_data.get("unlocked_recipe_ids", []))
     player.awarded_xp_sources = set(player_data.get("awarded_xp_sources", []))
     player.explored_tiles_by_level = {
@@ -336,7 +385,7 @@ class SaveManager:
             data = json.loads(save_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             return None
-        if int(data.get("version", 0)) != SAVE_VERSION:
+        if int(data.get("version", 0)) not in SUPPORTED_SAVE_VERSIONS:
             return None
         return data
 

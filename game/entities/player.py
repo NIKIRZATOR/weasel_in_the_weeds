@@ -197,6 +197,7 @@ class Player(Entity):
         self.knowledge_shards = 0
         self.selected_hotbar_index = 0
         self.story_flags = set()
+        self.quest_progress: dict[str, dict] = {}
         self.unlocked_recipe_ids = set()
         self.explored_tiles_by_level: dict[str, list[list[bool]]] = {}
         self.claimed_dialogue_rewards_by_npc: dict[str, set[str]] = {}
@@ -243,6 +244,7 @@ class Player(Entity):
         self.last_attack_fail_reason = ""
         self.knockback_velocity = Vector2()
         self.control_stun_timer = Timer(0.0)
+        self.quest_event_callback = None
         self._sync_inventory_capacities()
         self._update_sprite_animation(0.0)
 
@@ -566,7 +568,11 @@ class Player(Entity):
     def set_flag(self, flag):
         if not flag:
             return False
-        self.story_flags.add(str(flag))
+        normalized_flag = str(flag)
+        is_new_flag = normalized_flag not in self.story_flags
+        self.story_flags.add(normalized_flag)
+        if is_new_flag:
+            self.emit_quest_event(f"flag:{normalized_flag}")
         return True
 
     def unset_flag(self, flag):
@@ -580,6 +586,11 @@ class Player(Entity):
 
     def has_flags(self, flags):
         return all(self.has_flag(flag) for flag in flags)
+
+    def emit_quest_event(self, event_id, amount=1):
+        if self.quest_event_callback is None:
+            return False
+        return bool(self.quest_event_callback(event_id, amount))
 
     def can_open_map(self):
         return self.has_flag("has_map") or self.has_item("map")
@@ -666,7 +677,10 @@ class Player(Entity):
         for ingredient in recipe.ingredients:
             if not self.remove_item(ingredient.item_id, ingredient.quantity):
                 return False
-        return self.add_item(recipe.result.item_id, recipe.result.quantity)
+        crafted = self.add_item(recipe.result.item_id, recipe.result.quantity)
+        if crafted:
+            self.emit_quest_event(f"craft:{recipe.result.item_id}")
+        return crafted
 
     def get_inventory_capacity(self):
         return self.base_inventory_capacity + self.get_inventory_capacity_bonus()
@@ -733,6 +747,8 @@ class Player(Entity):
         return True
 
     def pickup_item(self, item_stack=None, coins=0):
+        picked_item_id = None
+        picked_quantity = 0
         if item_stack is not None:
             if item_stack.kind == ItemKind.CURRENCY:
                 if not self._add_currency_from_stack(item_stack):
@@ -740,12 +756,17 @@ class Player(Entity):
                 item_stack = None
             elif not self._target_inventory_for_stack(item_stack).can_add_item(item_stack):
                 return False
+            else:
+                picked_item_id = item_stack.item_id
+                picked_quantity = item_stack.quantity
 
         if item_stack is not None and not self._target_inventory_for_stack(item_stack).add_item(item_stack):
             return False
         if coins > 0:
             self.add_coins(coins)
         self._sync_inventory_capacities()
+        if picked_item_id and picked_quantity > 0:
+            self.emit_quest_event(f"pickup:{picked_item_id}", picked_quantity)
         return True
 
     def _add_currency_from_stack(self, item_stack):
@@ -937,6 +958,7 @@ class Player(Entity):
         self.dash_timer.start()
         self.dash_cooldown.start()
         self.stamina -= stamina_cost
+        self.emit_quest_event("action:dash")
 
         if self.dash_direction.x != 0:
             self.facing_left = self.dash_direction.x < 0
