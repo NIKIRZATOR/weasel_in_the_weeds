@@ -43,19 +43,30 @@
     {
       "type": "level_transition",
       "name": "To Forest Edge",
-      "x": 30,
-      "y": 23,
+      "x": 197,
+      "y": 3,
       "width": 1,
       "height": 3,
       "properties": {
-        "target_level": "level_02.json",
+        "target_level": "level_02",
         "target_spawn": {
-          "x": 2,
-          "y": 2
+          "x": 5,
+          "y": 5
         },
         "set_flags": [
           "entered_forest_edge"
         ]
+      }
+    },
+    {
+      "type": "checkpoint_object",
+      "name": "Forest Edge Stone",
+      "x": 196,
+      "y": 4,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "activation_radius_tiles": 1
       }
     },
     {
