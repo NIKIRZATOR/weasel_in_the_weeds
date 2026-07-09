@@ -136,7 +136,7 @@ class EnemyManager:
                 properties["knowledge_shards"] = int(drop.get("knowledge_shards", 0))
             if not properties:
                 continue
-            scene.world_objects.append(
+            scene.add_world_object(
                 PickableObject(
                     start_x + offset_x,
                     start_y + offset_y,
@@ -146,4 +146,3 @@ class EnemyManager:
                     properties={**properties, "auto_pickup": True},
                 )
             )
-        scene.collision_system.set_objects(scene.world_objects)

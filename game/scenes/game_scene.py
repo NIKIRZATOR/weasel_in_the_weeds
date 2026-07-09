@@ -2,6 +2,7 @@ import math
 import random
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 
 import pygame
 
@@ -15,6 +16,7 @@ from game.entities.player import Player
 from game.items import create_item_stack
 from game.localization import get_localizer
 from game.objects import create_world_object
+from game.objects.world_object import WorldObject
 from game.quests import QuestManager
 from game.save_system import SAVE_VERSION, load_player_state, serialize_player_state
 from game.scenes.base import Scene
@@ -36,6 +38,7 @@ SCREEN_SHAKE_DURATION = 0.12
 SCREEN_SHAKE_STRENGTH = 5.0
 CHECKPOINT_XP_REWARD = 12
 TRANSITION_XP_REWARD = 18
+STATIC_WORLD_CHUNK_TILES = 12
 
 
 class GameScene(Scene):
@@ -54,6 +57,16 @@ class GameScene(Scene):
             tileset=self.level.tileset,
         )
         self.collision_system = CollisionSystem(self.tilemap)
+        self.static_world_objects = []
+        self.dynamic_world_objects = []
+        self.updatable_world_objects = []
+        self.interactable_world_objects = []
+        self.auto_pickup_objects = []
+        self.checkpoint_objects = []
+        self.transition_objects = []
+        self.grass_hide_zone_objects = []
+        self._static_world_chunk_surfaces = {}
+        self._static_world_chunk_pixel_size = self.level.tile_size * STATIC_WORLD_CHUNK_TILES
 
         spawn_x, spawn_y = target_spawn if target_spawn is not None else self.level.player_spawn
         spawn_world_x = self.level.tile_size * spawn_x
@@ -77,6 +90,7 @@ class GameScene(Scene):
                 self.player.move_to_spawn(spawn_world_x, spawn_world_y)
         self.world_objects, enemies = self._load_world_objects()
         self._apply_level_state()
+        self._sync_world_objects(rebuild_static_chunks=True)
         defeated_enemy_ids = getattr(self, "_pending_defeated_enemy_ids", set())
         if defeated_enemy_ids:
             enemies = [
@@ -84,7 +98,6 @@ class GameScene(Scene):
                 if getattr(enemy, "persistence_id", "") not in defeated_enemy_ids
             ]
         self.enemy_manager = EnemyManager(self, enemies)
-        self.collision_system.set_objects(self.world_objects)
         self._player_attack_applied = False
         self.transition_target_level = None
         self.transition_target_spawn = None
@@ -272,7 +285,6 @@ class GameScene(Scene):
                 world_object.restore_activated_state()
             filtered_objects.append(world_object)
         self.world_objects = filtered_objects
-        self.collision_system.set_objects(self.world_objects)
 
         self.player.container_states = {
             key: value
@@ -297,6 +309,118 @@ class GameScene(Scene):
                 self.player.container_states,
                 f"{self.level_key}:{object_id}",
             )
+
+    def _sync_world_objects(self, rebuild_static_chunks=False):
+        self.collision_system.set_objects(self.world_objects)
+        self._reindex_world_objects()
+        if rebuild_static_chunks:
+            self._rebuild_static_world_chunks()
+
+    def _reindex_world_objects(self):
+        self.static_world_objects = []
+        self.dynamic_world_objects = []
+        self.updatable_world_objects = []
+        self.interactable_world_objects = []
+        self.auto_pickup_objects = []
+        self.checkpoint_objects = []
+        self.transition_objects = []
+        self.grass_hide_zone_objects = []
+
+        for world_object in self.world_objects:
+            if world_object.is_interactable:
+                self.interactable_world_objects.append(world_object)
+            if getattr(world_object, "auto_pickup", False):
+                self.auto_pickup_objects.append(world_object)
+            if getattr(world_object, "is_checkpoint", False):
+                self.checkpoint_objects.append(world_object)
+            if getattr(world_object, "is_transition", False):
+                self.transition_objects.append(world_object)
+            if getattr(world_object, "is_grass_hide_zone", False):
+                self.grass_hide_zone_objects.append(world_object)
+
+            if self._is_static_world_object(world_object):
+                self.static_world_objects.append(world_object)
+                continue
+
+            self.dynamic_world_objects.append(world_object)
+            if world_object.__class__.update is not WorldObject.update:
+                self.updatable_world_objects.append(world_object)
+
+    def _is_static_world_object(self, world_object):
+        if world_object.__class__.update is not WorldObject.update:
+            return False
+        if world_object.is_interactable:
+            return False
+        if getattr(world_object, "auto_pickup", False):
+            return False
+        if getattr(world_object, "is_checkpoint", False):
+            return False
+        if getattr(world_object, "is_transition", False):
+            return False
+        if getattr(world_object, "is_grass_hide_zone", False):
+            return False
+        if getattr(world_object, "is_npc", False):
+            return False
+        return True
+
+    def _rebuild_static_world_chunks(self):
+        self._static_world_chunk_surfaces = {}
+        if not self.static_world_objects:
+            return
+
+        chunk_size = self._static_world_chunk_pixel_size
+        chunk_cameras = {}
+        for world_object in self.static_world_objects:
+            min_chunk_x = int(world_object.position.x // chunk_size)
+            max_chunk_x = int((world_object.position.x + max(1, world_object.width) - 1) // chunk_size)
+            min_chunk_y = int(world_object.position.y // chunk_size)
+            max_chunk_y = int((world_object.position.y + max(1, world_object.height) - 1) // chunk_size)
+            for chunk_y in range(min_chunk_y, max_chunk_y + 1):
+                for chunk_x in range(min_chunk_x, max_chunk_x + 1):
+                    chunk_key = (chunk_x, chunk_y)
+                    surface = self._static_world_chunk_surfaces.get(chunk_key)
+                    if surface is None:
+                        surface = pygame.Surface((chunk_size, chunk_size), pygame.SRCALPHA)
+                        self._static_world_chunk_surfaces[chunk_key] = surface
+                    camera = chunk_cameras.get(chunk_key)
+                    if camera is None:
+                        camera = SimpleNamespace(position=Vector2(chunk_x * chunk_size, chunk_y * chunk_size))
+                        chunk_cameras[chunk_key] = camera
+                    world_object.draw(surface, camera)
+
+    def _draw_static_world_chunks(self, screen, visible_rect):
+        if not self._static_world_chunk_surfaces:
+            return
+        chunk_size = self._static_world_chunk_pixel_size
+        min_chunk_x = int(visible_rect.left // chunk_size)
+        max_chunk_x = int(max(visible_rect.left, visible_rect.right - 1) // chunk_size)
+        min_chunk_y = int(visible_rect.top // chunk_size)
+        max_chunk_y = int(max(visible_rect.top, visible_rect.bottom - 1) // chunk_size)
+        for chunk_y in range(min_chunk_y, max_chunk_y + 1):
+            for chunk_x in range(min_chunk_x, max_chunk_x + 1):
+                surface = self._static_world_chunk_surfaces.get((chunk_x, chunk_y))
+                if surface is None:
+                    continue
+                screen_x = chunk_x * chunk_size - self.camera.position.x
+                screen_y = chunk_y * chunk_size - self.camera.position.y
+                screen.blit(surface, (screen_x, screen_y))
+
+    def _iter_visible_world_objects(self, objects, visible_rect):
+        for world_object in objects:
+            if visible_rect.colliderect(world_object.get_hitbox_rect()):
+                yield world_object
+
+    def add_world_object(self, world_object):
+        self.world_objects.append(world_object)
+        self._sync_world_objects(rebuild_static_chunks=self._is_static_world_object(world_object))
+
+    def remove_world_object(self, world_object):
+        original_count = len(self.world_objects)
+        self.world_objects = [obj for obj in self.world_objects if obj is not world_object]
+        if len(self.world_objects) == original_count:
+            return False
+        self._sync_world_objects(rebuild_static_chunks=self._is_static_world_object(world_object))
+        return True
 
     def _create_enemy(self, raw_object, enemy_class):
         width = raw_object.get("width", 1) * self.level.tile_size
@@ -704,8 +828,7 @@ class GameScene(Scene):
         if getattr(target, "is_gatherable", False) and getattr(target, "is_depleted", False):
             self.mark_object_depleted(target)
         if result and getattr(target, "is_picked", False):
-            self.world_objects = [obj for obj in self.world_objects if obj is not target]
-            self.collision_system.set_objects(self.world_objects)
+            self.remove_world_object(target)
         return result
 
     def mark_object_picked(self, world_object):
@@ -734,10 +857,7 @@ class GameScene(Scene):
     def _find_interaction_target(self):
         player_zone = self.player.get_interaction_rect()
         candidates = []
-        for world_object in self.world_objects:
-            if not world_object.is_interactable:
-                continue
-
+        for world_object in self.interactable_world_objects:
             object_zone = world_object.get_interaction_rect()
             if _rects_intersect(player_zone, object_zone):
                 candidates.append(world_object)
@@ -802,8 +922,8 @@ class GameScene(Scene):
         self._check_level_transitions()
         if self.app.scene is self:
             self._show_next_quest_activation_dialogue()
-        screen_width, screen_height = self.app.get_screen_size()
-        self.camera.update(self.player, screen_width, screen_height)
+        viewport_width, viewport_height = self.app.get_world_render_size()
+        self.camera.update(self.player, viewport_width, viewport_height)
         self.current_interaction_target = self._find_interaction_target()
         if self.last_interaction_timer > 0:
             self.last_interaction_timer = max(0.0, self.last_interaction_timer - dt)
@@ -814,9 +934,7 @@ class GameScene(Scene):
 
     def _update_checkpoints(self):
         checkpoint_contacts = set()
-        for world_object in self.world_objects:
-            if not getattr(world_object, "is_checkpoint", False):
-                continue
+        for world_object in self.checkpoint_objects:
             checkpoint_id = world_object.get_persistence_id()
             if not world_object.can_activate(self.player):
                 continue
@@ -839,15 +957,16 @@ class GameScene(Scene):
         self.active_checkpoint_contacts = checkpoint_contacts
 
     def _update_world_objects(self, dt):
-        for world_object in self.world_objects:
+        update_rect = self._camera_world_rect(RENDER_CULL_MARGIN + self.level.tile_size * 2)
+        for world_object in self.updatable_world_objects:
+            if not update_rect.colliderect(world_object.get_hitbox_rect()):
+                continue
             world_object.update(dt, self)
 
     def _update_auto_pickups(self):
         player_hitbox = self.player.get_hitbox_rect()
         picked_objects = []
-        for world_object in self.world_objects:
-            if not getattr(world_object, "auto_pickup", False):
-                continue
+        for world_object in self.auto_pickup_objects:
             if getattr(world_object, "is_picked", False):
                 continue
             if not _rects_intersect(player_hitbox, world_object.get_hitbox_rect()):
@@ -857,9 +976,8 @@ class GameScene(Scene):
 
         if not picked_objects:
             return
-        picked_set = set(picked_objects)
-        self.world_objects = [obj for obj in self.world_objects if obj not in picked_set]
-        self.collision_system.set_objects(self.world_objects)
+        for world_object in picked_objects:
+            self.remove_world_object(world_object)
 
     def _update_map_reveal(self):
         player_center = self.player.get_center()
@@ -877,9 +995,7 @@ class GameScene(Scene):
     def _update_grass_hide_zones(self):
         player_hitbox = self.player.get_hitbox_rect()
         self.player.is_hidden = False
-        for world_object in self.world_objects:
-            if not getattr(world_object, "is_grass_hide_zone", False):
-                continue
+        for world_object in self.grass_hide_zone_objects:
             if not world_object.can_hide(self.player):
                 continue
             if _rects_intersect(player_hitbox, world_object.get_hitbox_rect()):
@@ -888,9 +1004,7 @@ class GameScene(Scene):
 
     def _check_level_transitions(self):
         player_hitbox = self.player.get_hitbox_rect()
-        for world_object in self.world_objects:
-            if not getattr(world_object, "is_transition", False):
-                continue
+        for world_object in self.transition_objects:
             if not _rects_intersect(player_hitbox, world_object.get_hitbox_rect()):
                 continue
             if not world_object.can_activate(self.player):
@@ -918,8 +1032,8 @@ class GameScene(Scene):
 
     def _update_level_transition(self, dt):
         self.transition_timer += dt
-        screen_width, screen_height = self.app.get_screen_size()
-        self.camera.update(self.player, screen_width, screen_height)
+        viewport_width, viewport_height = self.app.get_world_render_size()
+        self.camera.update(self.player, viewport_width, viewport_height)
         if self.transition_timer < TRANSITION_FADE_DURATION:
             return
 
@@ -943,12 +1057,12 @@ class GameScene(Scene):
         )
 
     def _camera_world_rect(self, margin=0):
-        screen_width, screen_height = self.app.get_screen_size()
+        viewport_width, viewport_height = self.app.get_world_render_size()
         return pygame.Rect(
             int(self.camera.position.x - margin),
             int(self.camera.position.y - margin),
-            int(screen_width + margin * 2),
-            int(screen_height + margin * 2),
+            int(viewport_width + margin * 2),
+            int(viewport_height + margin * 2),
         )
 
     def _collides_with_enemies(self, x, y, entity, ignored_enemy=None):
@@ -1190,9 +1304,10 @@ class GameScene(Scene):
         return True
 
     def _mouse_world_position(self, mouse_pos):
+        zoom = max(0.1, float(self.app.get_world_zoom()))
         return Vector2(
-            mouse_pos[0] + self.camera.position.x,
-            mouse_pos[1] + self.camera.position.y,
+            mouse_pos[0] / zoom + self.camera.position.x,
+            mouse_pos[1] / zoom + self.camera.position.y,
         )
 
     def _track_player_movement(self, previous_position):
@@ -1238,31 +1353,43 @@ class GameScene(Scene):
         return Vector2()
 
     def draw(self):
-        screen_width, _ = self.app.get_screen_size()
-        self.app.screen.fill(COLORS["BLACK"])
+        screen_width, screen_height = self.app.get_screen_size()
+        render_width, render_height = self.app.get_world_render_size()
+        world_zoom = max(0.1, float(self.app.get_world_zoom()))
+        target_screen = self.app.screen
+        target_screen.fill(COLORS["BLACK"])
+        world_surface = target_screen
+        if abs(world_zoom - 1.0) > 0.001:
+            world_surface = pygame.Surface((render_width, render_height), pygame.SRCALPHA)
+            world_surface.fill(COLORS["BLACK"])
         shake_offset = self._current_screen_shake_offset()
         self.camera.position.x += shake_offset.x
         self.camera.position.y += shake_offset.y
         visible_rect = self._camera_world_rect(RENDER_CULL_MARGIN)
-        self.tilemap.draw(self.app.screen, self.camera)
+        self.tilemap.draw(world_surface, self.camera)
+        self._draw_static_world_chunks(world_surface, visible_rect)
         overlay_world_objects = []
-        for world_object in self.world_objects:
-            if not visible_rect.colliderect(world_object.get_hitbox_rect()):
-                continue
+        for world_object in self._iter_visible_world_objects(self.dynamic_world_objects, visible_rect):
             if getattr(world_object, "is_grass_hide_zone", False):
                 overlay_world_objects.append(world_object)
                 continue
-            world_object.draw(self.app.screen, self.camera)
-        self.enemy_manager.draw(self.app.screen, self.camera)
-        self._draw_player_projectiles()
-        self._draw_damage_numbers()
-        self.player.draw(self.app.screen, self.camera)
+            world_object.draw(world_surface, self.camera)
+        self.enemy_manager.draw(world_surface, self.camera)
+        self._draw_player_projectiles(world_surface)
+        self._draw_damage_numbers(world_surface)
+        self.player.draw(world_surface, self.camera)
         for world_object in overlay_world_objects:
-            world_object.draw(self.app.screen, self.camera)
+            world_object.draw(world_surface, self.camera)
+        if self.current_interaction_target is not None:
+            self._draw_interaction_prompt(world_surface, self.current_interaction_target)
+        self._draw_transition_overlay(world_surface)
         self.camera.position.x -= shake_offset.x
         self.camera.position.y -= shake_offset.y
+        if abs(world_zoom - 1.0) > 0.001:
+            scaled_world = pygame.transform.scale(world_surface, (screen_width, screen_height))
+            target_screen.blit(scaled_world, (0, 0))
         self.hud.draw(
-            self.app.screen,
+            target_screen,
             self.player,
             quest_manager=self.quest_manager,
             combat_state=self._build_hud_combat_state(),
@@ -1270,40 +1397,37 @@ class GameScene(Scene):
             show_fps=self.app.show_fps,
             save_indicator_alpha=self._save_indicator_alpha(),
         )
-        if self.current_interaction_target is not None:
-            self._draw_interaction_prompt(self.current_interaction_target)
         if self.last_interaction_message:
             message = self.info_font.render(self.last_interaction_message, True, COLORS["WHITE"])
-            self.app.screen.blit(
+            target_screen.blit(
                 message,
                 message.get_rect(center=(screen_width // 2, 24)),
             )
-        self._draw_transition_overlay()
 
     def _save_indicator_alpha(self):
         if self.save_indicator_timer <= 0:
             return 0
         return int(255 * min(1.0, self.save_indicator_timer / 0.35))
 
-    def _draw_damage_numbers(self):
+    def _draw_damage_numbers(self, screen):
         for damage_number in self.damage_numbers:
-            damage_number.draw(self.app.screen, self.camera, self.info_font)
+            damage_number.draw(screen, self.camera, self.info_font)
 
-    def _draw_player_projectiles(self):
+    def _draw_player_projectiles(self, screen):
         for projectile in self.player_projectiles:
-            projectile.draw(self.app.screen, self.camera)
+            projectile.draw(screen, self.camera)
 
-    def _draw_transition_overlay(self):
+    def _draw_transition_overlay(self, screen):
         if self.transition_target_level is None:
             return
 
         progress = min(1.0, self.transition_timer / TRANSITION_FADE_DURATION)
-        screen_width, screen_height = self.app.get_screen_size()
+        screen_width, screen_height = screen.get_size()
         overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, int(255 * progress)))
-        self.app.screen.blit(overlay, (0, 0))
+        screen.blit(overlay, (0, 0))
 
-    def _draw_interaction_prompt(self, world_object):
+    def _draw_interaction_prompt(self, screen, world_object):
         prompt_text = self.interaction_font.render("E", True, COLORS["WHITE"])
         padding_x = 10
         padding_y = 6
@@ -1320,19 +1444,19 @@ class GameScene(Scene):
 
         bubble_rect = pygame.Rect(bubble_x, bubble_y, bubble_width, bubble_height)
         pygame.draw.rect(
-            self.app.screen,
+            screen,
             (30, 30, 36),
             bubble_rect,
             border_radius=8,
         )
         pygame.draw.rect(
-            self.app.screen,
+            screen,
             COLORS["INTERACTABLE_ACTIVE"],
             bubble_rect,
             width=2,
             border_radius=8,
         )
-        self.app.screen.blit(
+        screen.blit(
             prompt_text,
             prompt_text.get_rect(center=bubble_rect.center),
         )

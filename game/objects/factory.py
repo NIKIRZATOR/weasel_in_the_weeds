@@ -57,7 +57,7 @@ SOLID_OBJECT_SPRITES = {
     "red white flower": "world_objects/solid_object/flower_red_white.png",
     "white flower": "world_objects/solid_object/flower_white.png",
     "yellow flower": "world_objects/solid_object/flower_yellow.png",
-    "stone pile": "world_objects/solid_object/stone_pile.png",
+    "stone pile": "world_objects/solid_object/small_stone_pile.png",
 }
 
 
@@ -86,13 +86,16 @@ def create_world_object(raw_object, tile_size):
         properties = _resolve_npc_properties(name, properties)
     _assign_default_sprite_path(object_type, name, properties)
 
-    if object_type == "solid_object":
+    if object_type in {"solid_object", "passable_object"}:
         world_object = SolidObject(x, y, width, height, name=name, properties=properties)
-        raw_solid = raw_object.get("solid")
-        if raw_solid is not None:
-            world_object.is_solid = bool(raw_solid)
-        elif "solid" in properties:
-            world_object.is_solid = bool(properties.get("solid"))
+        if object_type == "passable_object":
+            world_object.is_solid = False
+        else:
+            raw_solid = raw_object.get("solid")
+            if raw_solid is not None:
+                world_object.is_solid = bool(raw_solid)
+            elif "solid" in properties:
+                world_object.is_solid = bool(properties.get("solid"))
         return world_object
 
     if object_type == "interactable_object":
@@ -214,7 +217,7 @@ def _assign_default_sprite_path(object_type, name, properties):
             properties["sprite_path"] = sprite_path
         return
 
-    if object_type == "solid_object":
+    if object_type in {"solid_object", "passable_object"}:
         sprite_path = SOLID_OBJECT_SPRITES.get(str(name or "").strip().lower())
         if sprite_path:
             properties["sprite_path"] = sprite_path

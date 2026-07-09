@@ -37,7 +37,7 @@
     },
     "stone_pile_small": {
       "name": "Stone Pile",
-      "sprite_path": "world_objects/solid_object/stone_pile.png",
+      "sprite_path": "world_objects/solid_object/small_stone_pile.png",
       "width": 1,
       "height": 1,
       "solid": false

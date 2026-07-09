@@ -4,9 +4,12 @@ class CollisionSystem:
     def __init__(self, tilemap):
         self.tilemap = tilemap
         self.objects = []
+        self._solid_spatial_index = {}
+        self._solid_objects = []
 
     def set_objects(self, objects):
         self.objects = objects
+        self._rebuild_solid_spatial_index()
 
     def check_collision(self, x, y, entity, ignore_jump=False):
         if getattr(entity, "has_collision_circle", lambda: False)():
@@ -59,7 +62,7 @@ class CollisionSystem:
         return False
 
     def _collides_with_solid_object(self, hitbox_x, hitbox_y, hitbox_width, hitbox_height, moving_entity):
-        for world_object in self.objects:
+        for world_object in self._iter_nearby_solid_objects(hitbox_x, hitbox_y, hitbox_width, hitbox_height):
             if world_object is moving_entity or not world_object.is_solid:
                 continue
 
@@ -79,7 +82,8 @@ class CollisionSystem:
         return False
 
     def _circle_collides_with_solid_object(self, center_x, center_y, radius, moving_entity):
-        for world_object in self.objects:
+        diameter = radius * 2
+        for world_object in self._iter_nearby_solid_objects(center_x - radius, center_y - radius, diameter, diameter):
             if world_object is moving_entity or not world_object.is_solid:
                 continue
 
@@ -96,6 +100,40 @@ class CollisionSystem:
                 return True
 
         return False
+
+    def _rebuild_solid_spatial_index(self):
+        self._solid_spatial_index = {}
+        self._solid_objects = [world_object for world_object in self.objects if getattr(world_object, "is_solid", False)]
+        tile_size = max(1, int(self.tilemap.tile_size))
+        for world_object in self._solid_objects:
+            x, y, width, height = world_object.get_hitbox_rect()
+            min_tile_x = int(x // tile_size)
+            max_tile_x = int((x + max(1, width) - 1) // tile_size)
+            min_tile_y = int(y // tile_size)
+            max_tile_y = int((y + max(1, height) - 1) // tile_size)
+            for tile_y in range(min_tile_y, max_tile_y + 1):
+                for tile_x in range(min_tile_x, max_tile_x + 1):
+                    self._solid_spatial_index.setdefault((tile_x, tile_y), []).append(world_object)
+
+    def _iter_nearby_solid_objects(self, x, y, width, height):
+        if not self._solid_objects:
+            return ()
+        tile_size = max(1, int(self.tilemap.tile_size))
+        min_tile_x = int(x // tile_size)
+        max_tile_x = int((x + max(1, width) - 1) // tile_size)
+        min_tile_y = int(y // tile_size)
+        max_tile_y = int((y + max(1, height) - 1) // tile_size)
+        candidates = []
+        seen_ids = set()
+        for tile_y in range(min_tile_y, max_tile_y + 1):
+            for tile_x in range(min_tile_x, max_tile_x + 1):
+                for world_object in self._solid_spatial_index.get((tile_x, tile_y), ()):
+                    object_id = id(world_object)
+                    if object_id in seen_ids:
+                        continue
+                    seen_ids.add(object_id)
+                    candidates.append(world_object)
+        return candidates
 
 
 def _rects_intersect(ax, ay, aw, ah, bx, by, bw, bh):

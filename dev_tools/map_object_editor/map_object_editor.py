@@ -21,6 +21,7 @@ PALETTE_CATEGORIES = (
     ("containers", "Containers"),
     ("gatherable", "Gatherable"),
     ("solid", "Solid"),
+    ("passable", "Passable"),
     ("zones", "Zones"),
 )
 
@@ -50,7 +51,7 @@ SOLID_OBJECT_SPRITES = {
     "red white flower": "world_objects/solid_object/flower_red_white.png",
     "white flower": "world_objects/solid_object/flower_white.png",
     "yellow flower": "world_objects/solid_object/flower_yellow.png",
-    "stone pile": "world_objects/solid_object/stone_pile.png",
+    "stone pile": "world_objects/solid_object/small_stone_pile.png",
 }
 
 ENEMY_PREVIEW_SPRITES = {
@@ -80,6 +81,7 @@ OBJECT_COLORS = {
     "pickable_object": "#ffe16a",
     "gatherable_object": "#65b65b",
     "solid_object": "#888888",
+    "passable_object": "#b5b5b5",
     "grass_hide_zone": "#54c450",
     "interactable_object": "#9fa8da",
     "level_transition": "#f18ec2",
@@ -409,6 +411,8 @@ class MapObjectEditor(tk.Tk):
             return "gatherable"
         if object_type == "solid_object":
             return "solid"
+        if object_type == "passable_object":
+            return "passable"
         return "zones"
 
     def _is_enemy_type(self, object_type):
@@ -789,7 +793,7 @@ class MapObjectEditor(tk.Tk):
             if sprite_path:
                 return sprite_path, None, None
 
-        if object_type == "solid_object":
+        if object_type in {"solid_object", "passable_object"}:
             sprite_path = SOLID_OBJECT_SPRITES.get(name.strip().lower())
             if sprite_path:
                 return sprite_path, None, None

@@ -9,6 +9,9 @@ from settings import LEVELS_DIR
 from settings import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
+FULLSCREEN_WORLD_ZOOM = 2
+
+
 class GameApp:
     def __init__(self):
         pygame.init()
@@ -74,6 +77,19 @@ class GameApp:
 
     def get_screen_size(self):
         return self.screen.get_size()
+
+    def get_world_zoom(self):
+        if self.display_mode == "fullscreen":
+            return FULLSCREEN_WORLD_ZOOM
+        return 1.0
+
+    def get_world_render_size(self):
+        screen_width, screen_height = self.get_screen_size()
+        zoom = max(0.1, float(self.get_world_zoom()))
+        return (
+            max(1, int(round(screen_width / zoom))),
+            max(1, int(round(screen_height / zoom))),
+        )
 
     def start_new_game(self, slot_id):
         from game.scenes.game_scene import GameScene

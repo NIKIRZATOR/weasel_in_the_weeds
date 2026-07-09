@@ -1,22 +1,22 @@
 [
   {
-    "label": "Solid: Stone Block",
+    "label": "Passable: Stone Pile",
     "object": {
-      "type": "solid_object",
-      "name": "Stone Block",
+      "type": "passable_object",
+      "name": "Stone Pile",
       "x": 0,
       "y": 0,
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/stone_block.png"
+        "sprite_path": "world_objects/solid_object/small_stone_pile.png"
       }
     }
   },
   {
-    "label": "Solid: Bush",
+    "label": "Passable: Bush",
     "object": {
-      "type": "solid_object",
+      "type": "passable_object",
       "name": "Bush",
       "x": 0,
       "y": 0,
@@ -28,9 +28,9 @@
     }
   },
   {
-    "label": "Solid: Bush 2",
+    "label": "Passable: Bush 2",
     "object": {
-      "type": "solid_object",
+      "type": "passable_object",
       "name": "Bush",
       "x": 0,
       "y": 0,
@@ -42,9 +42,9 @@
     }
   },
   {
-    "label": "Solid: Bush 3",
+    "label": "Passable: Bush 3",
     "object": {
-      "type": "solid_object",
+      "type": "passable_object",
       "name": "Bush",
       "x": 0,
       "y": 0,
@@ -56,92 +56,86 @@
     }
   },
   {
-    "label": "Solid: Blue Flower",
+    "label": "Passable: Blue Flower",
     "object": {
-      "type": "solid_object",
+      "type": "passable_object",
       "name": "Blue Flower",
       "x": 0,
       "y": 0,
       "width": 1,
       "height": 1,
-      "solid": false,
       "properties": {
         "sprite_path": "world_objects/solid_object/flower_blue.png"
       }
     }
   },
   {
-    "label": "Solid: Pink Flower",
+    "label": "Passable: Pink Flower",
     "object": {
-      "type": "solid_object",
+      "type": "passable_object",
       "name": "Pink Flower",
       "x": 0,
       "y": 0,
       "width": 1,
       "height": 1,
-      "solid": false,
       "properties": {
         "sprite_path": "world_objects/solid_object/flower_pink.png"
       }
     }
   },
   {
-    "label": "Solid: Red White Flower",
+    "label": "Passable: Red White Flower",
     "object": {
-      "type": "solid_object",
+      "type": "passable_object",
       "name": "Red White Flower",
       "x": 0,
       "y": 0,
       "width": 1,
       "height": 1,
-      "solid": false,
       "properties": {
         "sprite_path": "world_objects/solid_object/flower_red_white.png"
       }
     }
   },
   {
-    "label": "Solid: White Flower",
+    "label": "Passable: White Flower",
     "object": {
-      "type": "solid_object",
+      "type": "passable_object",
       "name": "White Flower",
       "x": 0,
       "y": 0,
       "width": 1,
       "height": 1,
-      "solid": false,
       "properties": {
         "sprite_path": "world_objects/solid_object/flower_white.png"
       }
     }
   },
   {
-    "label": "Solid: Yellow Flower",
+    "label": "Passable: Yellow Flower",
     "object": {
-      "type": "solid_object",
+      "type": "passable_object",
       "name": "Yellow Flower",
       "x": 0,
       "y": 0,
       "width": 1,
       "height": 1,
-      "solid": false,
       "properties": {
         "sprite_path": "world_objects/solid_object/flower_yellow.png"
       }
     }
   },
   {
-    "label": "Solid: Stone Pile",
+    "label": "Passable: Stone Block",
     "object": {
-      "type": "solid_object",
-      "name": "Stone Pile",
+      "type": "passable_object",
+      "name": "Stone Block",
       "x": 0,
       "y": 0,
       "width": 1,
       "height": 1,
-      "solid": false,
       "properties": {
-        "sprite_path": "world_objects/solid_object/small_stone_pile.png"
+        "sprite_path": "world_objects/solid_object/stone_block.png"
       }
     }
   }
