@@ -2,6 +2,7 @@ import pygame
 
 from game.localization import get_localizer
 from game.scenes.base import Scene
+from game.scenes.menu_background import AnimatedMenuBackground
 from settings import COLORS
 
 
@@ -16,6 +17,7 @@ class MenuScene(Scene):
         self.message_timer = 0.0
         self.buttons = []
         self._layout_size = None
+        self.background = AnimatedMenuBackground(pan_seconds=20.0, blur_divisor=8, overlay_color=(10, 12, 18, 116))
         self._build_buttons()
 
     def _build_buttons(self):
@@ -61,6 +63,7 @@ class MenuScene(Scene):
     def _ensure_layout(self):
         if self._layout_size != self.app.get_screen_size():
             self._build_buttons()
+            self.background.recalculate()
 
     def on_language_changed(self):
         self._build_buttons()
@@ -107,6 +110,7 @@ class MenuScene(Scene):
                         break
 
     def update(self, dt):
+        self.background.update(dt)
         if self.message_timer > 0:
             self.message_timer = max(0.0, self.message_timer - dt)
             if self.message_timer == 0.0:
@@ -115,7 +119,7 @@ class MenuScene(Scene):
     def draw(self):
         self._ensure_layout()
         screen_width, screen_height = self.app.get_screen_size()
-        self.app.screen.fill((18, 18, 26))
+        self.background.draw(self.app.screen)
 
         title = self.title_font.render(self.localizer.t("ui.menu.title"), True, COLORS["WHITE"])
         self.app.screen.blit(title, title.get_rect(center=(screen_width // 2, self.title_center_y)))

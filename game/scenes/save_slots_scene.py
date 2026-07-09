@@ -4,6 +4,7 @@ import pygame
 
 from game.localization import get_localizer
 from game.scenes.base import Scene
+from game.scenes.menu_background import AnimatedMenuBackground
 from settings import COLORS
 
 
@@ -35,6 +36,7 @@ class SaveSlotsScene(Scene):
         self.scroll_drag_active = False
         self.scroll_drag_offset_y = 0
         self._layout_size = None
+        self.background = AnimatedMenuBackground(pan_seconds=20.0, blur_divisor=8, overlay_color=(10, 12, 18, 124))
         self._refresh_slots()
 
     def _refresh_slots(self):
@@ -52,6 +54,7 @@ class SaveSlotsScene(Scene):
         if self._layout_size == self.app.get_screen_size():
             return
         self._layout_size = self.app.get_screen_size()
+        self.background.recalculate()
         screen_width, screen_height = self._layout_size
         self.input_rect = pygame.Rect((screen_width - 420) // 2, 120, 420, 42)
         self.create_rect = pygame.Rect((screen_width - self.CREATE_BUTTON_WIDTH) // 2, 176, self.CREATE_BUTTON_WIDTH, 42)
@@ -316,6 +319,7 @@ class SaveSlotsScene(Scene):
                         return
 
     def update(self, dt):
+        self.background.update(dt)
         if self.message_timer > 0:
             self.message_timer = max(0.0, self.message_timer - dt)
             if self.message_timer == 0.0:
@@ -341,7 +345,7 @@ class SaveSlotsScene(Scene):
         self._visible_count_cache = self._visible_row_capacity()
         self._ensure_selection_visible()
         screen_width, screen_height = self.app.get_screen_size()
-        self.app.screen.fill((18, 18, 26))
+        self.background.draw(self.app.screen)
         self.slot_rects = []
         self.scroll_track_rect = None
         self.scroll_thumb_rect = None

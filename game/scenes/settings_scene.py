@@ -2,6 +2,7 @@ import pygame
 
 from game.localization import get_localizer
 from game.scenes.base import Scene
+from game.scenes.menu_background import AnimatedMenuBackground
 from settings import COLORS
 
 
@@ -16,6 +17,7 @@ class SettingsScene(Scene):
         self.button_font = pygame.font.Font(None, 30)
         self.info_font = pygame.font.Font(None, 24)
         self._layout_size = None
+        self.background = AnimatedMenuBackground(pan_seconds=20.0, blur_divisor=8, overlay_color=(10, 12, 18, 132))
         self._build_buttons()
 
     def _build_buttons(self):
@@ -110,6 +112,7 @@ class SettingsScene(Scene):
     def _ensure_layout(self):
         if self._layout_size != self.app.get_screen_size():
             self._build_buttons()
+            self.background.recalculate()
 
     def on_language_changed(self):
         self._build_buttons()
@@ -147,18 +150,13 @@ class SettingsScene(Scene):
                     self.go_back()
 
     def update(self, dt):
+        self.background.update(dt)
         return None
 
     def draw(self):
         self._ensure_layout()
         screen_width, screen_height = self.app.get_screen_size()
-        if self.overlay_scene is not None:
-            self.overlay_scene.draw()
-            overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, 165))
-            self.app.screen.blit(overlay, (0, 0))
-        else:
-            self.app.screen.fill((18, 18, 26))
+        self.background.draw(self.app.screen)
 
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=16)
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.panel_rect, width=2, border_radius=16)
