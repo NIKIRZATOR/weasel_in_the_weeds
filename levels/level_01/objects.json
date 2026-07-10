@@ -2041,71 +2041,14 @@
       }
     },
     {
-      "type": "stump_object",
-      "name": "Fallen Tree 1",
-      "x": 25,
+      "type": "passable_object",
+      "name": "Stone Block",
+      "x": 30,
       "y": 19,
       "width": 2,
-      "height": 1,
-      "properties": {
-        "sprite_path": "world_objects/stump_object/fallen_tree.png",
-        "sprite_scale_x": 2,
-        "sprite_scale_y": 2,
-        "hitbox_width_ratio": 0.7,
-        "hitbox_height_ratio": 0.55,
-        "hitbox_lift": 0
-      }
-    },
-    {
-      "type": "stump_object",
-      "name": "Fallen Tree 2",
-      "x": 30,
-      "y": 18,
-      "width": 3,
       "height": 2,
       "properties": {
-        "sprite_path": "world_objects/stump_object/fallen_tree_2.png",
-        "sprite_scale_x": 2,
-        "sprite_scale_y": 2,
-        "hitbox_width_ratio": 0.7,
-        "hitbox_height_ratio": 0.55,
-        "hitbox_lift": 32
-      }
-    },
-    {
-      "type": "stump_object",
-      "name": "Fallen Tree 3",
-      "x": 40,
-      "y": 18,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "sprite_path": "world_objects/stump_object/fallen_tree_3.png",
-        "sprite_scale_x": 2,
-        "sprite_scale_y": 2,
-        "hitbox_width_ratio": 0.7,
-        "hitbox_height_ratio": 0.55,
-        "hitbox_lift": 32
-      }
-    },
-    {
-      "type": "stump_object",
-      "name": "Fallen Tree 4",
-      "x": 36,
-      "y": 18,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "sprite_path": "world_objects/stump_object/fallen_tree_4.png",
-        "sprite_scale_x": 2,
-        "sprite_scale_y": 2,
-        "hitbox_width_ratio": 0.7,
-        "hitbox_height_ratio": 0.55,
-        "hitbox_lift": 32,
-        "hitbox_width": 60,
-        "hitbox_height": 90,
-        "hitbox_offset_x": 3,
-        "hitbox_offset_y": -52
+        "sprite_path": "world_objects/solid_object/rocks/stone_block.png"
       }
     }
   ]

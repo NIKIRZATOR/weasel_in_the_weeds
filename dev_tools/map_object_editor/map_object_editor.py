@@ -44,14 +44,22 @@ PICKABLE_SPRITES = {
 }
 
 SOLID_OBJECT_SPRITES = {
-    "stone block": "world_objects/solid_object/stone_block.png",
-    "bush": "world_objects/solid_object/bush.png",
-    "blue flower": "world_objects/solid_object/flower_blue.png",
-    "pink flower": "world_objects/solid_object/flower_pink.png",
-    "red white flower": "world_objects/solid_object/flower_red_white.png",
-    "white flower": "world_objects/solid_object/flower_white.png",
-    "yellow flower": "world_objects/solid_object/flower_yellow.png",
-    "stone pile": "world_objects/solid_object/small_stone_pile.png",
+    "stone block": "world_objects/solid_object/rocks/stone_block.png",
+    "bush": "world_objects/solid_object/bushes/bush.png",
+    "blue flower": "world_objects/solid_object/flowers/flower_blue.png",
+    "pink flower": "world_objects/solid_object/flowers/flower_pink.png",
+    "red white flower": "world_objects/solid_object/flowers/flower_red_white.png",
+    "white flower": "world_objects/solid_object/flowers/flower_white.png",
+    "yellow flower": "world_objects/solid_object/flowers/flower_yellow.png",
+    "stone pile": "world_objects/solid_object/rocks/small_stone_pile.png",
+}
+
+STRUCTURE_SPRITES = {
+    "camp place": "world_objects/structure_object/camp_place.png",
+    "campfire": "world_objects/structure_object/campfire.png",
+    "small rock mountain": "world_objects/structure_object/small_rock_mountain.png",
+    "stolb": "world_objects/structure_object/stolb.png",
+    "stone column": "world_objects/structure_object/stone_column.png",
 }
 
 ENEMY_PREVIEW_SPRITES = {
@@ -81,6 +89,7 @@ OBJECT_COLORS = {
     "pickable_object": "#ffe16a",
     "gatherable_object": "#65b65b",
     "solid_object": "#888888",
+    "structure_object": "#7d6b5c",
     "passable_object": "#b5b5b5",
     "grass_hide_zone": "#54c450",
     "interactable_object": "#9fa8da",
@@ -164,6 +173,18 @@ STUMP_EDITOR_DEFAULTS = {
     "hitbox_width_ratio": 0.7,
     "hitbox_height_ratio": 0.55,
     "hitbox_lift": 0,
+}
+
+STRUCTURE_EDITOR_DEFAULTS = {
+    "sprite_scale_x": 1.0,
+    "sprite_scale_y": 1.0,
+    "hitbox_width_ratio": 0.7,
+    "hitbox_height_ratio": 0.55,
+    "hitbox_lift": 0,
+    "animation_frame_count": 0,
+    "animation_frame_width": 96,
+    "animation_frame_height": 96,
+    "animation_frame_duration": 0.12,
 }
 
 def _load_object_presets():
@@ -276,6 +297,20 @@ class MapObjectEditor(tk.Tk):
         self.stump_hitbox_offset_x_var = tk.StringVar()
         self.stump_hitbox_offset_y_var = tk.StringVar()
         self.stump_auto_hitbox_var = tk.BooleanVar(value=True)
+        self.structure_sprite_scale_x_var = tk.StringVar()
+        self.structure_sprite_scale_y_var = tk.StringVar()
+        self.structure_hitbox_width_ratio_var = tk.StringVar()
+        self.structure_hitbox_height_ratio_var = tk.StringVar()
+        self.structure_hitbox_lift_var = tk.StringVar()
+        self.structure_hitbox_width_var = tk.StringVar()
+        self.structure_hitbox_height_var = tk.StringVar()
+        self.structure_hitbox_offset_x_var = tk.StringVar()
+        self.structure_hitbox_offset_y_var = tk.StringVar()
+        self.structure_animation_frame_count_var = tk.StringVar()
+        self.structure_animation_frame_width_var = tk.StringVar()
+        self.structure_animation_frame_height_var = tk.StringVar()
+        self.structure_animation_frame_duration_var = tk.StringVar()
+        self.structure_auto_hitbox_var = tk.BooleanVar(value=True)
 
     def _build_ui(self):
         self.columnconfigure(1, weight=1)
@@ -356,7 +391,7 @@ class MapObjectEditor(tk.Tk):
         right = ttk.Frame(self, padding=(4, 0, 8, 8))
         right.grid(row=1, column=2, sticky="nsew")
         right.columnconfigure(0, weight=1)
-        right.rowconfigure(5, weight=1)
+        right.rowconfigure(6, weight=1)
         form = ttk.LabelFrame(right, text="Object", padding=8)
         form.grid(row=0, column=0, sticky="ew")
         for column in (1, 3):
@@ -431,8 +466,27 @@ class MapObjectEditor(tk.Tk):
         self._add_entry(self.stump_form, "Hitbox X", self.stump_hitbox_offset_x_var, 4, 0)
         self._add_entry(self.stump_form, "Hitbox Y", self.stump_hitbox_offset_y_var, 4, 2)
 
+        self.structure_form = ttk.LabelFrame(right, text="Structure Settings", padding=8)
+        self.structure_form.grid(row=5, column=0, sticky="ew", pady=(8, 0))
+        for column in (1, 3):
+            self.structure_form.columnconfigure(column, weight=1)
+        self._add_entry(self.structure_form, "Scale X", self.structure_sprite_scale_x_var, 0, 0)
+        self._add_entry(self.structure_form, "Scale Y", self.structure_sprite_scale_y_var, 0, 2)
+        self._add_entry(self.structure_form, "Ratio W", self.structure_hitbox_width_ratio_var, 1, 0)
+        self._add_entry(self.structure_form, "Ratio H", self.structure_hitbox_height_ratio_var, 1, 2)
+        self._add_entry(self.structure_form, "Lift", self.structure_hitbox_lift_var, 2, 0)
+        ttk.Checkbutton(self.structure_form, text="Auto hitbox", variable=self.structure_auto_hitbox_var, command=self._refresh_structure_hitbox_form_state).grid(row=2, column=2, sticky="w")
+        self._add_entry(self.structure_form, "Hitbox W", self.structure_hitbox_width_var, 3, 0)
+        self._add_entry(self.structure_form, "Hitbox H", self.structure_hitbox_height_var, 3, 2)
+        self._add_entry(self.structure_form, "Hitbox X", self.structure_hitbox_offset_x_var, 4, 0)
+        self._add_entry(self.structure_form, "Hitbox Y", self.structure_hitbox_offset_y_var, 4, 2)
+        self._add_entry(self.structure_form, "Anim Cnt", self.structure_animation_frame_count_var, 5, 0)
+        self._add_entry(self.structure_form, "Anim Dur", self.structure_animation_frame_duration_var, 5, 2)
+        self._add_entry(self.structure_form, "Frame W", self.structure_animation_frame_width_var, 6, 0)
+        self._add_entry(self.structure_form, "Frame H", self.structure_animation_frame_height_var, 6, 2)
+
         props = ttk.LabelFrame(right, text="Properties JSON", padding=8)
-        props.grid(row=5, column=0, sticky="nsew", pady=(8, 0))
+        props.grid(row=6, column=0, sticky="nsew", pady=(8, 0))
         props.columnconfigure(0, weight=1)
         props.rowconfigure(0, weight=1)
         self.properties_text = tk.Text(props, width=42, height=20, wrap="none")
@@ -534,7 +588,7 @@ class MapObjectEditor(tk.Tk):
             return "containers"
         if object_type == "gatherable_object":
             return "gatherable"
-        if object_type == "solid_object":
+        if object_type in {"solid_object", "tree_object", "stump_object", "structure_object"}:
             return "solid"
         if object_type == "passable_object":
             return "passable"
@@ -643,6 +697,9 @@ class MapObjectEditor(tk.Tk):
     def _stump_defaults(self):
         return deepcopy(STUMP_EDITOR_DEFAULTS)
 
+    def _structure_defaults(self):
+        return deepcopy(STRUCTURE_EDITOR_DEFAULTS)
+
     def _auto_stump_hitbox_properties(self, obj=None, *, width=None, height=None, properties=None):
         source_properties = properties
         if source_properties is None and obj is not None:
@@ -686,6 +743,52 @@ class MapObjectEditor(tk.Tk):
             properties = {}
         resolved = self._stump_defaults()
         resolved.update(self._auto_stump_hitbox_properties(obj, properties=properties))
+        resolved.update(properties)
+        return resolved
+
+    def _auto_structure_hitbox_properties(self, obj=None, *, width=None, height=None, properties=None):
+        source_properties = properties
+        if source_properties is None and obj is not None:
+            source_properties = obj.get("properties", {})
+        if not isinstance(source_properties, dict):
+            source_properties = {}
+        defaults = self._structure_defaults()
+        sprite_scale_x = max(0.1, self._safe_float(source_properties.get("sprite_scale_x"), defaults["sprite_scale_x"]))
+        sprite_scale_y = max(0.1, self._safe_float(source_properties.get("sprite_scale_y"), defaults["sprite_scale_y"]))
+        hitbox_width_ratio = self._safe_float(source_properties.get("hitbox_width_ratio"), defaults["hitbox_width_ratio"])
+        hitbox_height_ratio = self._safe_float(source_properties.get("hitbox_height_ratio"), defaults["hitbox_height_ratio"])
+        hitbox_lift = self._safe_float(source_properties.get("hitbox_lift"), defaults["hitbox_lift"])
+        pixel_offset_x = self._safe_int(source_properties.get("pixel_offset_x"), 0)
+        pixel_offset_y = self._safe_int(source_properties.get("pixel_offset_y"), 0)
+
+        if obj is not None:
+            base_width = max(1, int(obj.get("width", 1))) * self.tile_size if width is None else width
+            base_height = max(1, int(obj.get("height", 1))) * self.tile_size if height is None else height
+        else:
+            base_width = self.tile_size if width is None else width
+            base_height = self.tile_size if height is None else height
+
+        sprite_width = max(1, int(round(base_width * sprite_scale_x)))
+        sprite_height = max(1, int(round(base_height * sprite_scale_y)))
+        sprite_draw_offset_x = int(round((base_width - sprite_width) / 2))
+        sprite_draw_offset_y = int(round(base_height - sprite_height))
+        hitbox_width = max(8, int(round(sprite_width * hitbox_width_ratio)))
+        hitbox_height = max(8, int(round(sprite_height * hitbox_height_ratio)))
+        hitbox_offset_x = int(round(sprite_draw_offset_x + pixel_offset_x + (sprite_width - hitbox_width) / 2))
+        hitbox_offset_y = int(round(sprite_draw_offset_y + pixel_offset_y + sprite_height - hitbox_height - hitbox_lift))
+        return {
+            "hitbox_width": hitbox_width,
+            "hitbox_height": hitbox_height,
+            "hitbox_offset_x": hitbox_offset_x,
+            "hitbox_offset_y": hitbox_offset_y,
+        }
+
+    def _resolved_structure_properties(self, obj):
+        properties = obj.get("properties", {})
+        if not isinstance(properties, dict):
+            properties = {}
+        resolved = self._structure_defaults()
+        resolved.update(self._auto_structure_hitbox_properties(obj, properties=properties))
         resolved.update(properties)
         return resolved
 
@@ -738,6 +841,35 @@ class MapObjectEditor(tk.Tk):
             self.stump_hitbox_height_var,
             self.stump_hitbox_offset_x_var,
             self.stump_hitbox_offset_y_var,
+        ):
+            entry = self._entry_by_variable.get(str(variable))
+            if entry is None:
+                continue
+            try:
+                entry.configure(state=state)
+            except tk.TclError:
+                continue
+
+    def _set_structure_form_state(self, enabled):
+        state = "normal" if enabled else "disabled"
+        for child in self.structure_form.winfo_children():
+            try:
+                child.configure(state=state)
+            except tk.TclError:
+                continue
+        if enabled:
+            self._refresh_structure_hitbox_form_state()
+
+    def _structure_has_hitbox_override(self, properties):
+        return any(key in properties for key in ("hitbox_width", "hitbox_height", "hitbox_offset_x", "hitbox_offset_y"))
+
+    def _refresh_structure_hitbox_form_state(self):
+        state = "disabled" if self.structure_auto_hitbox_var.get() else "normal"
+        for variable in (
+            self.structure_hitbox_width_var,
+            self.structure_hitbox_height_var,
+            self.structure_hitbox_offset_x_var,
+            self.structure_hitbox_offset_y_var,
         ):
             entry = self._entry_by_variable.get(str(variable))
             if entry is None:
@@ -813,6 +945,28 @@ class MapObjectEditor(tk.Tk):
         self.stump_hitbox_offset_y_var.set("" if properties.get("hitbox_offset_y") is None else str(properties.get("hitbox_offset_y")))
         self._set_stump_form_state(object_type == "stump_object")
 
+    def _apply_structure_properties_to_form(self, object_type, properties):
+        self.structure_sprite_scale_x_var.set("" if properties.get("sprite_scale_x") is None else str(properties.get("sprite_scale_x")))
+        self.structure_sprite_scale_y_var.set("" if properties.get("sprite_scale_y") is None else str(properties.get("sprite_scale_y")))
+        self.structure_hitbox_width_ratio_var.set("" if properties.get("hitbox_width_ratio") is None else str(properties.get("hitbox_width_ratio")))
+        self.structure_hitbox_height_ratio_var.set("" if properties.get("hitbox_height_ratio") is None else str(properties.get("hitbox_height_ratio")))
+        self.structure_hitbox_lift_var.set("" if properties.get("hitbox_lift") is None else str(properties.get("hitbox_lift")))
+        self.structure_animation_frame_count_var.set("" if properties.get("animation_frame_count") is None else str(properties.get("animation_frame_count")))
+        self.structure_animation_frame_width_var.set("" if properties.get("animation_frame_width") is None else str(properties.get("animation_frame_width")))
+        self.structure_animation_frame_height_var.set("" if properties.get("animation_frame_height") is None else str(properties.get("animation_frame_height")))
+        self.structure_animation_frame_duration_var.set("" if properties.get("animation_frame_duration") is None else str(properties.get("animation_frame_duration")))
+        raw_properties = {}
+        if self.selected_object_index is not None and 0 <= self.selected_object_index < len(self.objects):
+            raw_properties = self.objects[self.selected_object_index].get("properties", {})
+        if not isinstance(raw_properties, dict):
+            raw_properties = {}
+        self.structure_auto_hitbox_var.set(not self._structure_has_hitbox_override(raw_properties))
+        self.structure_hitbox_width_var.set("" if properties.get("hitbox_width") is None else str(properties.get("hitbox_width")))
+        self.structure_hitbox_height_var.set("" if properties.get("hitbox_height") is None else str(properties.get("hitbox_height")))
+        self.structure_hitbox_offset_x_var.set("" if properties.get("hitbox_offset_x") is None else str(properties.get("hitbox_offset_x")))
+        self.structure_hitbox_offset_y_var.set("" if properties.get("hitbox_offset_y") is None else str(properties.get("hitbox_offset_y")))
+        self._set_structure_form_state(object_type == "structure_object")
+
     def _clear_enemy_form(self):
         self.enemy_detection_radius_var.set("")
         self.enemy_patrol_radius_var.set("")
@@ -862,6 +1016,23 @@ class MapObjectEditor(tk.Tk):
         self.stump_hitbox_offset_y_var.set("")
         self.stump_auto_hitbox_var.set(True)
         self._set_stump_form_state(False)
+
+    def _clear_structure_form(self):
+        self.structure_sprite_scale_x_var.set("")
+        self.structure_sprite_scale_y_var.set("")
+        self.structure_hitbox_width_ratio_var.set("")
+        self.structure_hitbox_height_ratio_var.set("")
+        self.structure_hitbox_lift_var.set("")
+        self.structure_hitbox_width_var.set("")
+        self.structure_hitbox_height_var.set("")
+        self.structure_hitbox_offset_x_var.set("")
+        self.structure_hitbox_offset_y_var.set("")
+        self.structure_animation_frame_count_var.set("")
+        self.structure_animation_frame_width_var.set("")
+        self.structure_animation_frame_height_var.set("")
+        self.structure_animation_frame_duration_var.set("")
+        self.structure_auto_hitbox_var.set(True)
+        self._set_structure_form_state(False)
 
     def _apply_enemy_form_to_properties(self, object_type, properties):
         if not self._is_enemy_type(object_type):
@@ -950,6 +1121,33 @@ class MapObjectEditor(tk.Tk):
         self._set_or_remove_tree_hitbox_override(properties, "hitbox_height", self.stump_hitbox_height_var.get(), auto_hitbox["hitbox_height"])
         self._set_or_remove_tree_hitbox_override(properties, "hitbox_offset_x", self.stump_hitbox_offset_x_var.get(), auto_hitbox["hitbox_offset_x"])
         self._set_or_remove_tree_hitbox_override(properties, "hitbox_offset_y", self.stump_hitbox_offset_y_var.get(), auto_hitbox["hitbox_offset_y"])
+
+    def _apply_structure_form_to_properties(self, object_type, properties):
+        if object_type != "structure_object":
+            return
+        self._set_or_remove_numeric_property(properties, "sprite_scale_x", self.structure_sprite_scale_x_var.get())
+        self._set_or_remove_numeric_property(properties, "sprite_scale_y", self.structure_sprite_scale_y_var.get())
+        self._set_or_remove_numeric_property(properties, "hitbox_width_ratio", self.structure_hitbox_width_ratio_var.get())
+        self._set_or_remove_numeric_property(properties, "hitbox_height_ratio", self.structure_hitbox_height_ratio_var.get())
+        self._set_or_remove_numeric_property(properties, "hitbox_lift", self.structure_hitbox_lift_var.get())
+        self._set_or_remove_numeric_property(properties, "animation_frame_count", self.structure_animation_frame_count_var.get())
+        self._set_or_remove_numeric_property(properties, "animation_frame_width", self.structure_animation_frame_width_var.get())
+        self._set_or_remove_numeric_property(properties, "animation_frame_height", self.structure_animation_frame_height_var.get())
+        self._set_or_remove_numeric_property(properties, "animation_frame_duration", self.structure_animation_frame_duration_var.get())
+        form_properties = dict(properties)
+        auto_hitbox = self._auto_structure_hitbox_properties(
+            width=max(1, self._safe_int(self.width_var.get(), 1)) * self.tile_size,
+            height=max(1, self._safe_int(self.height_var.get(), 1)) * self.tile_size,
+            properties=form_properties,
+        )
+        if self.structure_auto_hitbox_var.get():
+            for key in ("hitbox_width", "hitbox_height", "hitbox_offset_x", "hitbox_offset_y"):
+                properties.pop(key, None)
+            return
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_width", self.structure_hitbox_width_var.get(), auto_hitbox["hitbox_width"])
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_height", self.structure_hitbox_height_var.get(), auto_hitbox["hitbox_height"])
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_offset_x", self.structure_hitbox_offset_x_var.get(), auto_hitbox["hitbox_offset_x"])
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_offset_y", self.structure_hitbox_offset_y_var.get(), auto_hitbox["hitbox_offset_y"])
 
     def _set_or_remove_numeric_property(self, properties, key, value):
         text = str(value).strip()
@@ -1061,11 +1259,15 @@ class MapObjectEditor(tk.Tk):
         if tileset is not None:
             firstgid = int(tileset.attrib.get("firstgid", 1))
             columns = int(tileset.attrib.get("columns", 0))
+            tileset_name = tileset.attrib.get("name", tmx_path.parent.name)
             image = tileset.find("image")
             if image is not None:
                 candidate = (tmx_path.parent / image.attrib.get("source", "")).resolve()
                 if candidate.exists() and candidate.suffix.lower() != ".aseprite":
                     image_path = candidate
+            named_fallback = tmx_path.parent / f"{tileset_name}.png"
+            if image_path is None and named_fallback.exists():
+                image_path = named_fallback
             fallback = tmx_path.parent / "world_tile_set.png"
             if image_path is None and fallback.exists():
                 image_path = fallback
@@ -1173,7 +1375,7 @@ class MapObjectEditor(tk.Tk):
         sprite_scale_x = max(0.1, self._safe_float(properties.get("sprite_scale_x"), sprite_scale))
         sprite_scale_y = max(0.1, self._safe_float(properties.get("sprite_scale_y"), sprite_scale))
         object_type = str(obj.get("type", ""))
-        default_anchor = "bottom_center" if object_type in {"tree_object", "stump_object"} else "top_left"
+        default_anchor = "bottom_center" if object_type in {"tree_object", "stump_object", "structure_object"} else "top_left"
         sprite_anchor = str(properties.get("sprite_anchor", default_anchor)).strip().lower()
         pixel_offset_x = self._safe_int(properties.get("pixel_offset_x"), 0)
         pixel_offset_y = self._safe_int(properties.get("pixel_offset_y"), 0)
@@ -1233,6 +1435,16 @@ class MapObjectEditor(tk.Tk):
             if sprite_path:
                 return sprite_path, None, None
 
+        if object_type == "structure_object":
+            sprite_path = STRUCTURE_SPRITES.get(name.strip().lower())
+            if sprite_path:
+                frame_count = self._safe_int(properties.get("animation_frame_count"), 0)
+                if frame_count > 0:
+                    frame_width = self._safe_int(properties.get("animation_frame_width"), 96)
+                    frame_height = self._safe_int(properties.get("animation_frame_height"), 96)
+                    return sprite_path, frame_width, frame_height
+                return sprite_path, None, None
+
         if object_type == "grass_hide_zone":
             return "world_objects/grass_hide_zone/big_grass.png", None, None
 
@@ -1277,6 +1489,7 @@ class MapObjectEditor(tk.Tk):
                 self.object_canvas_ids.extend([rect_id, text_id])
         self._render_selected_sized_object_debug("tree_object", self._resolved_tree_properties)
         self._render_selected_sized_object_debug("stump_object", self._resolved_stump_properties)
+        self._render_selected_sized_object_debug("structure_object", self._resolved_structure_properties)
         self._render_selected_enemy_debug()
 
     def _render_selected_sized_object_debug(self, object_type, resolve_properties):
@@ -1452,6 +1665,7 @@ class MapObjectEditor(tk.Tk):
         self._apply_enemy_properties_to_form(obj.get("type", ""), self._resolved_enemy_properties(obj))
         self._apply_tree_properties_to_form(obj.get("type", ""), self._resolved_tree_properties(obj))
         self._apply_stump_properties_to_form(obj.get("type", ""), self._resolved_stump_properties(obj))
+        self._apply_structure_properties_to_form(obj.get("type", ""), self._resolved_structure_properties(obj))
         self.properties_text.delete("1.0", tk.END)
         self.properties_text.insert("1.0", json.dumps(properties, ensure_ascii=False, indent=2))
 
@@ -1467,6 +1681,7 @@ class MapObjectEditor(tk.Tk):
         self._clear_enemy_form()
         self._clear_tree_form()
         self._clear_stump_form()
+        self._clear_structure_form()
         self.properties_text.delete("1.0", tk.END)
         self.properties_text.insert("1.0", "{}")
 
@@ -1647,6 +1862,7 @@ class MapObjectEditor(tk.Tk):
         self._apply_enemy_form_to_properties(object_type, properties)
         self._apply_tree_form_to_properties(object_type, properties)
         self._apply_stump_form_to_properties(object_type, properties)
+        self._apply_structure_form_to_properties(object_type, properties)
         if properties:
             obj["properties"] = properties
         return obj

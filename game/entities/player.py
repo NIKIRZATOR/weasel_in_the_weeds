@@ -821,9 +821,6 @@ class Player(Entity):
             self.hotbar_slots[index] = None
 
     def update(self, dt, keys, world):
-        if self.health <= 0:
-            self.respawn()
-
         previous_position = Vector2(self.position.x, self.position.y)
         self.update_timers(dt)
 

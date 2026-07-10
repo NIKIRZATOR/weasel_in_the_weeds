@@ -1,16 +1,18 @@
 import pygame
 from math import ceil
 
+from game.core.assets import load_image
 from game.items import get_item_definition, get_item_icon
 from game.items.types import EquipSlot, ItemKind
 from game.localization import get_localizer
 from game.scenes.base import Scene
-from settings import COLORS, HOTBAR_SIZE, INVENTORY_COLUMNS, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings import ASSETS_DIR, COLORS, HOTBAR_SIZE, INVENTORY_COLUMNS, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 class InventoryScene(Scene):
     QUEST_COLUMNS = 2
     QUEST_ROWS = 5
+    PLAYER_PORTRAIT_PATH = ASSETS_DIR / "characters" / "player" / "weasel_hero__portraint_full.png"
 
     def __init__(self, app, game_scene):
         self.app = app
@@ -32,6 +34,7 @@ class InventoryScene(Scene):
         self.dragging = False
         self.drag_threshold = 6
         self.header_currency_targets = []
+        self._player_portrait_cache = {}
         self._layout_size = None
         self._build_layout()
 
@@ -373,7 +376,11 @@ class InventoryScene(Scene):
         self._draw_panel_title(self.left_panel, self.localizer.t("ui.inventory.character"))
 
         body_rect = pygame.Rect(self.left_panel.centerx - 30, self.left_panel.y + 72, 60, 90)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_SELECTED"], body_rect, border_radius=10)
+        portrait = self._get_player_portrait(body_rect.size)
+        if portrait is not None:
+            self.app.screen.blit(portrait, body_rect.topleft)
+        else:
+            pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_SELECTED"], body_rect, border_radius=10)
         pygame.draw.rect(self.app.screen, COLORS["WHITE"], body_rect, width=2, border_radius=10)
 
         stats = self.player.get_effective_stats()
@@ -391,6 +398,33 @@ class InventoryScene(Scene):
         for index, line in enumerate(stat_lines):
             text = self.stats_font.render(line, True, COLORS["WHITE"])
             self.app.screen.blit(text, (self.left_panel.x + 18, stats_start_y + index * 24))
+
+    def _get_player_portrait(self, size):
+        cache_key = tuple(size)
+        if cache_key not in self._player_portrait_cache:
+            source = load_image(self.PLAYER_PORTRAIT_PATH)
+            if source is None:
+                self._player_portrait_cache[cache_key] = None
+            else:
+                self._player_portrait_cache[cache_key] = self._fit_surface_to_rect(source, size, padding=4)
+        return self._player_portrait_cache[cache_key]
+
+    def _fit_surface_to_rect(self, surface, size, padding=0):
+        width, height = size
+        available_width = max(1, width - padding * 2)
+        available_height = max(1, height - padding * 2)
+        source_width, source_height = surface.get_size()
+        scale = min(available_width / source_width, available_height / source_height)
+        scaled_size = (
+            max(1, int(round(source_width * scale))),
+            max(1, int(round(source_height * scale))),
+        )
+        scaled = pygame.transform.smoothscale(surface, scaled_size)
+        result = pygame.Surface(size, pygame.SRCALPHA)
+        offset_x = (width - scaled.get_width()) // 2
+        offset_y = (height - scaled.get_height()) // 2
+        result.blit(scaled, (offset_x, offset_y))
+        return result
 
     def _draw_hotbar_panel(self):
         pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.hotbar_panel, border_radius=12)

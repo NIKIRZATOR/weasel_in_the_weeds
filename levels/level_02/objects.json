@@ -89,6 +89,66 @@
           "y": 5
         }
       }
+    },
+    {
+      "type": "structure_object",
+      "name": "Camp Place",
+      "x": 52,
+      "y": 57,
+      "width": 4,
+      "height": 3,
+      "solid": true,
+      "properties": {
+        "sprite_path": "world_objects/structure_object/camp_place.png",
+        "sprite_scale_x": 1,
+        "sprite_scale_y": 1,
+        "hitbox_width_ratio": 0.75,
+        "hitbox_height_ratio": 0.45,
+        "hitbox_lift": 0,
+        "animation_frame_count": 0,
+        "animation_frame_width": 96,
+        "animation_frame_height": 96,
+        "animation_frame_duration": 0.12
+      }
+    },
+    {
+      "type": "structure_object",
+      "name": "Stolb",
+      "x": 45,
+      "y": 57,
+      "width": 1,
+      "height": 2,
+      "solid": true,
+      "properties": {
+        "sprite_path": "world_objects/structure_object/stolb.png",
+        "sprite_scale_x": 1.0,
+        "sprite_scale_y": 1.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.8,
+        "hitbox_lift": 0
+      }
+    },
+    {
+      "type": "structure_object",
+      "name": "Campfire",
+      "x": 48,
+      "y": 56,
+      "width": 2,
+      "height": 2,
+      "solid": true,
+      "properties": {
+        "sprite_path": "world_objects/structure_object/campfire.png",
+        "sprite_sheet_path": "world_objects/structure_object/campfire.png",
+        "animation_frame_count": 10,
+        "animation_frame_width": 96,
+        "animation_frame_height": 96,
+        "animation_frame_duration": 0.12,
+        "sprite_scale_x": 1,
+        "sprite_scale_y": 1,
+        "hitbox_width_ratio": 0.45,
+        "hitbox_height_ratio": 0.35,
+        "hitbox_lift": 0
+      }
     }
   ]
 }

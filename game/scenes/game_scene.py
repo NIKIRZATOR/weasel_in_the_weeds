@@ -36,6 +36,10 @@ CHARGED_ATTACK_THRESHOLD = 1.5
 HIT_STOP_DURATION = 0.055
 SCREEN_SHAKE_DURATION = 0.12
 SCREEN_SHAKE_STRENGTH = 5.0
+PLAYER_DEATH_FADE_OUT_DURATION = 0.55
+PLAYER_DEATH_HOLD_DURATION = 0.18
+PLAYER_DEATH_FADE_IN_DURATION = 0.7
+PLAYER_DEATH_MAX_OVERLAY_ALPHA = 210
 CHECKPOINT_XP_REWARD = 12
 TRANSITION_XP_REWARD = 18
 STATIC_WORLD_CHUNK_TILES = 12
@@ -112,6 +116,9 @@ class GameScene(Scene):
         self.hit_stop_timer = 0.0
         self.screen_shake_timer = 0.0
         self.screen_shake_strength = 0.0
+        self.player_death_sequence_active = False
+        self.player_death_timer = 0.0
+        self.player_death_respawned = False
 
         world_width = self.tilemap.width * self.tilemap.tile_size
         world_height = self.tilemap.height * self.tilemap.tile_size
@@ -651,6 +658,8 @@ class GameScene(Scene):
         for event in events:
             if event.type == pygame.QUIT:
                 self.app.running = False
+            elif self.player_death_sequence_active:
+                continue
             elif self.transition_target_level is not None:
                 continue
             elif event.type == pygame.KEYDOWN:
@@ -879,6 +888,10 @@ class GameScene(Scene):
             self._update_level_transition(dt)
             return
 
+        if self.player_death_sequence_active:
+            self._update_player_death_sequence(dt)
+            return
+
         self._update_screen_shake(dt)
         if self.hit_stop_timer > 0:
             self.hit_stop_timer = max(0.0, self.hit_stop_timer - dt)
@@ -909,6 +922,8 @@ class GameScene(Scene):
         self.jump_pressed_last_frame = jump_pressed
         previous_position = Vector2(self.player.position.x, self.player.position.y)
         self.player.update(dt, keys, self)
+        if self._start_player_death_sequence_if_needed():
+            return
         self._track_player_movement(previous_position)
         if self.jump_requested and not self.player.is_jumping:
             direction = self._resolve_jump_direction(keys)
@@ -923,6 +938,8 @@ class GameScene(Scene):
         self._update_auto_pickups()
         self._update_player_projectiles(dt)
         self._resolve_player_enemy_overlaps()
+        if self._start_player_death_sequence_if_needed():
+            return
         self._apply_player_attack()
         self._update_damage_numbers(dt)
         self._check_level_transitions()
@@ -937,6 +954,43 @@ class GameScene(Scene):
                 self.last_interaction_message = ""
         if self.save_indicator_timer > 0:
             self.save_indicator_timer = max(0.0, self.save_indicator_timer - dt)
+
+    def _start_player_death_sequence_if_needed(self):
+        if self.player_death_sequence_active or self.player.health > 0:
+            return False
+        self.player_death_sequence_active = True
+        self.player_death_timer = 0.0
+        self.player_death_respawned = False
+        self.hit_stop_timer = 0.0
+        self.screen_shake_timer = 0.0
+        self.screen_shake_strength = 0.0
+        self.mouse_buttons_held.clear()
+        self.mouse_hold_time = 0.0
+        self.charged_combo_fired = False
+        self.jump_requested = False
+        self.current_interaction_target = None
+        self.last_interaction_message = ""
+        self.last_interaction_timer = 0.0
+        self.player.is_running = False
+        return True
+
+    def _update_player_death_sequence(self, dt):
+        self.player_death_timer += dt
+        if not self.player_death_respawned and self.player_death_timer >= PLAYER_DEATH_FADE_OUT_DURATION:
+            self.player.respawn()
+            self.player_death_respawned = True
+            viewport_width, viewport_height = self.app.get_world_render_size()
+            self.camera.update(self.player, viewport_width, viewport_height)
+        total_duration = (
+            PLAYER_DEATH_FADE_OUT_DURATION
+            + PLAYER_DEATH_HOLD_DURATION
+            + PLAYER_DEATH_FADE_IN_DURATION
+        )
+        if self.player_death_timer < total_duration:
+            return
+        self.player_death_sequence_active = False
+        self.player_death_timer = 0.0
+        self.player_death_respawned = False
 
     def _update_checkpoints(self):
         checkpoint_contacts = set()
@@ -1408,6 +1462,7 @@ class GameScene(Scene):
             show_fps=self.app.show_fps,
             save_indicator_alpha=self._save_indicator_alpha(),
         )
+        self._draw_player_death_overlay(target_screen)
         if self.last_interaction_message:
             message = self.info_font.render(self.last_interaction_message, True, COLORS["WHITE"])
             target_screen.blit(
@@ -1437,6 +1492,28 @@ class GameScene(Scene):
         overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, int(255 * progress)))
         screen.blit(overlay, (0, 0))
+
+    def _draw_player_death_overlay(self, screen):
+        if not self.player_death_sequence_active:
+            return
+        alpha = self._player_death_overlay_alpha()
+        if alpha <= 0:
+            return
+        overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, alpha))
+        screen.blit(overlay, (0, 0))
+
+    def _player_death_overlay_alpha(self):
+        timer = self.player_death_timer
+        if timer <= PLAYER_DEATH_FADE_OUT_DURATION:
+            progress = timer / max(0.001, PLAYER_DEATH_FADE_OUT_DURATION)
+            return int(PLAYER_DEATH_MAX_OVERLAY_ALPHA * progress)
+        timer -= PLAYER_DEATH_FADE_OUT_DURATION
+        if timer <= PLAYER_DEATH_HOLD_DURATION:
+            return PLAYER_DEATH_MAX_OVERLAY_ALPHA
+        timer -= PLAYER_DEATH_HOLD_DURATION
+        progress = min(1.0, timer / max(0.001, PLAYER_DEATH_FADE_IN_DURATION))
+        return int(PLAYER_DEATH_MAX_OVERLAY_ALPHA * (1.0 - progress))
 
     def _draw_interaction_prompt(self, screen, world_object):
         prompt_text = self.interaction_font.render("E", True, COLORS["WHITE"])

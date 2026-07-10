@@ -284,7 +284,7 @@ def _iter_object_occupied_tiles(raw_object: dict, tile_size: int):
     pixel_offset_x = _safe_int(properties.get("pixel_offset_x"), 0)
     pixel_offset_y = _safe_int(properties.get("pixel_offset_y"), 0)
     object_type = str(raw_object.get("type", "")).strip().lower()
-    default_anchor = "bottom_center" if object_type in {"tree_object", "stump_object"} else "top_left"
+    default_anchor = "bottom_center" if object_type in {"tree_object", "stump_object", "structure_object"} else "top_left"
     sprite_anchor = str(properties.get("sprite_anchor", default_anchor)).strip().lower()
 
     if sprite_anchor == "bottom_center":

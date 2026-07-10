@@ -8,6 +8,7 @@ from game.objects.level_transition import LevelTransition
 from game.objects.npc_object import NpcObject
 from game.objects.pickable_object import PickableObject
 from game.objects.solid_object import SolidObject
+from game.objects.structure_object import StructureObject
 from game.objects.stump_object import StumpObject
 from game.objects.tree_object import TreeObject
 
@@ -98,6 +99,54 @@ STUMP_SPRITES = {
     "fallen_tree_4": "world_objects/stump_object/fallen_tree_4.png",
 }
 
+STRUCTURE_DEFAULTS = {
+    "camp place": {
+        "sprite_path": "world_objects/structure_object/camp_place.png",
+        "sprite_scale_x": 1.0,
+        "sprite_scale_y": 1.0,
+        "hitbox_width_ratio": 0.75,
+        "hitbox_height_ratio": 0.45,
+        "hitbox_lift": 0,
+    },
+    "small rock mountain": {
+        "sprite_path": "world_objects/structure_object/small_rock_mountain.png",
+        "sprite_scale_x": 1.0,
+        "sprite_scale_y": 1.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 0,
+    },
+    "stolb": {
+        "sprite_path": "world_objects/structure_object/stolb.png",
+        "sprite_scale_x": 1.0,
+        "sprite_scale_y": 1.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.8,
+        "hitbox_lift": 0,
+    },
+    "stone column": {
+        "sprite_path": "world_objects/structure_object/stone_column.png",
+        "sprite_scale_x": 1.0,
+        "sprite_scale_y": 1.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.7,
+        "hitbox_lift": 0,
+    },
+    "campfire": {
+        "sprite_path": "world_objects/structure_object/campfire.png",
+        "sprite_sheet_path": "world_objects/structure_object/campfire.png",
+        "animation_frame_count": 10,
+        "animation_frame_width": 96,
+        "animation_frame_height": 96,
+        "animation_frame_duration": 0.12,
+        "sprite_scale_x": 1.0,
+        "sprite_scale_y": 1.0,
+        "hitbox_width_ratio": 0.45,
+        "hitbox_height_ratio": 0.35,
+        "hitbox_lift": 0,
+    },
+}
+
 
 def _resolve_dimensions(raw_object, tile_size):
     width = raw_object.get("width", 1) * tile_size
@@ -148,6 +197,16 @@ def create_world_object(raw_object, tile_size):
 
     if object_type == "stump_object":
         return StumpObject(
+            x,
+            y,
+            width,
+            height,
+            name=name,
+            properties=properties,
+        )
+
+    if object_type == "structure_object":
+        return StructureObject(
             x,
             y,
             width,
@@ -298,6 +357,14 @@ def _assign_default_sprite_path(object_type, name, properties):
         sprite_path = STUMP_SPRITES.get(str(name or "").strip().lower())
         if sprite_path:
             properties["sprite_path"] = sprite_path
+        return
+
+    if object_type == "structure_object":
+        defaults = STRUCTURE_DEFAULTS.get(str(name or "").strip().lower())
+        if not defaults:
+            return
+        for key, value in defaults.items():
+            properties.setdefault(key, value)
         return
 
     if object_type == "grass_hide_zone":
