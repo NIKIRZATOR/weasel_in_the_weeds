@@ -219,6 +219,10 @@
       "fatigue": {
         "name": "Усталость",
         "description": "Повышает затраты выносливости."
+      },
+      "poison": {
+        "name": "Яд",
+        "description": "Наносит 2 ед. урона в секунду."
       }
     },
     "progression": {

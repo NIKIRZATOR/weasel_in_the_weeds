@@ -136,8 +136,8 @@ class HUD:
         if not player.active_effects:
             return
 
-        slot_width = 88
-        slot_height = 26
+        slot_width = 74
+        slot_height = 30
         gap = 6
         x = 16
         y = 16 + self.portrait_radius * 2 + 18
@@ -154,22 +154,15 @@ class HUD:
             pygame.draw.rect(screen, fill, rect, border_radius=8)
             pygame.draw.rect(screen, border, rect, width=2, border_radius=8)
 
-            icon = self._get_effect_icon(effect, (18, 18))
+            icon = self._get_effect_icon(effect, (20, 20))
             if icon is not None:
                 screen.blit(icon, (rect.x + 6, rect.y + (rect.height - icon.get_height()) // 2))
-                label_x = rect.x + 30
             else:
-                label = self._effect_short_label(effect.effect_type)
-                label_text = self.tiny_font.render(label, True, COLORS["WHITE"])
-                screen.blit(label_text, (rect.x + 8, rect.y + 5))
-                label_x = rect.x + 30
+                placeholder_center = (rect.x + 16, rect.y + rect.height // 2)
+                pygame.draw.circle(screen, COLORS["WHITE"], placeholder_center, 6, width=2)
 
             time_text = self.tiny_font.render(f"{max(0.0, effect.remaining):.1f}s", True, COLORS["WHITE"])
-            screen.blit(time_text, (rect.right - time_text.get_width() - 6, rect.y + 5))
-            if icon is not None:
-                short_name = self._effect_short_label(effect.effect_type)
-                label_text = self.tiny_font.render(short_name, True, COLORS["WHITE"])
-                screen.blit(label_text, (label_x, rect.y + 5))
+            screen.blit(time_text, (rect.right - time_text.get_width() - 6, rect.y + 7))
 
             self.effect_rects.append((rect, effect))
             if rect.collidepoint(mouse_pos):
@@ -227,6 +220,8 @@ class HUD:
         effect_type = self._effect_key(effect.effect_type)
         if effect_type in {"slowed", "damage_increased", "damage_reduced", "fatigue"}:
             return f"{int(round(value * 100))}%"
+        if effect_type == "poison":
+            return f"{value:.1f}/s"
         return str(int(round(value))) if abs(value - round(value)) < 0.05 else f"{value:.1f}"
 
     def _draw_effect_tooltip(self, screen, effect, mouse_pos):

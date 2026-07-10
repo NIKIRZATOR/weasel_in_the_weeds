@@ -449,6 +449,8 @@ class Player(Entity):
                 self.restore_resource("health", effect.value * active_dt)
             elif effect.effect_type == EffectType.STAMINA_REGENERATION:
                 self.restore_resource("stamina", effect.value * active_dt)
+            elif effect.effect_type == EffectType.POISON:
+                self.health = max(0.0, self.health - effect.value * active_dt)
             effect.remaining -= elapsed
 
         self.active_effects = [effect for effect in self.active_effects if effect.remaining > 0]

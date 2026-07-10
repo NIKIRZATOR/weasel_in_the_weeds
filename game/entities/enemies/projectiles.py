@@ -52,7 +52,8 @@ class RangedProjectile:
             self.radius * 2,
         )
         if rects_intersect(projectile_rect, player.get_hitbox_rect()):
-            player.take_damage(self.damage)
+            if player.take_damage(self.damage):
+                self.on_hit_player(player)
             self.is_dead = True
             return
 
@@ -68,6 +69,9 @@ class RangedProjectile:
         pygame.draw.circle(screen, (255, 190, 70), (x, y), self.radius)
         pygame.draw.circle(screen, COLORS["BLACK"], (x, y), self.radius, width=1)
         pygame.draw.circle(screen, (90, 20, 20), (x - 1, y - 1), max(1, self.radius // 2))
+
+    def on_hit_player(self, player):
+        return None
 
 
 class SpikeProjectile(RangedProjectile):

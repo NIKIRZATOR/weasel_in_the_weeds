@@ -50,8 +50,8 @@
       "properties": {
         "target_level": "level_02",
         "target_spawn": {
-          "x": 5,
-          "y": 5
+          "x": 6,
+          "y": 6
         },
         "set_flags": [
           "entered_forest_edge"

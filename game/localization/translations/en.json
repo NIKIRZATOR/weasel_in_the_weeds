@@ -219,6 +219,10 @@
       "fatigue": {
         "name": "Fatigue",
         "description": "Increases stamina costs."
+      },
+      "poison": {
+        "name": "Poison",
+        "description": "Deals 2 damage per second."
       }
     },
     "progression": {

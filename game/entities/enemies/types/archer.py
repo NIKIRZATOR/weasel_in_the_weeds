@@ -10,6 +10,7 @@ from game.entities.enemies.ai.states import CHASE
 from game.entities.enemies.ai.steering import entity_distance
 from game.entities.enemies.base import Enemy
 from game.entities.enemies.projectiles import RangedProjectile
+from game.effects import EffectType
 from settings import ASSETS_DIR
 
 
@@ -235,9 +236,19 @@ class ArcherEnemy(Enemy):
 
 
 class WaspProjectile(RangedProjectile):
+    POISON_DAMAGE_PER_SECOND = 2.0
+    POISON_DURATION = 4.0
+
     def __init__(self, x, y, target_x, target_y, speed, damage, radius=5, sprite=None):
         super().__init__(x, y, target_x, target_y, speed, damage, radius)
         self.sprite = sprite
+
+    def on_hit_player(self, player):
+        player.add_active_effect(
+            EffectType.POISON,
+            self.POISON_DAMAGE_PER_SECOND,
+            self.POISON_DURATION,
+        )
 
     def draw(self, screen, camera):
         if self.is_dead:

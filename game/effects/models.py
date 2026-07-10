@@ -12,6 +12,7 @@ class EffectType(str, Enum):
     SLOWED = "slowed"
     DAMAGE_REDUCED = "damage_reduced"
     FATIGUE = "fatigue"
+    POISON = "poison"
 
 
 @dataclass(frozen=True)
@@ -64,6 +65,12 @@ EFFECT_DEFINITIONS: dict[EffectType, EffectDefinition] = {
         False,
         "Increases stamina costs.",
         "ui/effects/fatigue.png",
+    ),
+    EffectType.POISON: EffectDefinition(
+        EffectType.POISON,
+        False,
+        "Deals damage every second.",
+        "ui/effects/poison.png",
     ),
 }
 
