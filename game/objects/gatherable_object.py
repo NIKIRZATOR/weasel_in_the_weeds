@@ -27,9 +27,10 @@ class GatherableObject(WorldObject):
         self.depleted_color = tuple(properties.get("depleted_color", COLORS["UI_SLOT_BORDER"]))
         self.loot = list(properties.get("loot", []))
         self.one_time = bool(properties.get("one_time", True))
+        self.base_sprite_path = self.properties.get("sprite_path")
+        self.depleted_sprite_path = self.properties.get("depleted_sprite_path", self.base_sprite_path)
         self.is_depleted = bool(properties.get("depleted", False))
-        if self.is_depleted:
-            self.color = self.depleted_color
+        self._apply_visual_state()
 
     def interact(self, player, game_scene):
         if self.is_depleted:
@@ -98,7 +99,15 @@ class GatherableObject(WorldObject):
 
     def _deplete(self):
         self.is_depleted = True
-        self.color = self.depleted_color
+        self._apply_visual_state()
 
     def restore_depleted_state(self):
         self._deplete()
+
+    def _apply_visual_state(self):
+        if self.is_depleted:
+            self.color = self.depleted_color
+            self.sprite_path = self.depleted_sprite_path
+            return
+        self.color = self.base_color
+        self.sprite_path = self.base_sprite_path

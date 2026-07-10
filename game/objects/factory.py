@@ -16,10 +16,22 @@ CONTAINER_SPRITES = {
 }
 
 GATHERABLE_TEMPLATE_SPRITES = {
-    "berry_bush_small": "world_objects/gatherable_object/berry_bush.png",
-    "fallen_log_small": "world_objects/gatherable_object/fallen_log.png",
-    "stone_pile_small": "world_objects/gatherable_object/stone_pile.png",
-    "bug_remains_small": "world_objects/gatherable_object/stump.png",
+    "berry_bush_small": {
+        "sprite_path": "world_objects/gatherable_object/berry_bush_full.png",
+        "depleted_sprite_path": "world_objects/gatherable_object/berry_bush_empty.png",
+    },
+    "fallen_log_small": {
+        "sprite_path": "world_objects/gatherable_object/fallen_log_full.png",
+        "depleted_sprite_path": "world_objects/gatherable_object/fallen_log_empty.png",
+    },
+    "stone_pile_small": {
+        "sprite_path": "world_objects/gatherable_object/stone_pile_full.png",
+        "depleted_sprite_path": "world_objects/gatherable_object/stone_pile_empty.png",
+    },
+    "bug_remains_small": {
+        "sprite_path": "world_objects/gatherable_object/stump_full.png",
+        "depleted_sprite_path": "world_objects/gatherable_object/stump_empty.png",
+    },
 }
 
 PICKABLE_SPRITES = {
@@ -199,10 +211,9 @@ def _resolve_gatherable_properties(name, properties):
 
 
 def _assign_default_sprite_path(object_type, name, properties):
-    if properties.get("sprite_path"):
-        return
-
     if object_type == "container_object":
+        if properties.get("sprite_path"):
+            return
         sprite_path = CONTAINER_SPRITES.get(str(properties.get("container_type", "")))
         if sprite_path:
             properties["sprite_path"] = sprite_path
@@ -210,24 +221,32 @@ def _assign_default_sprite_path(object_type, name, properties):
 
     if object_type == "gatherable_object":
         template_id = str(properties.get("template_id", ""))
-        sprite_path = GATHERABLE_TEMPLATE_SPRITES.get(template_id)
-        if not sprite_path and template_id == "grass_patch_small":
-            sprite_path = "world_objects/solid_object/bush.png"
-        if sprite_path:
-            properties["sprite_path"] = sprite_path
+        sprite_paths = GATHERABLE_TEMPLATE_SPRITES.get(template_id)
+        if sprite_paths:
+            properties.setdefault("sprite_path", sprite_paths["sprite_path"])
+            properties.setdefault("depleted_sprite_path", sprite_paths["depleted_sprite_path"])
+            return
+        if template_id == "grass_patch_small":
+            properties.setdefault("sprite_path", "world_objects/solid_object/bush.png")
         return
 
     if object_type in {"solid_object", "passable_object"}:
+        if properties.get("sprite_path"):
+            return
         sprite_path = SOLID_OBJECT_SPRITES.get(str(name or "").strip().lower())
         if sprite_path:
             properties["sprite_path"] = sprite_path
         return
 
     if object_type == "grass_hide_zone":
+        if properties.get("sprite_path"):
+            return
         properties["sprite_path"] = "world_objects/grass_hide_zone/big_grass.png"
         return
 
     if object_type == "pickable_object":
+        if properties.get("sprite_path"):
+            return
         item_id = str(properties.get("item_id") or name or "")
         sprite_path = PICKABLE_SPRITES.get(item_id.lower())
         if sprite_path:

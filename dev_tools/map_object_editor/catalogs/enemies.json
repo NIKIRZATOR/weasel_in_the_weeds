@@ -18,22 +18,22 @@
         "patrol_radius": 140,
         "charge_range": 210,
         "body_hitbox": {
-          "width": 22,
-          "height": 18,
-          "offset_x": 5,
-          "offset_y": 11
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
         },
         "hurtbox": {
-          "width": 20,
-          "height": 18,
-          "offset_x": 6,
-          "offset_y": 11
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
         },
         "attack_hitbox": {
-          "width": 20,
-          "height": 14,
-          "offset_x": 18,
-          "offset_y": 13,
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8,
           "mirror_with_facing": true
         },
         "collision_circle": {

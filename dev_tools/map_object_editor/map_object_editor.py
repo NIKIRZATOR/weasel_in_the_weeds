@@ -32,10 +32,10 @@ CONTAINER_SPRITES = {
 }
 
 GATHERABLE_TEMPLATE_SPRITES = {
-    "berry_bush_small": "world_objects/gatherable_object/berry_bush.png",
-    "fallen_log_small": "world_objects/gatherable_object/fallen_log.png",
-    "stone_pile_small": "world_objects/gatherable_object/stone_pile.png",
-    "bug_remains_small": "world_objects/gatherable_object/stump.png",
+    "berry_bush_small": "world_objects/gatherable_object/berry_bush_full.png",
+    "fallen_log_small": "world_objects/gatherable_object/fallen_log_full.png",
+    "stone_pile_small": "world_objects/gatherable_object/stone_pile_full.png",
+    "bug_remains_small": "world_objects/gatherable_object/stump_full.png",
 }
 
 PICKABLE_SPRITES = {

@@ -1815,7 +1815,35 @@
       "x": 42,
       "y": 30,
       "width": 2,
-      "height": 2
+      "height": 2,
+      "properties": {
+        "detection_radius": 150,
+        "patrol_radius": 100,
+        "charge_range": 120,
+        "stationary": false,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
     },
     {
       "type": "enemy_beetle",
@@ -1983,6 +2011,42 @@
       "y": 65,
       "width": 2,
       "height": 2
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 49,
+      "y": 40,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "detection_radius": 0,
+        "patrol_radius": 0,
+        "charge_range": 0,
+        "stationary": false,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
     }
   ]
 }
