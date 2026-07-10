@@ -361,6 +361,10 @@ class GameScene(Scene):
             return False
         if getattr(world_object, "is_npc", False):
             return False
+        if getattr(world_object, "draw_after_player_only", False):
+            return False
+        if getattr(world_object, "has_overlay_pass", lambda: False)():
+            return False
         return True
 
     def _rebuild_static_world_chunks(self):
@@ -371,10 +375,11 @@ class GameScene(Scene):
         chunk_size = self._static_world_chunk_pixel_size
         chunk_cameras = {}
         for world_object in self.static_world_objects:
-            min_chunk_x = int(world_object.position.x // chunk_size)
-            max_chunk_x = int((world_object.position.x + max(1, world_object.width) - 1) // chunk_size)
-            min_chunk_y = int(world_object.position.y // chunk_size)
-            max_chunk_y = int((world_object.position.y + max(1, world_object.height) - 1) // chunk_size)
+            render_rect = world_object.get_render_rect()
+            min_chunk_x = int(render_rect.left // chunk_size)
+            max_chunk_x = int((render_rect.right - 1) // chunk_size)
+            min_chunk_y = int(render_rect.top // chunk_size)
+            max_chunk_y = int((render_rect.bottom - 1) // chunk_size)
             for chunk_y in range(min_chunk_y, max_chunk_y + 1):
                 for chunk_x in range(min_chunk_x, max_chunk_x + 1):
                     chunk_key = (chunk_x, chunk_y)
@@ -407,7 +412,8 @@ class GameScene(Scene):
 
     def _iter_visible_world_objects(self, objects, visible_rect):
         for world_object in objects:
-            if visible_rect.colliderect(world_object.get_hitbox_rect()):
+            render_rect = world_object.get_render_rect() if hasattr(world_object, "get_render_rect") else world_object.get_hitbox_rect()
+            if visible_rect.colliderect(render_rect):
                 yield world_object
 
     def add_world_object(self, world_object):
@@ -1370,16 +1376,21 @@ class GameScene(Scene):
         self._draw_static_world_chunks(world_surface, visible_rect)
         overlay_world_objects = []
         for world_object in self._iter_visible_world_objects(self.dynamic_world_objects, visible_rect):
-            if getattr(world_object, "is_grass_hide_zone", False):
+            if getattr(world_object, "draw_after_player_only", False) or getattr(world_object, "is_grass_hide_zone", False):
                 overlay_world_objects.append(world_object)
                 continue
             world_object.draw(world_surface, self.camera)
+            if getattr(world_object, "has_overlay_pass", lambda: False)():
+                overlay_world_objects.append(world_object)
         self.enemy_manager.draw(world_surface, self.camera)
         self._draw_player_projectiles(world_surface)
         self._draw_damage_numbers(world_surface)
         self.player.draw(world_surface, self.camera)
         for world_object in overlay_world_objects:
-            world_object.draw(world_surface, self.camera)
+            if getattr(world_object, "draw_after_player_only", False) or getattr(world_object, "is_grass_hide_zone", False):
+                world_object.draw(world_surface, self.camera)
+                continue
+            world_object.draw_overlay(world_surface, self.camera)
         if self.current_interaction_target is not None:
             self._draw_interaction_prompt(world_surface, self.current_interaction_target)
         self._draw_transition_overlay(world_surface)

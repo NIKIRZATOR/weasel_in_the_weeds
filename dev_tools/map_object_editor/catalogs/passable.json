@@ -1,61 +1,5 @@
 [
   {
-    "label": "Passable: Stone Pile",
-    "object": {
-      "type": "passable_object",
-      "name": "Stone Pile",
-      "x": 0,
-      "y": 0,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "sprite_path": "world_objects/solid_object/small_stone_pile.png"
-      }
-    }
-  },
-  {
-    "label": "Passable: Bush",
-    "object": {
-      "type": "passable_object",
-      "name": "Bush",
-      "x": 0,
-      "y": 0,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "sprite_path": "world_objects/solid_object/bush.png"
-      }
-    }
-  },
-  {
-    "label": "Passable: Bush 2",
-    "object": {
-      "type": "passable_object",
-      "name": "Bush",
-      "x": 0,
-      "y": 0,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "sprite_path": "world_objects/solid_object/bush2.png"
-      }
-    }
-  },
-  {
-    "label": "Passable: Bush 3",
-    "object": {
-      "type": "passable_object",
-      "name": "Bush",
-      "x": 0,
-      "y": 0,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "sprite_path": "world_objects/solid_object/bush3.png"
-      }
-    }
-  },
-  {
     "label": "Passable: Blue Flower",
     "object": {
       "type": "passable_object",
@@ -65,7 +9,7 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_blue.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_blue.png"
       }
     }
   },
@@ -79,7 +23,7 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_pink.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_pink.png"
       }
     }
   },
@@ -93,7 +37,7 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_red_white.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_red_white.png"
       }
     }
   },
@@ -107,7 +51,7 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_white.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_white.png"
       }
     }
   },
@@ -121,7 +65,175 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_yellow.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_yellow.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Grass 1",
+    "object": {
+      "type": "passable_object",
+      "name": "Grass Patch",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/grass/grass_1.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Grass 2",
+    "object": {
+      "type": "passable_object",
+      "name": "Grass Patch",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/grass/grass_2.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Grass 3",
+    "object": {
+      "type": "passable_object",
+      "name": "Grass Patch",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/grass/grass_3.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Stone Pile",
+    "object": {
+      "type": "passable_object",
+      "name": "Stone Pile",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/rocks/small_stone_pile.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Small Stones 1",
+    "object": {
+      "type": "passable_object",
+      "name": "Small Stones",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/rocks/small_stones_1.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Small Stones 2",
+    "object": {
+      "type": "passable_object",
+      "name": "Small Stones",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/rocks/small_stones_2.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Small Stones 3",
+    "object": {
+      "type": "passable_object",
+      "name": "Small Stones",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/rocks/small_stones_3.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Bush",
+    "object": {
+      "type": "passable_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bushes/bush.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Bush 2",
+    "object": {
+      "type": "passable_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bushes/bush2.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Bush 3",
+    "object": {
+      "type": "passable_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bushes/bush3.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Bush 4",
+    "object": {
+      "type": "passable_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bushes/bush4.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Bush 5",
+    "object": {
+      "type": "passable_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bushes/bush5.png"
       }
     }
   },
@@ -135,7 +247,35 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/stone_block.png"
+        "sprite_path": "world_objects/solid_object/rocks/stone_block.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Water Grass 1",
+    "object": {
+      "type": "passable_object",
+      "name": "Water Grass",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/water/water_flower.png"
+      }
+    }
+  },
+  {
+    "label": "Passable: Water Grass 2",
+    "object": {
+      "type": "passable_object",
+      "name": "Water Grass",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/water/water_flower_2.png"
       }
     }
   }

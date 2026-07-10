@@ -149,6 +149,23 @@ ENEMY_EDITOR_DEFAULTS = {
     },
 }
 
+TREE_EDITOR_DEFAULTS = {
+    "sprite_scale_x": 3.0,
+    "sprite_scale_y": 4.0,
+    "canopy_overlay_ratio": 0.68,
+    "trunk_width_ratio": 0.24,
+    "trunk_height_ratio": 0.28,
+    "trunk_hitbox_lift": 16,
+}
+
+STUMP_EDITOR_DEFAULTS = {
+    "sprite_scale_x": 2.0,
+    "sprite_scale_y": 2.0,
+    "hitbox_width_ratio": 0.7,
+    "hitbox_height_ratio": 0.55,
+    "hitbox_lift": 0,
+}
+
 def _load_object_presets():
     presets = []
     if not CATALOGS_DIR.exists():
@@ -193,7 +210,12 @@ class MapObjectEditor(tk.Tk):
         self.object_sprite_images = []
         self.palette_canvases = {}
         self.palette_images = []
+        self.palette_tab_buttons = []
+        self.palette_tab_offset = 0
+        self.palette_visible_tab_count = 4
+        self.current_palette_category = PALETTE_CATEGORIES[0][0] if PALETTE_CATEGORIES else None
         self.sprite_image_cache = {}
+        self._entry_by_variable = {}
         self.is_panning = False
         self.dragging_object_index = None
         self.drag_offset_tiles = (0, 0)
@@ -233,6 +255,27 @@ class MapObjectEditor(tk.Tk):
         self.enemy_collision_radius_var = tk.StringVar()
         self.enemy_collision_offset_x_var = tk.StringVar()
         self.enemy_collision_offset_y_var = tk.StringVar()
+        self.tree_sprite_scale_x_var = tk.StringVar()
+        self.tree_sprite_scale_y_var = tk.StringVar()
+        self.tree_canopy_overlay_ratio_var = tk.StringVar()
+        self.tree_trunk_width_ratio_var = tk.StringVar()
+        self.tree_trunk_height_ratio_var = tk.StringVar()
+        self.tree_trunk_hitbox_lift_var = tk.StringVar()
+        self.tree_hitbox_width_var = tk.StringVar()
+        self.tree_hitbox_height_var = tk.StringVar()
+        self.tree_hitbox_offset_x_var = tk.StringVar()
+        self.tree_hitbox_offset_y_var = tk.StringVar()
+        self.tree_auto_hitbox_var = tk.BooleanVar(value=True)
+        self.stump_sprite_scale_x_var = tk.StringVar()
+        self.stump_sprite_scale_y_var = tk.StringVar()
+        self.stump_hitbox_width_ratio_var = tk.StringVar()
+        self.stump_hitbox_height_ratio_var = tk.StringVar()
+        self.stump_hitbox_lift_var = tk.StringVar()
+        self.stump_hitbox_width_var = tk.StringVar()
+        self.stump_hitbox_height_var = tk.StringVar()
+        self.stump_hitbox_offset_x_var = tk.StringVar()
+        self.stump_hitbox_offset_y_var = tk.StringVar()
+        self.stump_auto_hitbox_var = tk.BooleanVar(value=True)
 
     def _build_ui(self):
         self.columnconfigure(1, weight=1)
@@ -253,18 +296,35 @@ class MapObjectEditor(tk.Tk):
         ttk.Button(toolbar, text="Apply Zoom", command=self._apply_zoom).grid(row=0, column=6, padx=2)
         ttk.Label(toolbar, textvariable=self.status_var).grid(row=0, column=8, sticky="e")
 
-        left = ttk.Frame(self, padding=(8, 0, 4, 8))
+        left = ttk.Frame(self, padding=(8, 0, 4, 8), width=270)
         left.grid(row=1, column=0, sticky="ns")
-        left.rowconfigure(1, weight=1)
+        left.grid_propagate(False)
+        left.columnconfigure(0, weight=1)
+        left.rowconfigure(2, weight=1)
         left.rowconfigure(4, weight=1)
 
         ttk.Label(left, text="Palette").grid(row=0, column=0, sticky="w")
-        self.palette_notebook = ttk.Notebook(left)
-        self.palette_notebook.grid(row=1, column=0, sticky="nsew")
+        self.palette_tabs_frame = ttk.Frame(left)
+        self.palette_tabs_frame.grid(row=1, column=0, sticky="ew", pady=(4, 6))
+        self.palette_tabs_frame.columnconfigure(1, weight=1)
+        ttk.Button(self.palette_tabs_frame, text="<", width=3, command=lambda: self._scroll_palette_tabs(-1)).grid(row=0, column=0, padx=(0, 4))
+        self.palette_tab_strip = ttk.Frame(self.palette_tabs_frame)
+        self.palette_tab_strip.grid(row=0, column=1, sticky="ew")
+        ttk.Button(self.palette_tabs_frame, text=">", width=3, command=lambda: self._scroll_palette_tabs(1)).grid(row=0, column=2, padx=(4, 0))
+
+        palette_frame = ttk.Frame(left)
+        palette_frame.grid(row=2, column=0, sticky="nsew")
+        palette_frame.columnconfigure(0, weight=1)
+        palette_frame.rowconfigure(0, weight=1)
+        self.palette_canvas = tk.Canvas(palette_frame, width=212, height=250, background="#f3f3f3", highlightthickness=0)
+        self.palette_canvas.grid(row=0, column=0, sticky="nsew")
+        palette_scrollbar = ttk.Scrollbar(palette_frame, orient="vertical", command=self.palette_canvas.yview)
+        palette_scrollbar.grid(row=0, column=1, sticky="ns")
+        self.palette_canvas.configure(yscrollcommand=palette_scrollbar.set)
         self._build_palette_tabs()
 
         ttk.Label(left, text="Objects").grid(row=3, column=0, sticky="w", pady=(12, 0))
-        self.object_list = tk.Listbox(left, width=30, exportselection=False)
+        self.object_list = tk.Listbox(left, width=24, exportselection=False)
         self.object_list.grid(row=4, column=0, sticky="nsew")
         self.object_list.bind("<<ListboxSelect>>", self._on_object_selected)
 
@@ -296,7 +356,7 @@ class MapObjectEditor(tk.Tk):
         right = ttk.Frame(self, padding=(4, 0, 8, 8))
         right.grid(row=1, column=2, sticky="nsew")
         right.columnconfigure(0, weight=1)
-        right.rowconfigure(2, weight=1)
+        right.rowconfigure(5, weight=1)
         form = ttk.LabelFrame(right, text="Object", padding=8)
         form.grid(row=0, column=0, sticky="ew")
         for column in (1, 3):
@@ -340,8 +400,39 @@ class MapObjectEditor(tk.Tk):
         self._add_entry(self.enemy_form, "Coll X", self.enemy_collision_offset_x_var, 9, 2)
         self._add_entry(self.enemy_form, "Coll Y", self.enemy_collision_offset_y_var, 10, 0)
 
+        self.tree_form = ttk.LabelFrame(right, text="Tree Settings", padding=8)
+        self.tree_form.grid(row=3, column=0, sticky="ew", pady=(8, 0))
+        for column in (1, 3):
+            self.tree_form.columnconfigure(column, weight=1)
+        self._add_entry(self.tree_form, "Scale X", self.tree_sprite_scale_x_var, 0, 0)
+        self._add_entry(self.tree_form, "Scale Y", self.tree_sprite_scale_y_var, 0, 2)
+        self._add_entry(self.tree_form, "Canopy", self.tree_canopy_overlay_ratio_var, 1, 0)
+        self._add_entry(self.tree_form, "Trunk W", self.tree_trunk_width_ratio_var, 1, 2)
+        self._add_entry(self.tree_form, "Trunk H", self.tree_trunk_height_ratio_var, 2, 0)
+        self._add_entry(self.tree_form, "Lift", self.tree_trunk_hitbox_lift_var, 2, 2)
+        ttk.Checkbutton(self.tree_form, text="Auto hitbox", variable=self.tree_auto_hitbox_var, command=self._refresh_tree_hitbox_form_state).grid(row=3, column=0, sticky="w")
+        self._add_entry(self.tree_form, "Hitbox W", self.tree_hitbox_width_var, 4, 0)
+        self._add_entry(self.tree_form, "Hitbox H", self.tree_hitbox_height_var, 4, 2)
+        self._add_entry(self.tree_form, "Hitbox X", self.tree_hitbox_offset_x_var, 5, 0)
+        self._add_entry(self.tree_form, "Hitbox Y", self.tree_hitbox_offset_y_var, 5, 2)
+
+        self.stump_form = ttk.LabelFrame(right, text="Stump Settings", padding=8)
+        self.stump_form.grid(row=4, column=0, sticky="ew", pady=(8, 0))
+        for column in (1, 3):
+            self.stump_form.columnconfigure(column, weight=1)
+        self._add_entry(self.stump_form, "Scale X", self.stump_sprite_scale_x_var, 0, 0)
+        self._add_entry(self.stump_form, "Scale Y", self.stump_sprite_scale_y_var, 0, 2)
+        self._add_entry(self.stump_form, "Ratio W", self.stump_hitbox_width_ratio_var, 1, 0)
+        self._add_entry(self.stump_form, "Ratio H", self.stump_hitbox_height_ratio_var, 1, 2)
+        self._add_entry(self.stump_form, "Lift", self.stump_hitbox_lift_var, 2, 0)
+        ttk.Checkbutton(self.stump_form, text="Auto hitbox", variable=self.stump_auto_hitbox_var, command=self._refresh_stump_hitbox_form_state).grid(row=2, column=2, sticky="w")
+        self._add_entry(self.stump_form, "Hitbox W", self.stump_hitbox_width_var, 3, 0)
+        self._add_entry(self.stump_form, "Hitbox H", self.stump_hitbox_height_var, 3, 2)
+        self._add_entry(self.stump_form, "Hitbox X", self.stump_hitbox_offset_x_var, 4, 0)
+        self._add_entry(self.stump_form, "Hitbox Y", self.stump_hitbox_offset_y_var, 4, 2)
+
         props = ttk.LabelFrame(right, text="Properties JSON", padding=8)
-        props.grid(row=3, column=0, sticky="nsew", pady=(8, 0))
+        props.grid(row=5, column=0, sticky="nsew", pady=(8, 0))
         props.columnconfigure(0, weight=1)
         props.rowconfigure(0, weight=1)
         self.properties_text = tk.Text(props, width=42, height=20, wrap="none")
@@ -350,49 +441,83 @@ class MapObjectEditor(tk.Tk):
 
     def _add_entry(self, parent, label, variable, row, column):
         ttk.Label(parent, text=label).grid(row=row, column=column, sticky="w", pady=2)
-        ttk.Entry(parent, textvariable=variable).grid(row=row, column=column + 1, sticky="ew", padx=(4, 12), pady=2)
+        entry = ttk.Entry(parent, textvariable=variable)
+        entry.grid(row=row, column=column + 1, sticky="ew", padx=(4, 12), pady=2)
+        self._entry_by_variable[str(variable)] = entry
 
     def _build_palette_tabs(self):
-        for category_id, title in PALETTE_CATEGORIES:
-            tab = ttk.Frame(self.palette_notebook)
-            tab.columnconfigure(0, weight=1)
-            tab.rowconfigure(0, weight=1)
-            canvas = tk.Canvas(tab, width=220, height=250, background="#f3f3f3", highlightthickness=0)
-            scrollbar = ttk.Scrollbar(tab, orient="vertical", command=canvas.yview)
-            canvas.configure(yscrollcommand=scrollbar.set)
-            canvas.grid(row=0, column=0, sticky="nsew")
-            scrollbar.grid(row=0, column=1, sticky="ns")
-            self.palette_notebook.add(tab, text=title)
-            self.palette_canvases[category_id] = canvas
+        self._update_palette_tab_buttons()
+
+    def _update_palette_tab_buttons(self):
+        for button in self.palette_tab_buttons:
+            button.destroy()
+        self.palette_tab_buttons = []
+        visible_categories = PALETTE_CATEGORIES[self.palette_tab_offset:self.palette_tab_offset + self.palette_visible_tab_count]
+        for index, (category_id, title) in enumerate(visible_categories):
+            selected = category_id == self.current_palette_category
+            button = ttk.Button(
+                self.palette_tab_strip,
+                text=title,
+                width=10,
+                command=lambda category=category_id: self._show_palette_category(category),
+            )
+            button.grid(row=0, column=index, padx=2, sticky="ew")
+            if selected:
+                button.state(["disabled"])
+            self.palette_tab_strip.columnconfigure(index, weight=1)
+            self.palette_tab_buttons.append(button)
+
+    def _scroll_palette_tabs(self, direction):
+        max_offset = max(0, len(PALETTE_CATEGORIES) - self.palette_visible_tab_count)
+        new_offset = max(0, min(self.palette_tab_offset + direction, max_offset))
+        if new_offset == self.palette_tab_offset:
+            return
+        self.palette_tab_offset = new_offset
+        self._update_palette_tab_buttons()
+
+    def _show_palette_category(self, category_id):
+        self.current_palette_category = category_id
+        category_indices = [index for index, (item_id, _title) in enumerate(PALETTE_CATEGORIES) if item_id == category_id]
+        if category_indices:
+            category_index = category_indices[0]
+            if category_index < self.palette_tab_offset:
+                self.palette_tab_offset = category_index
+            elif category_index >= self.palette_tab_offset + self.palette_visible_tab_count:
+                self.palette_tab_offset = category_index - self.palette_visible_tab_count + 1
+        self._update_palette_tab_buttons()
+        self._refresh_palette()
 
     def _refresh_palette(self):
         self.palette_images = []
-        for category_id, canvas in self.palette_canvases.items():
-            canvas.delete("all")
-            preset_indices = [
-                index
-                for index, preset in enumerate(OBJECT_PRESETS)
-                if self._preset_category(preset) == category_id
-            ]
-            row_height = 38
-            for row, preset_index in enumerate(preset_indices):
-                preset = OBJECT_PRESETS[preset_index]
-                y = row * row_height
-                selected = preset_index == self.selected_preset_index
-                fill = "#6aa8f7" if selected else "#ffffff"
-                outline = "#2a72c8" if selected else "#c8c8c8"
-                tag = f"preset_{preset_index}"
-                canvas.create_rectangle(2, y + 2, 214, y + row_height - 2, fill=fill, outline=outline, tags=(tag,))
-                icon = self._make_object_preview_photo(preset["object"], (28, 28))
-                if icon is not None:
-                    self.palette_images.append(icon)
-                    canvas.create_image(8, y + 5, anchor="nw", image=icon, tags=(tag,))
-                canvas.create_text(42, y + row_height / 2, anchor="w", text=preset["label"], fill="#111111", tags=(tag,))
-                canvas.tag_bind(tag, "<Button-1>", lambda _event, index=preset_index: self._select_preset(index))
-            canvas.configure(scrollregion=(0, 0, 216, max(row_height, len(preset_indices) * row_height)))
+        canvas = self.palette_canvas
+        canvas.delete("all")
+        preset_indices = [
+            index
+            for index, preset in enumerate(OBJECT_PRESETS)
+            if self._preset_category(preset) == self.current_palette_category
+        ]
+        row_height = 38
+        for row, preset_index in enumerate(preset_indices):
+            preset = OBJECT_PRESETS[preset_index]
+            y = row * row_height
+            selected = preset_index == self.selected_preset_index
+            fill = "#6aa8f7" if selected else "#ffffff"
+            outline = "#2a72c8" if selected else "#c8c8c8"
+            tag = f"preset_{preset_index}"
+            canvas.create_rectangle(2, y + 2, 206, y + row_height - 2, fill=fill, outline=outline, tags=(tag,))
+            icon = self._make_object_preview_photo(preset["object"], (28, 28))
+            if icon is not None:
+                self.palette_images.append(icon)
+                canvas.create_image(8, y + 5, anchor="nw", image=icon, tags=(tag,))
+            canvas.create_text(42, y + row_height / 2, anchor="w", text=preset["label"], fill="#111111", tags=(tag,))
+            canvas.tag_bind(tag, "<Button-1>", lambda _event, index=preset_index: self._select_preset(index))
+        canvas.configure(scrollregion=(0, 0, 208, max(row_height, len(preset_indices) * row_height)))
+        canvas.yview_moveto(0)
 
     def _select_preset(self, preset_index):
         self.selected_preset_index = preset_index
+        self.current_palette_category = self._preset_category(OBJECT_PRESETS[preset_index])
+        self._show_palette_category(self.current_palette_category)
         self._refresh_palette()
 
     def _preset_category(self, preset):
@@ -466,6 +591,162 @@ class MapObjectEditor(tk.Tk):
             except tk.TclError:
                 continue
 
+    def _tree_defaults(self):
+        return deepcopy(TREE_EDITOR_DEFAULTS)
+
+    def _auto_tree_hitbox_properties(self, obj=None, *, width=None, height=None, properties=None):
+        source_properties = properties
+        if source_properties is None and obj is not None:
+            source_properties = obj.get("properties", {})
+        if not isinstance(source_properties, dict):
+            source_properties = {}
+        defaults = self._tree_defaults()
+        sprite_scale_x = max(0.1, self._safe_float(source_properties.get("sprite_scale_x"), defaults["sprite_scale_x"]))
+        sprite_scale_y = max(0.1, self._safe_float(source_properties.get("sprite_scale_y"), defaults["sprite_scale_y"]))
+        trunk_width_ratio = self._safe_float(source_properties.get("trunk_width_ratio"), defaults["trunk_width_ratio"])
+        trunk_height_ratio = self._safe_float(source_properties.get("trunk_height_ratio"), defaults["trunk_height_ratio"])
+        trunk_hitbox_lift = self._safe_float(source_properties.get("trunk_hitbox_lift"), defaults["trunk_hitbox_lift"])
+        pixel_offset_x = self._safe_int(source_properties.get("pixel_offset_x"), 0)
+        pixel_offset_y = self._safe_int(source_properties.get("pixel_offset_y"), 0)
+
+        if obj is not None:
+            base_width = max(1, int(obj.get("width", 1))) * self.tile_size if width is None else width
+            base_height = max(1, int(obj.get("height", 1))) * self.tile_size if height is None else height
+        else:
+            base_width = self.tile_size if width is None else width
+            base_height = self.tile_size if height is None else height
+
+        sprite_width = max(1, int(round(base_width * sprite_scale_x)))
+        sprite_height = max(1, int(round(base_height * sprite_scale_y)))
+        sprite_draw_offset_x = int(round((base_width - sprite_width) / 2))
+        sprite_draw_offset_y = int(round(base_height - sprite_height))
+        hitbox_width = max(8, int(round(sprite_width * trunk_width_ratio)))
+        hitbox_height = max(8, int(round(sprite_height * trunk_height_ratio)))
+        hitbox_offset_x = int(round(sprite_draw_offset_x + pixel_offset_x + (sprite_width - hitbox_width) / 2))
+        hitbox_offset_y = int(round(sprite_draw_offset_y + pixel_offset_y + sprite_height - hitbox_height - trunk_hitbox_lift))
+        return {
+            "hitbox_width": hitbox_width,
+            "hitbox_height": hitbox_height,
+            "hitbox_offset_x": hitbox_offset_x,
+            "hitbox_offset_y": hitbox_offset_y,
+        }
+
+    def _resolved_tree_properties(self, obj):
+        properties = obj.get("properties", {})
+        if not isinstance(properties, dict):
+            properties = {}
+        resolved = self._tree_defaults()
+        resolved.update(self._auto_tree_hitbox_properties(obj, properties=properties))
+        resolved.update(properties)
+        return resolved
+
+    def _stump_defaults(self):
+        return deepcopy(STUMP_EDITOR_DEFAULTS)
+
+    def _auto_stump_hitbox_properties(self, obj=None, *, width=None, height=None, properties=None):
+        source_properties = properties
+        if source_properties is None and obj is not None:
+            source_properties = obj.get("properties", {})
+        if not isinstance(source_properties, dict):
+            source_properties = {}
+        defaults = self._stump_defaults()
+        sprite_scale_x = max(0.1, self._safe_float(source_properties.get("sprite_scale_x"), defaults["sprite_scale_x"]))
+        sprite_scale_y = max(0.1, self._safe_float(source_properties.get("sprite_scale_y"), defaults["sprite_scale_y"]))
+        hitbox_width_ratio = self._safe_float(source_properties.get("hitbox_width_ratio"), defaults["hitbox_width_ratio"])
+        hitbox_height_ratio = self._safe_float(source_properties.get("hitbox_height_ratio"), defaults["hitbox_height_ratio"])
+        hitbox_lift = self._safe_float(source_properties.get("hitbox_lift"), defaults["hitbox_lift"])
+        pixel_offset_x = self._safe_int(source_properties.get("pixel_offset_x"), 0)
+        pixel_offset_y = self._safe_int(source_properties.get("pixel_offset_y"), 0)
+
+        if obj is not None:
+            base_width = max(1, int(obj.get("width", 1))) * self.tile_size if width is None else width
+            base_height = max(1, int(obj.get("height", 1))) * self.tile_size if height is None else height
+        else:
+            base_width = self.tile_size if width is None else width
+            base_height = self.tile_size if height is None else height
+
+        sprite_width = max(1, int(round(base_width * sprite_scale_x)))
+        sprite_height = max(1, int(round(base_height * sprite_scale_y)))
+        sprite_draw_offset_x = int(round((base_width - sprite_width) / 2))
+        sprite_draw_offset_y = int(round(base_height - sprite_height))
+        hitbox_width = max(8, int(round(sprite_width * hitbox_width_ratio)))
+        hitbox_height = max(8, int(round(sprite_height * hitbox_height_ratio)))
+        hitbox_offset_x = int(round(sprite_draw_offset_x + pixel_offset_x + (sprite_width - hitbox_width) / 2))
+        hitbox_offset_y = int(round(sprite_draw_offset_y + pixel_offset_y + sprite_height - hitbox_height - hitbox_lift))
+        return {
+            "hitbox_width": hitbox_width,
+            "hitbox_height": hitbox_height,
+            "hitbox_offset_x": hitbox_offset_x,
+            "hitbox_offset_y": hitbox_offset_y,
+        }
+
+    def _resolved_stump_properties(self, obj):
+        properties = obj.get("properties", {})
+        if not isinstance(properties, dict):
+            properties = {}
+        resolved = self._stump_defaults()
+        resolved.update(self._auto_stump_hitbox_properties(obj, properties=properties))
+        resolved.update(properties)
+        return resolved
+
+    def _set_tree_form_state(self, enabled):
+        state = "normal" if enabled else "disabled"
+        for child in self.tree_form.winfo_children():
+            try:
+                child.configure(state=state)
+            except tk.TclError:
+                continue
+        if enabled:
+            self._refresh_tree_hitbox_form_state()
+
+    def _tree_has_hitbox_override(self, properties):
+        return any(key in properties for key in ("hitbox_width", "hitbox_height", "hitbox_offset_x", "hitbox_offset_y"))
+
+    def _refresh_tree_hitbox_form_state(self):
+        state = "disabled" if self.tree_auto_hitbox_var.get() else "normal"
+        for variable in (
+            self.tree_hitbox_width_var,
+            self.tree_hitbox_height_var,
+            self.tree_hitbox_offset_x_var,
+            self.tree_hitbox_offset_y_var,
+        ):
+            entry = self._entry_by_variable.get(str(variable))
+            if entry is None:
+                continue
+            try:
+                entry.configure(state=state)
+            except tk.TclError:
+                continue
+
+    def _set_stump_form_state(self, enabled):
+        state = "normal" if enabled else "disabled"
+        for child in self.stump_form.winfo_children():
+            try:
+                child.configure(state=state)
+            except tk.TclError:
+                continue
+        if enabled:
+            self._refresh_stump_hitbox_form_state()
+
+    def _stump_has_hitbox_override(self, properties):
+        return any(key in properties for key in ("hitbox_width", "hitbox_height", "hitbox_offset_x", "hitbox_offset_y"))
+
+    def _refresh_stump_hitbox_form_state(self):
+        state = "disabled" if self.stump_auto_hitbox_var.get() else "normal"
+        for variable in (
+            self.stump_hitbox_width_var,
+            self.stump_hitbox_height_var,
+            self.stump_hitbox_offset_x_var,
+            self.stump_hitbox_offset_y_var,
+        ):
+            entry = self._entry_by_variable.get(str(variable))
+            if entry is None:
+                continue
+            try:
+                entry.configure(state=state)
+            except tk.TclError:
+                continue
+
     def _apply_enemy_properties_to_form(self, object_type, properties):
         collision_circle = properties.get("collision_circle") if isinstance(properties.get("collision_circle"), dict) else {}
         self.enemy_detection_radius_var.set("" if properties.get("detection_radius") is None else str(properties.get("detection_radius")))
@@ -495,6 +776,43 @@ class MapObjectEditor(tk.Tk):
         self.enemy_collision_offset_y_var.set("" if collision_circle.get("offset_y") is None else str(collision_circle.get("offset_y")))
         self._set_enemy_form_state(self._is_enemy_type(object_type))
 
+    def _apply_tree_properties_to_form(self, object_type, properties):
+        self.tree_sprite_scale_x_var.set("" if properties.get("sprite_scale_x") is None else str(properties.get("sprite_scale_x")))
+        self.tree_sprite_scale_y_var.set("" if properties.get("sprite_scale_y") is None else str(properties.get("sprite_scale_y")))
+        self.tree_canopy_overlay_ratio_var.set("" if properties.get("canopy_overlay_ratio") is None else str(properties.get("canopy_overlay_ratio")))
+        self.tree_trunk_width_ratio_var.set("" if properties.get("trunk_width_ratio") is None else str(properties.get("trunk_width_ratio")))
+        self.tree_trunk_height_ratio_var.set("" if properties.get("trunk_height_ratio") is None else str(properties.get("trunk_height_ratio")))
+        self.tree_trunk_hitbox_lift_var.set("" if properties.get("trunk_hitbox_lift") is None else str(properties.get("trunk_hitbox_lift")))
+        raw_properties = {}
+        if self.selected_object_index is not None and 0 <= self.selected_object_index < len(self.objects):
+            raw_properties = self.objects[self.selected_object_index].get("properties", {})
+        if not isinstance(raw_properties, dict):
+            raw_properties = {}
+        self.tree_auto_hitbox_var.set(not self._tree_has_hitbox_override(raw_properties))
+        self.tree_hitbox_width_var.set("" if properties.get("hitbox_width") is None else str(properties.get("hitbox_width")))
+        self.tree_hitbox_height_var.set("" if properties.get("hitbox_height") is None else str(properties.get("hitbox_height")))
+        self.tree_hitbox_offset_x_var.set("" if properties.get("hitbox_offset_x") is None else str(properties.get("hitbox_offset_x")))
+        self.tree_hitbox_offset_y_var.set("" if properties.get("hitbox_offset_y") is None else str(properties.get("hitbox_offset_y")))
+        self._set_tree_form_state(object_type == "tree_object")
+
+    def _apply_stump_properties_to_form(self, object_type, properties):
+        self.stump_sprite_scale_x_var.set("" if properties.get("sprite_scale_x") is None else str(properties.get("sprite_scale_x")))
+        self.stump_sprite_scale_y_var.set("" if properties.get("sprite_scale_y") is None else str(properties.get("sprite_scale_y")))
+        self.stump_hitbox_width_ratio_var.set("" if properties.get("hitbox_width_ratio") is None else str(properties.get("hitbox_width_ratio")))
+        self.stump_hitbox_height_ratio_var.set("" if properties.get("hitbox_height_ratio") is None else str(properties.get("hitbox_height_ratio")))
+        self.stump_hitbox_lift_var.set("" if properties.get("hitbox_lift") is None else str(properties.get("hitbox_lift")))
+        raw_properties = {}
+        if self.selected_object_index is not None and 0 <= self.selected_object_index < len(self.objects):
+            raw_properties = self.objects[self.selected_object_index].get("properties", {})
+        if not isinstance(raw_properties, dict):
+            raw_properties = {}
+        self.stump_auto_hitbox_var.set(not self._stump_has_hitbox_override(raw_properties))
+        self.stump_hitbox_width_var.set("" if properties.get("hitbox_width") is None else str(properties.get("hitbox_width")))
+        self.stump_hitbox_height_var.set("" if properties.get("hitbox_height") is None else str(properties.get("hitbox_height")))
+        self.stump_hitbox_offset_x_var.set("" if properties.get("hitbox_offset_x") is None else str(properties.get("hitbox_offset_x")))
+        self.stump_hitbox_offset_y_var.set("" if properties.get("hitbox_offset_y") is None else str(properties.get("hitbox_offset_y")))
+        self._set_stump_form_state(object_type == "stump_object")
+
     def _clear_enemy_form(self):
         self.enemy_detection_radius_var.set("")
         self.enemy_patrol_radius_var.set("")
@@ -517,6 +835,33 @@ class MapObjectEditor(tk.Tk):
         self.enemy_collision_offset_x_var.set("")
         self.enemy_collision_offset_y_var.set("")
         self._set_enemy_form_state(False)
+
+    def _clear_tree_form(self):
+        self.tree_sprite_scale_x_var.set("")
+        self.tree_sprite_scale_y_var.set("")
+        self.tree_canopy_overlay_ratio_var.set("")
+        self.tree_trunk_width_ratio_var.set("")
+        self.tree_trunk_height_ratio_var.set("")
+        self.tree_trunk_hitbox_lift_var.set("")
+        self.tree_hitbox_width_var.set("")
+        self.tree_hitbox_height_var.set("")
+        self.tree_hitbox_offset_x_var.set("")
+        self.tree_hitbox_offset_y_var.set("")
+        self.tree_auto_hitbox_var.set(True)
+        self._set_tree_form_state(False)
+
+    def _clear_stump_form(self):
+        self.stump_sprite_scale_x_var.set("")
+        self.stump_sprite_scale_y_var.set("")
+        self.stump_hitbox_width_ratio_var.set("")
+        self.stump_hitbox_height_ratio_var.set("")
+        self.stump_hitbox_lift_var.set("")
+        self.stump_hitbox_width_var.set("")
+        self.stump_hitbox_height_var.set("")
+        self.stump_hitbox_offset_x_var.set("")
+        self.stump_hitbox_offset_y_var.set("")
+        self.stump_auto_hitbox_var.set(True)
+        self._set_stump_form_state(False)
 
     def _apply_enemy_form_to_properties(self, object_type, properties):
         if not self._is_enemy_type(object_type):
@@ -559,6 +904,53 @@ class MapObjectEditor(tk.Tk):
             self.enemy_collision_offset_y_var.get(),
         )
 
+    def _apply_tree_form_to_properties(self, object_type, properties):
+        if object_type != "tree_object":
+            return
+        self._set_or_remove_numeric_property(properties, "sprite_scale_x", self.tree_sprite_scale_x_var.get())
+        self._set_or_remove_numeric_property(properties, "sprite_scale_y", self.tree_sprite_scale_y_var.get())
+        self._set_or_remove_numeric_property(properties, "canopy_overlay_ratio", self.tree_canopy_overlay_ratio_var.get())
+        self._set_or_remove_numeric_property(properties, "trunk_width_ratio", self.tree_trunk_width_ratio_var.get())
+        self._set_or_remove_numeric_property(properties, "trunk_height_ratio", self.tree_trunk_height_ratio_var.get())
+        self._set_or_remove_numeric_property(properties, "trunk_hitbox_lift", self.tree_trunk_hitbox_lift_var.get())
+        form_properties = dict(properties)
+        auto_hitbox = self._auto_tree_hitbox_properties(
+            width=max(1, self._safe_int(self.width_var.get(), 1)) * self.tile_size,
+            height=max(1, self._safe_int(self.height_var.get(), 1)) * self.tile_size,
+            properties=form_properties,
+        )
+        if self.tree_auto_hitbox_var.get():
+            for key in ("hitbox_width", "hitbox_height", "hitbox_offset_x", "hitbox_offset_y"):
+                properties.pop(key, None)
+            return
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_width", self.tree_hitbox_width_var.get(), auto_hitbox["hitbox_width"])
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_height", self.tree_hitbox_height_var.get(), auto_hitbox["hitbox_height"])
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_offset_x", self.tree_hitbox_offset_x_var.get(), auto_hitbox["hitbox_offset_x"])
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_offset_y", self.tree_hitbox_offset_y_var.get(), auto_hitbox["hitbox_offset_y"])
+
+    def _apply_stump_form_to_properties(self, object_type, properties):
+        if object_type != "stump_object":
+            return
+        self._set_or_remove_numeric_property(properties, "sprite_scale_x", self.stump_sprite_scale_x_var.get())
+        self._set_or_remove_numeric_property(properties, "sprite_scale_y", self.stump_sprite_scale_y_var.get())
+        self._set_or_remove_numeric_property(properties, "hitbox_width_ratio", self.stump_hitbox_width_ratio_var.get())
+        self._set_or_remove_numeric_property(properties, "hitbox_height_ratio", self.stump_hitbox_height_ratio_var.get())
+        self._set_or_remove_numeric_property(properties, "hitbox_lift", self.stump_hitbox_lift_var.get())
+        form_properties = dict(properties)
+        auto_hitbox = self._auto_stump_hitbox_properties(
+            width=max(1, self._safe_int(self.width_var.get(), 1)) * self.tile_size,
+            height=max(1, self._safe_int(self.height_var.get(), 1)) * self.tile_size,
+            properties=form_properties,
+        )
+        if self.stump_auto_hitbox_var.get():
+            for key in ("hitbox_width", "hitbox_height", "hitbox_offset_x", "hitbox_offset_y"):
+                properties.pop(key, None)
+            return
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_width", self.stump_hitbox_width_var.get(), auto_hitbox["hitbox_width"])
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_height", self.stump_hitbox_height_var.get(), auto_hitbox["hitbox_height"])
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_offset_x", self.stump_hitbox_offset_x_var.get(), auto_hitbox["hitbox_offset_x"])
+        self._set_or_remove_tree_hitbox_override(properties, "hitbox_offset_y", self.stump_hitbox_offset_y_var.get(), auto_hitbox["hitbox_offset_y"])
+
     def _set_or_remove_numeric_property(self, properties, key, value):
         text = str(value).strip()
         if not text:
@@ -566,6 +958,18 @@ class MapObjectEditor(tk.Tk):
             return
         numeric = float(text)
         properties[key] = int(numeric) if numeric.is_integer() else numeric
+
+    def _set_or_remove_tree_hitbox_override(self, properties, key, value, auto_value):
+        text = str(value).strip()
+        if not text:
+            properties.pop(key, None)
+            return
+        numeric = float(text)
+        resolved_value = int(numeric) if numeric.is_integer() else numeric
+        if resolved_value == auto_value:
+            properties.pop(key, None)
+            return
+        properties[key] = resolved_value
 
     def _set_or_remove_hitbox_property(self, properties, key, width, height, offset_x, offset_y, mirror_with_facing=None):
         hitbox = {}
@@ -730,12 +1134,12 @@ class MapObjectEditor(tk.Tk):
             tile = tile.resize((display_tile_size, display_tile_size), Image.Resampling.NEAREST)
         return tile
 
-    def _make_object_preview_photo(self, obj, size):
+    def _make_object_preview_photo(self, obj, size, fit_to_box=True):
         sprite_info = self._resolve_object_sprite_info(obj)
         if sprite_info is None:
             return None
         sprite_path, frame_width, frame_height = sprite_info
-        cache_key = (sprite_path, frame_width, frame_height, int(size[0]), int(size[1]))
+        cache_key = (sprite_path, frame_width, frame_height, int(size[0]), int(size[1]), bool(fit_to_box))
         if cache_key in self.sprite_image_cache:
             return self.sprite_image_cache[cache_key]
         image_path = ASSETS_DIR / sprite_path
@@ -744,7 +1148,12 @@ class MapObjectEditor(tk.Tk):
         image = Image.open(image_path).convert("RGBA")
         if frame_width and frame_height:
             image = image.crop((0, 0, min(frame_width, image.width), min(frame_height, image.height)))
-        image.thumbnail((max(1, int(size[0])), max(1, int(size[1]))), Image.Resampling.NEAREST)
+        target_width = max(1, int(size[0]))
+        target_height = max(1, int(size[1]))
+        if fit_to_box:
+            image.thumbnail((target_width, target_height), Image.Resampling.NEAREST)
+        else:
+            image = image.resize((target_width, target_height), Image.Resampling.NEAREST)
         preview = Image.new("RGBA", (max(1, int(size[0])), max(1, int(size[1]))), (0, 0, 0, 0))
         left = (preview.width - image.width) // 2
         top = (preview.height - image.height) // 2
@@ -752,6 +1161,32 @@ class MapObjectEditor(tk.Tk):
         photo = ImageTk.PhotoImage(preview)
         self.sprite_image_cache[cache_key] = photo
         return photo
+
+    def _make_map_object_sprite(self, obj, base_size):
+        properties = obj.get("properties", {})
+        if not isinstance(properties, dict):
+            properties = {}
+        sprite_info = self._resolve_object_sprite_info(obj)
+        if sprite_info is None:
+            return None, 0, 0
+        sprite_scale = self._safe_float(properties.get("sprite_scale"), 1.0)
+        sprite_scale_x = max(0.1, self._safe_float(properties.get("sprite_scale_x"), sprite_scale))
+        sprite_scale_y = max(0.1, self._safe_float(properties.get("sprite_scale_y"), sprite_scale))
+        object_type = str(obj.get("type", ""))
+        default_anchor = "bottom_center" if object_type in {"tree_object", "stump_object"} else "top_left"
+        sprite_anchor = str(properties.get("sprite_anchor", default_anchor)).strip().lower()
+        pixel_offset_x = self._safe_int(properties.get("pixel_offset_x"), 0)
+        pixel_offset_y = self._safe_int(properties.get("pixel_offset_y"), 0)
+        draw_width = max(1, int(round(base_size[0] * sprite_scale_x)))
+        draw_height = max(1, int(round(base_size[1] * sprite_scale_y)))
+        sprite = self._make_object_preview_photo(obj, (draw_width, draw_height), fit_to_box=False)
+        if sprite is None:
+            return None, 0, 0
+        if sprite_anchor == "bottom_center":
+            offset_x = int(round((base_size[0] - draw_width) / 2 + pixel_offset_x))
+            offset_y = int(round(base_size[1] - draw_height + pixel_offset_y))
+            return sprite, offset_x, offset_y
+        return sprite, pixel_offset_x, pixel_offset_y
 
     def _resolve_object_sprite_info(self, obj):
         properties = obj.get("properties", {})
@@ -822,10 +1257,10 @@ class MapObjectEditor(tk.Tk):
             height = max(1, int(obj.get("height", 1))) * display_tile_size
             color = OBJECT_COLORS.get(str(obj.get("type", "object")), "#ffffff")
             outline = "#00ffff" if index == self.selected_object_index else "#111111"
-            sprite = self._make_object_preview_photo(obj, (width, height))
+            sprite, sprite_offset_x, sprite_offset_y = self._make_map_object_sprite(obj, (width, height))
             if sprite is not None:
                 self.object_sprite_images.append(sprite)
-                image_id = self.canvas.create_image(x + width / 2, y + height / 2, image=sprite)
+                image_id = self.canvas.create_image(x + sprite_offset_x, y + sprite_offset_y, image=sprite, anchor="nw")
                 rect_id = self.canvas.create_rectangle(
                     x + 2,
                     y + 2,
@@ -840,7 +1275,38 @@ class MapObjectEditor(tk.Tk):
                 rect_id = self.canvas.create_rectangle(x + 2, y + 2, x + width - 2, y + height - 2, fill=color, outline=outline, width=3 if index == self.selected_object_index else 2, stipple="" if index == self.selected_object_index else "gray50")
                 text_id = self.canvas.create_text(x + width / 2, y + height / 2, text=self._object_short_label(obj), fill="#ffffff", font=("TkDefaultFont", max(7, min(11, display_tile_size // 3)), "bold"))
                 self.object_canvas_ids.extend([rect_id, text_id])
+        self._render_selected_sized_object_debug("tree_object", self._resolved_tree_properties)
+        self._render_selected_sized_object_debug("stump_object", self._resolved_stump_properties)
         self._render_selected_enemy_debug()
+
+    def _render_selected_sized_object_debug(self, object_type, resolve_properties):
+        if self.selected_object_index is None or not (0 <= self.selected_object_index < len(self.objects)):
+            return
+        obj = self.objects[self.selected_object_index]
+        if str(obj.get("type", "")) != object_type:
+            return
+        display_tile_size = max(4, int(self.tile_size * self.zoom))
+        tile_scale = display_tile_size / max(1, self.tile_size)
+        x = int(obj.get("x", 0)) * display_tile_size
+        y = int(obj.get("y", 0)) * display_tile_size
+        width = max(1, int(obj.get("width", 1))) * display_tile_size
+        height = max(1, int(obj.get("height", 1))) * display_tile_size
+        properties = resolve_properties(obj)
+        hitbox_rect = self._scaled_property_rect(
+            x,
+            y,
+            width,
+            height,
+            tile_scale,
+            properties.get("hitbox_width"),
+            properties.get("hitbox_height"),
+            properties.get("hitbox_offset_x"),
+            properties.get("hitbox_offset_y"),
+        )
+        if hitbox_rect is not None:
+            self.object_canvas_ids.append(
+                self.canvas.create_rectangle(*hitbox_rect, outline="#00e5ff", width=2)
+            )
 
     def _render_selected_enemy_debug(self):
         if self.selected_object_index is None or not (0 <= self.selected_object_index < len(self.objects)):
@@ -894,6 +1360,20 @@ class MapObjectEditor(tk.Tk):
         rect_height = self._safe_float(rect_data.get("height"), fallback_height / scale) * scale
         rect_x = base_x + self._safe_float(rect_data.get("offset_x"), (fallback_width - rect_width) / max(scale, 0.001) / 2) * scale
         rect_y = base_y + self._safe_float(rect_data.get("offset_y"), (fallback_height - rect_height) / max(scale, 0.001) / 2) * scale
+        return (
+            rect_x,
+            rect_y,
+            rect_x + rect_width,
+            rect_y + rect_height,
+        )
+
+    def _scaled_property_rect(self, base_x, base_y, fallback_width, fallback_height, scale, width, height, offset_x, offset_y):
+        if width is None or height is None or offset_x is None or offset_y is None:
+            return None
+        rect_width = self._safe_float(width, fallback_width / scale) * scale
+        rect_height = self._safe_float(height, fallback_height / scale) * scale
+        rect_x = base_x + self._safe_float(offset_x, 0.0) * scale
+        rect_y = base_y + self._safe_float(offset_y, 0.0) * scale
         return (
             rect_x,
             rect_y,
@@ -970,6 +1450,8 @@ class MapObjectEditor(tk.Tk):
         if not isinstance(properties, dict):
             properties = {}
         self._apply_enemy_properties_to_form(obj.get("type", ""), self._resolved_enemy_properties(obj))
+        self._apply_tree_properties_to_form(obj.get("type", ""), self._resolved_tree_properties(obj))
+        self._apply_stump_properties_to_form(obj.get("type", ""), self._resolved_stump_properties(obj))
         self.properties_text.delete("1.0", tk.END)
         self.properties_text.insert("1.0", json.dumps(properties, ensure_ascii=False, indent=2))
 
@@ -983,6 +1465,8 @@ class MapObjectEditor(tk.Tk):
         self.height_var.set("1")
         self.solid_var.set(False)
         self._clear_enemy_form()
+        self._clear_tree_form()
+        self._clear_stump_form()
         self.properties_text.delete("1.0", tk.END)
         self.properties_text.insert("1.0", "{}")
 
@@ -1161,6 +1645,8 @@ class MapObjectEditor(tk.Tk):
         if self.solid_var.get():
             obj["solid"] = True
         self._apply_enemy_form_to_properties(object_type, properties)
+        self._apply_tree_form_to_properties(object_type, properties)
+        self._apply_stump_form_to_properties(object_type, properties)
         if properties:
             obj["properties"] = properties
         return obj

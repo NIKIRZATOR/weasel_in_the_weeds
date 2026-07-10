@@ -5,8 +5,8 @@
       "name": "Meadow Stone",
       "x": 18,
       "y": 23,
-      "width": 1,
-      "height": 1,
+      "width": 2,
+      "height": 2,
       "properties": {
         "activation_radius_tiles": 1
       }
@@ -23,22 +23,6 @@
         "health": 35,
         "dialogue_file": "hermit_mouse.json"
       }
-    },
-    {
-      "type": "pickable_object",
-      "name": "rusty_knife",
-      "x": 16,
-      "y": 22,
-      "width": 1,
-      "height": 1
-    },
-    {
-      "type": "pickable_object",
-      "name": "short_bow",
-      "x": 17,
-      "y": 22,
-      "width": 1,
-      "height": 1
     },
     {
       "type": "level_transition",
@@ -68,14 +52,6 @@
       "properties": {
         "activation_radius_tiles": 1
       }
-    },
-    {
-      "type": "solid_object",
-      "name": "Bush",
-      "x": 19,
-      "y": 28,
-      "width": 1,
-      "height": 1
     },
     {
       "type": "gatherable_object",
@@ -2046,6 +2022,90 @@
         "collision_circle": {
           "radius": 11
         }
+      }
+    },
+    {
+      "type": "stump_object",
+      "name": "Fallen Tree 3",
+      "x": 55,
+      "y": 37,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/stump_object/fallen_tree_3.png",
+        "sprite_scale_x": 2.0,
+        "sprite_scale_y": 2.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 0
+      }
+    },
+    {
+      "type": "stump_object",
+      "name": "Fallen Tree 1",
+      "x": 25,
+      "y": 19,
+      "width": 2,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/stump_object/fallen_tree.png",
+        "sprite_scale_x": 2,
+        "sprite_scale_y": 2,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 0
+      }
+    },
+    {
+      "type": "stump_object",
+      "name": "Fallen Tree 2",
+      "x": 30,
+      "y": 18,
+      "width": 3,
+      "height": 2,
+      "properties": {
+        "sprite_path": "world_objects/stump_object/fallen_tree_2.png",
+        "sprite_scale_x": 2,
+        "sprite_scale_y": 2,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 32
+      }
+    },
+    {
+      "type": "stump_object",
+      "name": "Fallen Tree 3",
+      "x": 40,
+      "y": 18,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "sprite_path": "world_objects/stump_object/fallen_tree_3.png",
+        "sprite_scale_x": 2,
+        "sprite_scale_y": 2,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 32
+      }
+    },
+    {
+      "type": "stump_object",
+      "name": "Fallen Tree 4",
+      "x": 36,
+      "y": 18,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "sprite_path": "world_objects/stump_object/fallen_tree_4.png",
+        "sprite_scale_x": 2,
+        "sprite_scale_y": 2,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 32,
+        "hitbox_width": 60,
+        "hitbox_height": 90,
+        "hitbox_offset_x": 3,
+        "hitbox_offset_y": -52
       }
     }
   ]

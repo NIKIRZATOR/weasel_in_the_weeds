@@ -9,6 +9,7 @@ from settings import COLORS
 
 class ProgressionScene(Scene):
     NODE_RADIUS = 20
+    NODE_ICON_SCALE = 1.8
 
     def __init__(self, app, game_scene):
         self.app = app
@@ -273,10 +274,10 @@ class ProgressionScene(Scene):
     def _get_node_icon(self, node):
         if node.icon_path is None:
             return None
-        cache_key = (node.id, self.NODE_RADIUS)
+        cache_key = (node.id, self.NODE_RADIUS, self.NODE_ICON_SCALE)
         if cache_key in self.node_icon_cache:
             return self.node_icon_cache[cache_key]
-        size = int(self.NODE_RADIUS * 1.5)
+        size = int(self.NODE_RADIUS * self.NODE_ICON_SCALE)
         icon = load_image(node.icon_path, (size, size))
         self.node_icon_cache[cache_key] = icon
         return icon

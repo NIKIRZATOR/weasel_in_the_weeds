@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass
+import math
 from pathlib import Path
 import random
 import xml.etree.ElementTree as ET
@@ -224,16 +225,16 @@ def _generate_tmx_decor_objects(
     collision_by_gid: dict[int, int],
     existing_objects: list[dict],
 ) -> list[dict]:
-    occupied_tiles = _collect_occupied_tiles(existing_objects)
+    occupied_tiles = _collect_occupied_tiles(existing_objects, tile_size)
     generated_objects: list[dict] = []
     for tile_y, row in enumerate(ground_layer):
         for tile_x, tile_gid in enumerate(row):
             if tile_gid <= 0 or (tile_x, tile_y) in occupied_tiles:
                 continue
-            if collision_by_gid.get(tile_gid, 0) != 0:
+            tile_properties = tile_properties_by_gid.get(tile_gid, {})
+            if collision_by_gid.get(tile_gid, 0) != 0 and not _has_water_generated_content(tile_properties):
                 continue
 
-            tile_properties = tile_properties_by_gid.get(tile_gid, {})
             generated_object = _build_generated_decor_object(
                 level_name=level_name,
                 tile_gid=tile_gid,
@@ -246,27 +247,92 @@ def _generate_tmx_decor_objects(
                 continue
 
             generated_objects.append(generated_object)
-            occupied_tiles.add((tile_x, tile_y))
+            occupied_tiles.update(_iter_object_occupied_tiles(generated_object, tile_size))
     return generated_objects
 
 
-def _collect_occupied_tiles(objects: list[dict]) -> set[tuple[int, int]]:
+def _collect_occupied_tiles(objects: list[dict], tile_size: int) -> set[tuple[int, int]]:
     occupied_tiles: set[tuple[int, int]] = set()
     for raw_object in objects:
-        start_x = int(raw_object.get("x", 0))
-        start_y = int(raw_object.get("y", 0))
-        width = max(1, int(raw_object.get("width", 1)))
-        height = max(1, int(raw_object.get("height", 1)))
-        for tile_y in range(start_y, start_y + height):
-            for tile_x in range(start_x, start_x + width):
-                occupied_tiles.add((tile_x, tile_y))
+        occupied_tiles.update(_iter_object_occupied_tiles(raw_object, tile_size))
     return occupied_tiles
 
 
+def _iter_object_occupied_tiles(raw_object: dict, tile_size: int):
+    base_x = int(raw_object.get("x", 0))
+    base_y = int(raw_object.get("y", 0))
+    width_tiles = max(1, int(raw_object.get("width", 1)))
+    height_tiles = max(1, int(raw_object.get("height", 1)))
+
+    for tile_y in range(base_y, base_y + height_tiles):
+        for tile_x in range(base_x, base_x + width_tiles):
+            yield tile_x, tile_y
+
+    properties = raw_object.get("properties", {})
+    if not isinstance(properties, dict):
+        properties = {}
+
+    base_left = base_x * tile_size
+    base_top = base_y * tile_size
+    base_width = width_tiles * tile_size
+    base_height = height_tiles * tile_size
+    sprite_scale = max(0.1, _safe_float(properties.get("sprite_scale"), 1.0))
+    sprite_scale_x = max(0.1, _safe_float(properties.get("sprite_scale_x"), sprite_scale))
+    sprite_scale_y = max(0.1, _safe_float(properties.get("sprite_scale_y"), sprite_scale))
+    sprite_width = max(1, int(round(base_width * sprite_scale_x)))
+    sprite_height = max(1, int(round(base_height * sprite_scale_y)))
+    pixel_offset_x = _safe_int(properties.get("pixel_offset_x"), 0)
+    pixel_offset_y = _safe_int(properties.get("pixel_offset_y"), 0)
+    object_type = str(raw_object.get("type", "")).strip().lower()
+    default_anchor = "bottom_center" if object_type in {"tree_object", "stump_object"} else "top_left"
+    sprite_anchor = str(properties.get("sprite_anchor", default_anchor)).strip().lower()
+
+    if sprite_anchor == "bottom_center":
+        sprite_left = base_left + (base_width - sprite_width) / 2 + pixel_offset_x
+        sprite_top = base_top + base_height - sprite_height + pixel_offset_y
+    else:
+        sprite_left = base_left + pixel_offset_x
+        sprite_top = base_top + pixel_offset_y
+
+    yield from _iter_tiles_overlapping_rect(
+        sprite_left,
+        sprite_top,
+        sprite_left + sprite_width,
+        sprite_top + sprite_height,
+        tile_size,
+    )
+
+
+def _iter_tiles_overlapping_rect(left: float, top: float, right: float, bottom: float, tile_size: int):
+    if right <= left or bottom <= top:
+        return
+    start_x = math.floor(left / tile_size)
+    end_x = math.floor((right - 1) / tile_size)
+    start_y = math.floor(top / tile_size)
+    end_y = math.floor((bottom - 1) / tile_size)
+    for tile_y in range(start_y, end_y + 1):
+        for tile_x in range(start_x, end_x + 1):
+            yield tile_x, tile_y
+
+
+def _safe_float(value, default: float) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _safe_int(value, default: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def _build_generated_decor_object(level_name, tile_gid, tile_x, tile_y, tile_size, tile_properties):
-    object_id = str(tile_properties.get("decor_object", "")).strip()
-    decor_set = str(tile_properties.get("decor_set", "")).strip()
-    if not object_id and not decor_set:
+    object_id = _resolve_generated_object_id(tile_properties)
+    decor_sets = _resolve_generated_set_ids(tile_properties)
+    if not object_id and not decor_sets:
         return None
 
     chance = float(tile_properties.get("decor_chance", tile_properties.get("decor_density", 1.0)))
@@ -277,7 +343,7 @@ def _build_generated_decor_object(level_name, tile_gid, tile_x, tile_y, tile_siz
     if rng.random() > chance:
         return None
 
-    template_id = object_id or _choose_weighted_template_id(decor_set, rng)
+    template_id = object_id or _choose_weighted_template_id_from_sets(decor_sets, rng)
     if not template_id:
         return None
 
@@ -314,8 +380,42 @@ def _build_generated_decor_object(level_name, tile_gid, tile_x, tile_y, tile_siz
     }
 
 
-def _choose_weighted_template_id(set_id: str, rng: random.Random) -> str | None:
-    entries = get_solid_object_set(set_id)
+def _resolve_generated_object_id(tile_properties: dict[str, object]) -> str:
+    for key in ("decor_object", "water_decor_object"):
+        value = str(tile_properties.get(key, "")).strip()
+        if value:
+            return value
+    return ""
+
+
+def _has_water_generated_content(tile_properties: dict[str, object]) -> bool:
+    return any(
+        str(tile_properties.get(key, "")).strip()
+        for key in ("water_decor_object", "water_decor_set", "water_decor_sets")
+    )
+
+
+def _resolve_generated_set_ids(tile_properties: dict[str, object]) -> list[str]:
+    set_ids: list[str] = []
+    for key in ("decor_sets", "decor_set", "water_decor_sets", "water_decor_set"):
+        set_ids.extend(_parse_set_id_list(tile_properties.get(key)))
+    return set_ids
+
+
+def _parse_set_id_list(raw_value: object) -> list[str]:
+    if raw_value is None:
+        return []
+    return [
+        part.strip()
+        for part in str(raw_value).split(",")
+        if part.strip()
+    ]
+
+
+def _choose_weighted_template_id_from_sets(set_ids: list[str], rng: random.Random) -> str | None:
+    entries: list[dict] = []
+    for set_id in set_ids:
+        entries.extend(get_solid_object_set(set_id))
     if not entries:
         return None
     total_weight = sum(max(0, int(entry.get("weight", 1))) for entry in entries)

@@ -8,11 +8,15 @@ from game.objects.level_transition import LevelTransition
 from game.objects.npc_object import NpcObject
 from game.objects.pickable_object import PickableObject
 from game.objects.solid_object import SolidObject
+from game.objects.stump_object import StumpObject
+from game.objects.tree_object import TreeObject
 from game.objects.world_object import WorldObject
 
 __all__ = [
     "WorldObject",
     "SolidObject",
+    "StumpObject",
+    "TreeObject",
     "InteractableObject",
     "GatherableObject",
     "CheckpointObject",

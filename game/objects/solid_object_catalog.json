@@ -2,94 +2,259 @@
   "objects": {
     "flower_blue": {
       "name": "Blue Flower",
-      "sprite_path": "world_objects/solid_object/flower_blue.png",
+      "sprite_path": "world_objects/solid_object/flowers/flower_blue.png",
       "width": 1,
       "height": 1,
       "solid": false
     },
     "flower_pink": {
       "name": "Pink Flower",
-      "sprite_path": "world_objects/solid_object/flower_pink.png",
+      "sprite_path": "world_objects/solid_object/flowers/flower_pink.png",
       "width": 1,
       "height": 1,
       "solid": false
     },
     "flower_red_white": {
       "name": "Red White Flower",
-      "sprite_path": "world_objects/solid_object/flower_red_white.png",
+      "sprite_path": "world_objects/solid_object/flowers/flower_red_white.png",
       "width": 1,
       "height": 1,
       "solid": false
     },
     "flower_white": {
       "name": "White Flower",
-      "sprite_path": "world_objects/solid_object/flower_white.png",
+      "sprite_path": "world_objects/solid_object/flowers/flower_white.png",
       "width": 1,
       "height": 1,
       "solid": false
     },
     "flower_yellow": {
       "name": "Yellow Flower",
-      "sprite_path": "world_objects/solid_object/flower_yellow.png",
+      "sprite_path": "world_objects/solid_object/flowers/flower_yellow.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "grass_patch_1": {
+      "name": "Grass Patch",
+      "sprite_path": "world_objects/solid_object/grass/grass_1.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "grass_patch_2": {
+      "name": "Grass Patch",
+      "sprite_path": "world_objects/solid_object/grass/grass_2.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "grass_patch_3": {
+      "name": "Grass Patch",
+      "sprite_path": "world_objects/solid_object/grass/grass_3.png",
       "width": 1,
       "height": 1,
       "solid": false
     },
     "stone_pile_small": {
       "name": "Stone Pile",
-      "sprite_path": "world_objects/solid_object/small_stone_pile.png",
+      "sprite_path": "world_objects/solid_object/rocks/small_stone_pile.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "small_stones_1": {
+      "name": "Small Stones",
+      "sprite_path": "world_objects/solid_object/rocks/small_stones_1.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "small_stones_2": {
+      "name": "Small Stones",
+      "sprite_path": "world_objects/solid_object/rocks/small_stones_2.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "small_stones_3": {
+      "name": "Small Stones",
+      "sprite_path": "world_objects/solid_object/rocks/small_stones_3.png",
       "width": 1,
       "height": 1,
       "solid": false
     },
     "bush_small": {
       "name": "Bush",
-      "sprite_path": "world_objects/solid_object/bush.png",
+      "sprite_path": "world_objects/solid_object/bushes/bush.png",
       "width": 1,
       "height": 1,
       "solid": false
     },
     "bush_small_2": {
       "name": "Bush",
-      "sprite_path": "world_objects/solid_object/bush2.png",
+      "sprite_path": "world_objects/solid_object/bushes/bush2.png",
       "width": 1,
       "height": 1,
       "solid": false
     },
     "bush_small_3": {
       "name": "Bush",
-      "sprite_path": "world_objects/solid_object/bush3.png",
+      "sprite_path": "world_objects/solid_object/bushes/bush3.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "bush_small_4": {
+      "name": "Bush",
+      "sprite_path": "world_objects/solid_object/bushes/bush4.png",
+      "width": 1,
+      "height": 1,
+      "solid": false
+    },
+    "bush_small_5": {
+      "name": "Bush",
+      "sprite_path": "world_objects/solid_object/bushes/bush5.png",
       "width": 1,
       "height": 1,
       "solid": false
     },
     "stone_block": {
-      "name": "Stone Block",
-      "sprite_path": "world_objects/solid_object/stone_block.png",
+      "name": "Boulder",
+      "sprite_path": "world_objects/solid_object/rocks/stone_block.png",
       "width": 1,
       "height": 1,
       "solid": false
+    },
+    "water_flower_1": {
+      "name": "Water Grass",
+      "sprite_path": "world_objects/solid_object/water/water_flower.png",
+      "width": 1,
+      "height": 1,
+      "solid": true
+    },
+    "water_flower_2": {
+      "name": "Water Grass",
+      "sprite_path": "world_objects/solid_object/water/water_flower_2.png",
+      "width": 1,
+      "height": 1,
+      "solid": true
     }
   },
   "sets": {
+    "meadow_flowers": [
+      { "object_id": "flower_blue", "weight": 2 },
+      { "object_id": "flower_pink", "weight": 2 },
+      { "object_id": "flower_red_white", "weight": 1 },
+      { "object_id": "flower_white", "weight": 2 },
+      { "object_id": "flower_yellow", "weight": 2 }
+    ],
+    "meadow_grass": [
+      { "object_id": "grass_patch_1", "weight": 2 },
+      { "object_id": "grass_patch_2", "weight": 2 },
+      { "object_id": "grass_patch_3", "weight": 1 }
+    ],
+    "meadow_pebbles": [
+      { "object_id": "stone_pile_small", "weight": 3 },
+      { "object_id": "small_stones_1", "weight": 2 },
+      { "object_id": "small_stones_2", "weight": 2 },
+      { "object_id": "small_stones_3", "weight": 2 }
+    ],
+    "meadow_bushes": [
+      { "object_id": "bush_small", "weight": 1 },
+      { "object_id": "bush_small_2", "weight": 1 },
+      { "object_id": "bush_small_3", "weight": 1 },
+      { "object_id": "bush_small_4", "weight": 1 },
+      { "object_id": "bush_small_5", "weight": 1 }
+    ],
+    "forest_rocks": [
+      { "object_id": "stone_pile_small", "weight": 3 },
+      { "object_id": "small_stones_1", "weight": 2 },
+      { "object_id": "small_stones_2", "weight": 2 },
+      { "object_id": "small_stones_3", "weight": 2 },
+      { "object_id": "stone_block", "weight": 2 }
+    ],
+    "forest_sparse_flowers": [
+      { "object_id": "flower_white", "weight": 1 },
+      { "object_id": "flower_yellow", "weight": 1 }
+    ],
+    "forest_bushes": [
+      { "object_id": "bush_small", "weight": 2 },
+      { "object_id": "bush_small_2", "weight": 2 },
+      { "object_id": "bush_small_3", "weight": 2 },
+      { "object_id": "bush_small_4", "weight": 2 },
+      { "object_id": "bush_small_5", "weight": 2 }
+    ],
+    "lake_water_decor": [
+      { "object_id": "water_flower_1", "weight": 2 },
+      { "object_id": "water_flower_2", "weight": 2 }
+    ],
+    "meadow_ground_decor": [
+      { "object_id": "flower_blue", "weight": 2 },
+      { "object_id": "flower_pink", "weight": 2 },
+      { "object_id": "flower_red_white", "weight": 1 },
+      { "object_id": "flower_white", "weight": 2 },
+      { "object_id": "flower_yellow", "weight": 2 },
+      { "object_id": "grass_patch_1", "weight": 2 },
+      { "object_id": "grass_patch_2", "weight": 2 },
+      { "object_id": "grass_patch_3", "weight": 1 },
+      { "object_id": "stone_pile_small", "weight": 2 },
+      { "object_id": "small_stones_1", "weight": 1 },
+      { "object_id": "small_stones_2", "weight": 1 },
+      { "object_id": "small_stones_3", "weight": 1 },
+      { "object_id": "bush_small", "weight": 1 },
+      { "object_id": "bush_small_2", "weight": 1 },
+      { "object_id": "bush_small_3", "weight": 1 },
+      { "object_id": "bush_small_4", "weight": 1 },
+      { "object_id": "bush_small_5", "weight": 1 }
+    ],
+    "forest_ground_decor": [
+      { "object_id": "grass_patch_1", "weight": 2 },
+      { "object_id": "grass_patch_2", "weight": 2 },
+      { "object_id": "grass_patch_3", "weight": 1 },
+      { "object_id": "stone_pile_small", "weight": 3 },
+      { "object_id": "small_stones_1", "weight": 2 },
+      { "object_id": "small_stones_2", "weight": 2 },
+      { "object_id": "small_stones_3", "weight": 2 },
+      { "object_id": "stone_block", "weight": 2 },
+      { "object_id": "bush_small", "weight": 1 },
+      { "object_id": "bush_small_2", "weight": 1 },
+      { "object_id": "bush_small_3", "weight": 1 },
+      { "object_id": "bush_small_4", "weight": 1 },
+      { "object_id": "bush_small_5", "weight": 1 },
+      { "object_id": "flower_white", "weight": 1 },
+      { "object_id": "flower_yellow", "weight": 1 }
+    ],
     "grass_decor": [
       { "object_id": "flower_blue", "weight": 2 },
       { "object_id": "flower_pink", "weight": 2 },
       { "object_id": "flower_red_white", "weight": 1 },
       { "object_id": "flower_white", "weight": 2 },
       { "object_id": "flower_yellow", "weight": 2 },
+      { "object_id": "grass_patch_1", "weight": 2 },
+      { "object_id": "grass_patch_2", "weight": 2 },
+      { "object_id": "grass_patch_3", "weight": 1 },
+      { "object_id": "stone_pile_small", "weight": 2 },
+      { "object_id": "small_stones_1", "weight": 1 },
+      { "object_id": "small_stones_2", "weight": 1 },
+      { "object_id": "small_stones_3", "weight": 1 },
       { "object_id": "bush_small", "weight": 1 },
       { "object_id": "bush_small_2", "weight": 1 },
       { "object_id": "bush_small_3", "weight": 1 }
     ],
     "stone_decor": [
       { "object_id": "stone_pile_small", "weight": 3 },
+      { "object_id": "small_stones_1", "weight": 2 },
+      { "object_id": "small_stones_2", "weight": 2 },
+      { "object_id": "small_stones_3", "weight": 2 },
       { "object_id": "stone_block", "weight": 1 }
     ],
     "bush_decor": [
       { "object_id": "bush_small", "weight": 2 },
       { "object_id": "bush_small_2", "weight": 2 },
-      { "object_id": "bush_small_3", "weight": 2 }
+      { "object_id": "bush_small_3", "weight": 2 },
+      { "object_id": "bush_small_4", "weight": 2 },
+      { "object_id": "bush_small_5", "weight": 2 }
     ]
   }
 }

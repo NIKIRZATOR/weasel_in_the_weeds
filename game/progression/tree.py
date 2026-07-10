@@ -48,14 +48,14 @@ SKILL_TREE_NODES: dict[str, SkillNodeDefinition] = {
     "edge_1": SkillNodeDefinition(
         id="edge_1",
         position=(360, 88),
-        icon_path="assets/ui/progression_nodes/edge_1.png",
+        icon_path="assets/ui/progression_nodes/bow_edge_1.png",
         bonuses=ProgressionBonuses(stats=CharacterStats(attack=1)),
     ),
     "edge_2": SkillNodeDefinition(
         id="edge_2",
         position=(360, 176),
         requires=("edge_1",),
-        icon_path="assets/ui/progression_nodes/edge_2.png",
+        icon_path="assets/ui/progression_nodes/bow_edge_2.png",
         bonuses=ProgressionBonuses(stats=CharacterStats(attack=1)),
     ),
     "light_hands": SkillNodeDefinition(
@@ -98,11 +98,11 @@ SKILL_TREE_NODES: dict[str, SkillNodeDefinition] = {
             charge_time_multiplier=0.8,
         ),
     ),
-    "relentless": SkillNodeDefinition(
-        id="relentless",
+    "relentless_1": SkillNodeDefinition(
+        id="relentless_1",
         position=(360, 430),
         requires=("heavy_form",),
-        icon_path="assets/ui/progression_nodes/relentless.png",
+        icon_path="assets/ui/progression_nodes/relentless_1.png",
         bonuses=ProgressionBonuses(
             charged_damage_bonus=2,
             recovery_multiplier=0.9,
@@ -111,7 +111,7 @@ SKILL_TREE_NODES: dict[str, SkillNodeDefinition] = {
     "relentless_2": SkillNodeDefinition(
         id="relentless_2",
         position=(420, 490),
-        requires=("relentless",),
+        requires=("relentless_1",),
         icon_path="assets/ui/progression_nodes/relentless_2.png",
         bonuses=ProgressionBonuses(
             charged_damage_bonus=4,

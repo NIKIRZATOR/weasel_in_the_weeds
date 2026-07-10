@@ -18,6 +18,7 @@ class GrassHideZone(WorldObject):
             properties=properties,
         )
         self.is_grass_hide_zone = True
+        self.draw_after_player_only = True
         self.concealment = bool(self.properties.get("concealment", True))
         self.slow_multiplier = float(self.properties.get("slow_multiplier", 1.0))
         self.required_crouch = bool(self.properties.get("required_crouch", False))

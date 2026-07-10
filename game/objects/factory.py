@@ -8,6 +8,8 @@ from game.objects.level_transition import LevelTransition
 from game.objects.npc_object import NpcObject
 from game.objects.pickable_object import PickableObject
 from game.objects.solid_object import SolidObject
+from game.objects.stump_object import StumpObject
+from game.objects.tree_object import TreeObject
 
 CONTAINER_SPRITES = {
     "crate": "world_objects/container_object/crate.png",
@@ -62,14 +64,38 @@ NPC_DEFAULT_PROPERTIES_BY_NAME = {
 }
 
 SOLID_OBJECT_SPRITES = {
-    "stone block": "world_objects/solid_object/stone_block.png",
-    "bush": "world_objects/solid_object/bush.png",
-    "blue flower": "world_objects/solid_object/flower_blue.png",
-    "pink flower": "world_objects/solid_object/flower_pink.png",
-    "red white flower": "world_objects/solid_object/flower_red_white.png",
-    "white flower": "world_objects/solid_object/flower_white.png",
-    "yellow flower": "world_objects/solid_object/flower_yellow.png",
-    "stone pile": "world_objects/solid_object/small_stone_pile.png",
+    "stone block": "world_objects/solid_object/rocks/stone_block.png",
+    "boulder": "world_objects/solid_object/rocks/stone_block.png",
+    "bush": "world_objects/solid_object/bushes/bush.png",
+    "blue flower": "world_objects/solid_object/flowers/flower_blue.png",
+    "pink flower": "world_objects/solid_object/flowers/flower_pink.png",
+    "red white flower": "world_objects/solid_object/flowers/flower_red_white.png",
+    "white flower": "world_objects/solid_object/flowers/flower_white.png",
+    "yellow flower": "world_objects/solid_object/flowers/flower_yellow.png",
+    "stone pile": "world_objects/solid_object/rocks/small_stone_pile.png",
+    "water grass": "world_objects/solid_object/water/water_flower.png",
+}
+
+TREE_SPRITES = {
+    "tree 1": "world_objects/tree_object/tree_1.png",
+    "tree 2": "world_objects/tree_object/tree_2.png",
+    "tree 3": "world_objects/tree_object/tree_3.png",
+    "tree 4": "world_objects/tree_object/tree_4.png",
+    "tree_1": "world_objects/tree_object/tree_1.png",
+    "tree_2": "world_objects/tree_object/tree_2.png",
+    "tree_3": "world_objects/tree_object/tree_3.png",
+    "tree_4": "world_objects/tree_object/tree_4.png",
+}
+
+STUMP_SPRITES = {
+    "fallen tree 1": "world_objects/stump_object/fallen_tree.png",
+    "fallen tree 2": "world_objects/stump_object/fallen_tree_2.png",
+    "fallen tree 3": "world_objects/stump_object/fallen_tree_3.png",
+    "fallen tree 4": "world_objects/stump_object/fallen_tree_4.png",
+    "fallen_tree": "world_objects/stump_object/fallen_tree.png",
+    "fallen_tree_2": "world_objects/stump_object/fallen_tree_2.png",
+    "fallen_tree_3": "world_objects/stump_object/fallen_tree_3.png",
+    "fallen_tree_4": "world_objects/stump_object/fallen_tree_4.png",
 }
 
 
@@ -109,6 +135,26 @@ def create_world_object(raw_object, tile_size):
             elif "solid" in properties:
                 world_object.is_solid = bool(properties.get("solid"))
         return world_object
+
+    if object_type == "tree_object":
+        return TreeObject(
+            x,
+            y,
+            width,
+            height,
+            name=name,
+            properties=properties,
+        )
+
+    if object_type == "stump_object":
+        return StumpObject(
+            x,
+            y,
+            width,
+            height,
+            name=name,
+            properties=properties,
+        )
 
     if object_type == "interactable_object":
         is_solid = raw_object.get("solid", False)
@@ -227,13 +273,29 @@ def _assign_default_sprite_path(object_type, name, properties):
             properties.setdefault("depleted_sprite_path", sprite_paths["depleted_sprite_path"])
             return
         if template_id == "grass_patch_small":
-            properties.setdefault("sprite_path", "world_objects/solid_object/bush.png")
+            properties.setdefault("sprite_path", "world_objects/solid_object/bushes/bush.png")
         return
 
     if object_type in {"solid_object", "passable_object"}:
         if properties.get("sprite_path"):
             return
         sprite_path = SOLID_OBJECT_SPRITES.get(str(name or "").strip().lower())
+        if sprite_path:
+            properties["sprite_path"] = sprite_path
+        return
+
+    if object_type == "tree_object":
+        if properties.get("sprite_path"):
+            return
+        sprite_path = TREE_SPRITES.get(str(name or "").strip().lower())
+        if sprite_path:
+            properties["sprite_path"] = sprite_path
+        return
+
+    if object_type == "stump_object":
+        if properties.get("sprite_path"):
+            return
+        sprite_path = STUMP_SPRITES.get(str(name or "").strip().lower())
         if sprite_path:
             properties["sprite_path"] = sprite_path
         return

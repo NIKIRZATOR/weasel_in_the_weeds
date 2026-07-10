@@ -9,7 +9,7 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/stone_block.png"
+        "sprite_path": "world_objects/solid_object/rocks/stone_block.png"
       }
     }
   },
@@ -23,7 +23,7 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/bush.png"
+        "sprite_path": "world_objects/solid_object/bushes/bush.png"
       }
     }
   },
@@ -37,7 +37,7 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/bush2.png"
+        "sprite_path": "world_objects/solid_object/bushes/bush2.png"
       }
     }
   },
@@ -51,7 +51,37 @@
       "width": 1,
       "height": 1,
       "properties": {
-        "sprite_path": "world_objects/solid_object/bush3.png"
+        "sprite_path": "world_objects/solid_object/bushes/bush3.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Bush 4",
+    "object": {
+      "type": "solid_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bushes/bush4.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Bush 5",
+    "object": {
+      "type": "solid_object",
+      "name": "Bush",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/bushes/bush5.png"
       }
     }
   },
@@ -66,7 +96,7 @@
       "height": 1,
       "solid": false,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_blue.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_blue.png"
       }
     }
   },
@@ -81,7 +111,7 @@
       "height": 1,
       "solid": false,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_pink.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_pink.png"
       }
     }
   },
@@ -96,7 +126,7 @@
       "height": 1,
       "solid": false,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_red_white.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_red_white.png"
       }
     }
   },
@@ -111,7 +141,7 @@
       "height": 1,
       "solid": false,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_white.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_white.png"
       }
     }
   },
@@ -126,7 +156,52 @@
       "height": 1,
       "solid": false,
       "properties": {
-        "sprite_path": "world_objects/solid_object/flower_yellow.png"
+        "sprite_path": "world_objects/solid_object/flowers/flower_yellow.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Grass 1",
+    "object": {
+      "type": "solid_object",
+      "name": "Grass Patch",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/grass/grass_1.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Grass 2",
+    "object": {
+      "type": "solid_object",
+      "name": "Grass Patch",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/grass/grass_2.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Grass 3",
+    "object": {
+      "type": "solid_object",
+      "name": "Grass Patch",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/grass/grass_3.png"
       }
     }
   },
@@ -141,7 +216,236 @@
       "height": 1,
       "solid": false,
       "properties": {
-        "sprite_path": "world_objects/solid_object/small_stone_pile.png"
+        "sprite_path": "world_objects/solid_object/rocks/small_stone_pile.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Small Stones 1",
+    "object": {
+      "type": "solid_object",
+      "name": "Small Stones",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/rocks/small_stones_1.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Small Stones 2",
+    "object": {
+      "type": "solid_object",
+      "name": "Small Stones",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/rocks/small_stones_2.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Small Stones 3",
+    "object": {
+      "type": "solid_object",
+      "name": "Small Stones",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "solid": false,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/rocks/small_stones_3.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Water Grass 1",
+    "object": {
+      "type": "solid_object",
+      "name": "Water Grass",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/water/water_flower.png"
+      }
+    }
+  },
+  {
+    "label": "Solid: Water Grass 2",
+    "object": {
+      "type": "solid_object",
+      "name": "Water Grass",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/solid_object/water/water_flower_2.png"
+      }
+    }
+  },
+  {
+    "label": "Tree: Tree 1",
+    "object": {
+      "type": "tree_object",
+      "name": "Tree 1",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/tree_object/tree_1.png",
+        "sprite_scale_x": 3.0,
+        "sprite_scale_y": 4.0,
+        "canopy_overlay_ratio": 0.68,
+        "trunk_width_ratio": 0.24,
+        "trunk_height_ratio": 0.28,
+        "trunk_hitbox_lift": 16
+      }
+    }
+  },
+  {
+    "label": "Tree: Tree 2",
+    "object": {
+      "type": "tree_object",
+      "name": "Tree 2",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/tree_object/tree_2.png",
+        "sprite_scale_x": 3.0,
+        "sprite_scale_y": 4.0,
+        "canopy_overlay_ratio": 0.68,
+        "trunk_width_ratio": 0.24,
+        "trunk_height_ratio": 0.28,
+        "trunk_hitbox_lift": 16
+      }
+    }
+  },
+  {
+    "label": "Tree: Tree 3",
+    "object": {
+      "type": "tree_object",
+      "name": "Tree 3",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/tree_object/tree_3.png",
+        "sprite_scale_x": 3.0,
+        "sprite_scale_y": 4.0,
+        "canopy_overlay_ratio": 0.68,
+        "trunk_width_ratio": 0.24,
+        "trunk_height_ratio": 0.28,
+        "trunk_hitbox_lift": 16
+      }
+    }
+  },
+  {
+    "label": "Tree: Tree 4",
+    "object": {
+      "type": "tree_object",
+      "name": "Tree 4",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/tree_object/tree_4.png",
+        "sprite_scale_x": 3.0,
+        "sprite_scale_y": 4.0,
+        "canopy_overlay_ratio": 0.68,
+        "trunk_width_ratio": 0.24,
+        "trunk_height_ratio": 0.28,
+        "trunk_hitbox_lift": 16
+      }
+    }
+  },
+  {
+    "label": "Stump: Fallen Tree 1",
+    "object": {
+      "type": "stump_object",
+      "name": "Fallen Tree 1",
+      "x": 0,
+      "y": 0,
+      "width": 2,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/stump_object/fallen_tree.png",
+        "sprite_scale_x": 2.0,
+        "sprite_scale_y": 2.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 0
+      }
+    }
+  },
+  {
+    "label": "Stump: Fallen Tree 2",
+    "object": {
+      "type": "stump_object",
+      "name": "Fallen Tree 2",
+      "x": 0,
+      "y": 0,
+      "width": 2,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/stump_object/fallen_tree_2.png",
+        "sprite_scale_x": 2.0,
+        "sprite_scale_y": 2.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 0
+      }
+    }
+  },
+  {
+    "label": "Stump: Fallen Tree 3",
+    "object": {
+      "type": "stump_object",
+      "name": "Fallen Tree 3",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/stump_object/fallen_tree_3.png",
+        "sprite_scale_x": 2.0,
+        "sprite_scale_y": 2.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 0
+      }
+    }
+  },
+  {
+    "label": "Stump: Fallen Tree 4",
+    "object": {
+      "type": "stump_object",
+      "name": "Fallen Tree 4",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "sprite_path": "world_objects/stump_object/fallen_tree_4.png",
+        "sprite_scale_x": 2.0,
+        "sprite_scale_y": 2.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.55,
+        "hitbox_lift": 0
       }
     }
   }

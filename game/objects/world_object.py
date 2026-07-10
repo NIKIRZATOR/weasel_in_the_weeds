@@ -1,4 +1,5 @@
 import pygame
+import math
 
 from game.core.assets import load_image
 from game.entities.entity import Entity
@@ -56,6 +57,8 @@ class WorldObject(Entity):
         self.object_id = str(self.properties.get("object_id", "")).strip()
         self.sprite_path = self.properties.get("sprite_path")
         self.sprite_scale = max(0.1, float(self.properties.get("sprite_scale", 1.0)))
+        self.sprite_scale_x = max(0.1, float(self.properties.get("sprite_scale_x", self.sprite_scale)))
+        self.sprite_scale_y = max(0.1, float(self.properties.get("sprite_scale_y", self.sprite_scale)))
         self.sprite_anchor = str(self.properties.get("sprite_anchor", "top_left")).strip().lower()
         self.pixel_offset_x = int(self.properties.get("pixel_offset_x", 0))
         self.pixel_offset_y = int(self.properties.get("pixel_offset_y", 0))
@@ -112,8 +115,8 @@ class WorldObject(Entity):
 
     def _get_sprite_draw_size(self):
         return (
-            max(1, int(round(self.width * self.sprite_scale))),
-            max(1, int(round(self.height * self.sprite_scale))),
+            max(1, int(round(self.width * self.sprite_scale_x))),
+            max(1, int(round(self.height * self.sprite_scale_y))),
         )
 
     def _get_sprite_draw_position(self, rect, sprite):
@@ -123,6 +126,38 @@ class WorldObject(Entity):
                 rect.y + (rect.height - sprite.get_height()) + self.pixel_offset_y,
             )
         return rect.x + self.pixel_offset_x, rect.y + self.pixel_offset_y
+
+    def get_render_rect(self):
+        base_rect = pygame.Rect(
+            math.floor(self.position.x),
+            math.floor(self.position.y),
+            math.ceil(self.width),
+            math.ceil(self.height),
+        )
+        if not self.sprite_path:
+            return base_rect
+
+        sprite_width, sprite_height = self._get_sprite_draw_size()
+        if self.sprite_anchor == "bottom_center":
+            sprite_left = self.position.x + (self.width - sprite_width) / 2 + self.pixel_offset_x
+            sprite_top = self.position.y + self.height - sprite_height + self.pixel_offset_y
+        else:
+            sprite_left = self.position.x + self.pixel_offset_x
+            sprite_top = self.position.y + self.pixel_offset_y
+
+        sprite_rect = pygame.Rect(
+            math.floor(sprite_left),
+            math.floor(sprite_top),
+            math.ceil(sprite_width),
+            math.ceil(sprite_height),
+        )
+        return base_rect.union(sprite_rect)
+
+    def has_overlay_pass(self):
+        return False
+
+    def draw_overlay(self, screen, camera):
+        return None
 
     def get_persistence_id(self):
         if self.object_id:
