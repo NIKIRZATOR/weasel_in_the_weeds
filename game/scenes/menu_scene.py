@@ -31,7 +31,6 @@ class MenuScene(Scene):
             (self.localizer.t("ui.menu.new_game"), self.start_game, False),
             (self.localizer.t("ui.menu.continue_game"), self.continue_game, not has_slots),
             (self.localizer.t("ui.menu.settings"), self.open_settings, False),
-            (self.localizer.t("ui.menu.about"), self.show_author, False),
             (self.localizer.t("ui.menu.exit"), self.exit_game, False),
         ]
 

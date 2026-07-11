@@ -1,8 +1,13 @@
+import sys
 from pathlib import Path
 
 import pygame
 
-BASE_DIR = Path(__file__).resolve().parent
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    BASE_DIR = Path(sys._MEIPASS)
+else:
+    BASE_DIR = Path(__file__).resolve().parent
+
 LEVELS_DIR = BASE_DIR / "levels"
 DIALOGUES_DIR = BASE_DIR / "dialogues"
 ASSETS_DIR = BASE_DIR / "assets"
