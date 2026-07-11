@@ -1,27 +1,30 @@
 {
-  "stone_knife": {
-    "name": "Stone Knife",
-    "category": "tools",
-    "description": "A sharpened pebble fixed to a stick. Simple but useful.",
-    "ingredients": [
-      { "item_id": "stick", "quantity": 1 },
-      { "item_id": "stone_pebble", "quantity": 2 }
-    ],
-    "result": { "item_id": "test_item", "quantity": 1 },
-    "unlock_type": "default",
-    "sort_order": 10
-  },
   "stone_spear": {
     "name": "Stone Spear",
     "category": "tools",
     "description": "A sturdy branch tipped with sharpened stone. Reliable reach for early fights.",
     "ingredients": [
-      { "item_id": "stick", "quantity": 2 },
+      { "item_id": "stick", "quantity": 4 },
       { "item_id": "stone_pebble", "quantity": 3 }
     ],
     "result": { "item_id": "stone_spear", "quantity": 1 },
     "unlock_type": "default",
     "sort_order": 15
+  },
+  "short_bow": {
+    "name": "Short Bow",
+    "category": "tools",
+    "description": "A simple hunting bow bound from sticks, bark and spider webbing.",
+    "ingredients": [
+      { "item_id": "stick", "quantity": 6 },
+      { "item_id": "web", "quantity": 6 },
+      { "item_id": "stone_pebble", "quantity": 2 },
+      { "item_id": "bark", "quantity": 3 }
+    ],
+    "result": { "item_id": "short_bow", "quantity": 1 },
+    "unlock_type": "knowledge",
+    "knowledge_cost": 6,
+    "sort_order": 18
   },
   "berry_mix": {
     "name": "Berry Mix",
@@ -77,52 +80,61 @@
     "required_flags": ["met_mouse_hermit"],
     "sort_order": 50
   },
-  "temp_healing_tonic": {
+  "healing_tonic_recipe": {
     "name": "Healing Tonic",
     "category": "healing",
-    "description": "TEMP: placeholder recipe; ingredients will be replaced later.",
+    "description": "Crushed berries and a fresh bud brewed into a quick restorative tonic.",
     "ingredients": [
-      { "item_id": "berry", "quantity": 1 }
+      { "item_id": "berry", "quantity": 3 },
+      { "item_id": "seed", "quantity": 1 },
+      { "item_id": "yellow_bud", "quantity": 1 }
     ],
     "result": { "item_id": "healing_tonic", "quantity": 1 },
     "unlock_type": "default",
-    "sort_order": 100,
-    "is_temporary": true
+    "sort_order": 100
   },
-  "temp_healing_infusion": {
+  "healing_infusion_recipe": {
     "name": "Healing Infusion",
     "category": "healing",
-    "description": "TEMP: placeholder recipe; ingredients will be replaced later.",
+    "description": "A stronger healing brew steeped from berries, petals and mushroom flesh.",
     "ingredients": [
-      { "item_id": "berry", "quantity": 1 }
+      { "item_id": "berry", "quantity": 4 },
+      { "item_id": "petals", "quantity": 2 },
+      { "item_id": "mushroom", "quantity": 1 },
+      { "item_id": "bark", "quantity": 1 }
     ],
     "result": { "item_id": "healing_infusion", "quantity": 1 },
-    "unlock_type": "default",
-    "sort_order": 110,
-    "is_temporary": true
+    "unlock_type": "knowledge",
+    "knowledge_cost": 2,
+    "sort_order": 110
   },
-  "temp_stamina_tonic": {
+  "stamina_tonic_recipe": {
     "name": "Stamina Tonic",
     "category": "survival",
-    "description": "TEMP: placeholder recipe; ingredients will be replaced later.",
+    "description": "A brisk tonic made from mushroom and meadow herbs to keep you moving.",
     "ingredients": [
-      { "item_id": "berry", "quantity": 1 }
+      { "item_id": "mushroom", "quantity": 2 },
+      { "item_id": "grass_blade", "quantity": 2 },
+      { "item_id": "petals", "quantity": 1 }
     ],
     "result": { "item_id": "stamina_tonic", "quantity": 1 },
-    "unlock_type": "default",
-    "sort_order": 120,
-    "is_temporary": true
+    "unlock_type": "knowledge",
+    "knowledge_cost": 3,
+    "sort_order": 120
   },
-  "temp_stamina_infusion": {
+  "stamina_infusion_recipe": {
     "name": "Stamina Infusion",
     "category": "survival",
-    "description": "TEMP: placeholder recipe; ingredients will be replaced later.",
+    "description": "A concentrated field infusion that trades rarity for a longer-lasting kick.",
     "ingredients": [
-      { "item_id": "berry", "quantity": 1 }
+      { "item_id": "mushroom", "quantity": 2 },
+      { "item_id": "yellow_bud", "quantity": 2 },
+      { "item_id": "web", "quantity": 1 },
+      { "item_id": "bark", "quantity": 1 }
     ],
     "result": { "item_id": "stamina_infusion", "quantity": 1 },
-    "unlock_type": "default",
-    "sort_order": 130,
-    "is_temporary": true
+    "unlock_type": "knowledge",
+    "knowledge_cost": 4,
+    "sort_order": 130
   }
 }

@@ -36,6 +36,9 @@ GATHERABLE_TEMPLATE_SPRITES = {
     "fallen_log_small": "world_objects/gatherable_object/fallen_log_full.png",
     "stone_pile_small": "world_objects/gatherable_object/stone_pile_full.png",
     "bug_remains_small": "world_objects/gatherable_object/stump_full.png",
+    "leaf_pile_small": "world_objects/gatherable_object/bunch_of_leaves_full.png",
+    "yellow_flower_small": "world_objects/gatherable_object/yellow_flower_full.png",
+    "bone_pile_small": "world_objects/gatherable_object/bunch_of_bones_full.png",
 }
 
 PICKABLE_SPRITES = {
@@ -57,10 +60,13 @@ SOLID_OBJECT_SPRITES = {
 STRUCTURE_SPRITES = {
     "camp place": "world_objects/structure_object/camp_place.png",
     "campfire": "world_objects/structure_object/campfire.png",
+    "cave entrance": "world_objects/structure_object/cave_closed_enter.png",
     "small rock mountain": "world_objects/structure_object/small_rock_mountain.png",
     "stolb": "world_objects/structure_object/stolb.png",
     "stone column": "world_objects/structure_object/stone_column.png",
 }
+
+LEVEL_TRANSITION_SPRITE = "world_objects/level_transition/portal.png"
 
 ENEMY_PREVIEW_SPRITES = {
     "enemy_beetle": ("enemies/beatle/beatle_idle.png", 64, 64),
@@ -98,12 +104,13 @@ OBJECT_COLORS = {
 
 ENEMY_EDITOR_DEFAULTS = {
     "enemy_melee": {
-        "detection_radius": 150,
-        "patrol_radius": 140,
+        "detection_radius": 230,
+        "patrol_radius": 150,
         "attack_radius_key": "melee_range",
-        "attack_radius": 60,
-        "body_hitbox": {"width": 48, "height": 64, "offset_x": 8, "offset_y": 8},
-        "hurtbox": {"width": 48, "height": 64, "offset_x": 8, "offset_y": 8},
+        "attack_radius": 0,
+        "body_hitbox": {"width": 48, "height": 64, "offset_x": 8, "offset_y": 0},
+        "hurtbox": {"width": 48, "height": 64, "offset_x": 8, "offset_y": 0},
+        "attack_hitbox": {"width": 48, "height": 64, "offset_x": 8, "offset_y": 0, "mirror_with_facing": True},
         "collision_circle": {"radius": 10.5},
     },
     "enemy_ranged": {
@@ -111,9 +118,9 @@ ENEMY_EDITOR_DEFAULTS = {
         "patrol_radius": 160,
         "attack_radius_key": "attack_range",
         "attack_radius": 260,
-        "body_hitbox": {"width": 40, "height": 40, "offset_x": 6, "offset_y": 11},
-        "hurtbox": {"width": 40, "height": 40, "offset_x": 7, "offset_y": 10},
-        "attack_hitbox": {"width": 16, "height": 14, "offset_x": 18, "offset_y": 13, "mirror_with_facing": True},
+        "body_hitbox": {"width": 48, "height": 48, "offset_x": 8, "offset_y": 8},
+        "hurtbox": {"width": 48, "height": 48, "offset_x": 8, "offset_y": 8},
+        "attack_hitbox": {"width": 32, "height": 32, "offset_x": 16, "offset_y": 16, "mirror_with_facing": True},
         "collision_circle": {"radius": 10},
     },
     "enemy_spider": {
@@ -121,19 +128,19 @@ ENEMY_EDITOR_DEFAULTS = {
         "patrol_radius": 150,
         "attack_radius_key": "spit_range",
         "attack_radius": 250,
-        "body_hitbox": {"width": 20, "height": 16, "offset_x": 6, "offset_y": 12},
-        "hurtbox": {"width": 18, "height": 16, "offset_x": 7, "offset_y": 12},
-        "attack_hitbox": {"width": 18, "height": 12, "offset_x": 18, "offset_y": 14, "mirror_with_facing": True},
+        "body_hitbox": {"width": 48, "height": 48, "offset_x": 8, "offset_y": 8},
+        "hurtbox": {"width": 48, "height": 48, "offset_x": 8, "offset_y": 8},
+        "attack_hitbox": {"width": 32, "height": 32, "offset_x": 16, "offset_y": 16, "mirror_with_facing": True},
         "collision_circle": {"radius": 10},
     },
     "enemy_beetle": {
         "detection_radius": 230,
         "patrol_radius": 140,
         "attack_radius_key": "charge_range",
-        "attack_radius": 210,
-        "body_hitbox": {"width": 22, "height": 18, "offset_x": 5, "offset_y": 11},
-        "hurtbox": {"width": 20, "height": 18, "offset_x": 6, "offset_y": 11},
-        "attack_hitbox": {"width": 20, "height": 14, "offset_x": 18, "offset_y": 13, "mirror_with_facing": True},
+        "attack_radius": 140,
+        "body_hitbox": {"width": 64, "height": 64, "offset_x": 0, "offset_y": 0},
+        "hurtbox": {"width": 64, "height": 64, "offset_x": 0, "offset_y": 0},
+        "attack_hitbox": {"width": 40, "height": 40, "offset_x": 12, "offset_y": 12, "mirror_with_facing": False},
         "collision_circle": {"radius": 11},
     },
     "enemy_boss_forest_guardian": {
@@ -244,6 +251,7 @@ class MapObjectEditor(tk.Tk):
 
         self._init_form_vars()
         self._build_ui()
+        self.type_var.trace_add("write", self._on_type_changed)
         if self.level_entries:
             self._load_selected_level()
 
@@ -256,6 +264,7 @@ class MapObjectEditor(tk.Tk):
         self.width_var = tk.StringVar(value="1")
         self.height_var = tk.StringVar(value="1")
         self.solid_var = tk.BooleanVar(value=False)
+        self.flip_x_var = tk.BooleanVar(value=False)
         self.enemy_detection_radius_var = tk.StringVar()
         self.enemy_patrol_radius_var = tk.StringVar()
         self.enemy_attack_radius_var = tk.StringVar()
@@ -391,8 +400,20 @@ class MapObjectEditor(tk.Tk):
         right = ttk.Frame(self, padding=(4, 0, 8, 8))
         right.grid(row=1, column=2, sticky="nsew")
         right.columnconfigure(0, weight=1)
-        right.rowconfigure(6, weight=1)
-        form = ttk.LabelFrame(right, text="Object", padding=8)
+        right.rowconfigure(0, weight=1)
+        self.settings_canvas = tk.Canvas(right, highlightthickness=0, background=self.cget("background"))
+        self.settings_canvas.grid(row=0, column=0, sticky="nsew")
+        settings_scrollbar = ttk.Scrollbar(right, orient="vertical", command=self.settings_canvas.yview)
+        settings_scrollbar.grid(row=0, column=1, sticky="ns")
+        self.settings_canvas.configure(yscrollcommand=settings_scrollbar.set)
+        self.settings_frame = ttk.Frame(self.settings_canvas)
+        self.settings_canvas_window = self.settings_canvas.create_window((0, 0), window=self.settings_frame, anchor="nw")
+        self.settings_frame.columnconfigure(0, weight=1)
+        self.settings_frame.bind("<Configure>", self._on_settings_frame_configure)
+        self.settings_canvas.bind("<Configure>", self._on_settings_canvas_configure)
+        self.settings_canvas.bind_all("<MouseWheel>", self._on_settings_mousewheel, add="+")
+
+        form = ttk.LabelFrame(self.settings_frame, text="Object", padding=8)
         form.grid(row=0, column=0, sticky="ew")
         for column in (1, 3):
             form.columnconfigure(column, weight=1)
@@ -404,13 +425,14 @@ class MapObjectEditor(tk.Tk):
         self._add_entry(form, "Y", self.y_var, 2, 2)
         self._add_entry(form, "Width", self.width_var, 3, 0)
         self._add_entry(form, "Height", self.height_var, 3, 2)
+        ttk.Checkbutton(form, text="Flip X", variable=self.flip_x_var).grid(row=4, column=0, sticky="w")
 
-        actions = ttk.Frame(right)
+        actions = ttk.Frame(self.settings_frame)
         actions.grid(row=1, column=0, sticky="ew", pady=(8, 0))
         ttk.Button(actions, text="Apply", command=self._apply_form_to_selected).grid(row=0, column=0, padx=2)
         ttk.Button(actions, text="New From Form", command=self._new_from_form).grid(row=0, column=1, padx=2)
 
-        self.enemy_form = ttk.LabelFrame(right, text="Enemy Settings", padding=8)
+        self.enemy_form = ttk.LabelFrame(self.settings_frame, text="Enemy Settings", padding=8)
         self.enemy_form.grid(row=2, column=0, sticky="ew", pady=(8, 0))
         for column in (1, 3):
             self.enemy_form.columnconfigure(column, weight=1)
@@ -431,11 +453,12 @@ class MapObjectEditor(tk.Tk):
         self._add_entry(self.enemy_form, "Atk X", self.enemy_attack_offset_x_var, 7, 0)
         self._add_entry(self.enemy_form, "Atk Y", self.enemy_attack_offset_y_var, 7, 2)
         ttk.Checkbutton(self.enemy_form, text="Mirror attack", variable=self.enemy_attack_mirror_var).grid(row=8, column=0, sticky="w")
+        ttk.Button(self.enemy_form, text="Default Boxes", command=self._reset_enemy_boxes_to_defaults).grid(row=8, column=2, sticky="w")
         self._add_entry(self.enemy_form, "Coll R", self.enemy_collision_radius_var, 9, 0)
         self._add_entry(self.enemy_form, "Coll X", self.enemy_collision_offset_x_var, 9, 2)
         self._add_entry(self.enemy_form, "Coll Y", self.enemy_collision_offset_y_var, 10, 0)
 
-        self.tree_form = ttk.LabelFrame(right, text="Tree Settings", padding=8)
+        self.tree_form = ttk.LabelFrame(self.settings_frame, text="Tree Settings", padding=8)
         self.tree_form.grid(row=3, column=0, sticky="ew", pady=(8, 0))
         for column in (1, 3):
             self.tree_form.columnconfigure(column, weight=1)
@@ -451,7 +474,7 @@ class MapObjectEditor(tk.Tk):
         self._add_entry(self.tree_form, "Hitbox X", self.tree_hitbox_offset_x_var, 5, 0)
         self._add_entry(self.tree_form, "Hitbox Y", self.tree_hitbox_offset_y_var, 5, 2)
 
-        self.stump_form = ttk.LabelFrame(right, text="Stump Settings", padding=8)
+        self.stump_form = ttk.LabelFrame(self.settings_frame, text="Stump Settings", padding=8)
         self.stump_form.grid(row=4, column=0, sticky="ew", pady=(8, 0))
         for column in (1, 3):
             self.stump_form.columnconfigure(column, weight=1)
@@ -466,7 +489,7 @@ class MapObjectEditor(tk.Tk):
         self._add_entry(self.stump_form, "Hitbox X", self.stump_hitbox_offset_x_var, 4, 0)
         self._add_entry(self.stump_form, "Hitbox Y", self.stump_hitbox_offset_y_var, 4, 2)
 
-        self.structure_form = ttk.LabelFrame(right, text="Structure Settings", padding=8)
+        self.structure_form = ttk.LabelFrame(self.settings_frame, text="Structure Settings", padding=8)
         self.structure_form.grid(row=5, column=0, sticky="ew", pady=(8, 0))
         for column in (1, 3):
             self.structure_form.columnconfigure(column, weight=1)
@@ -485,12 +508,18 @@ class MapObjectEditor(tk.Tk):
         self._add_entry(self.structure_form, "Frame W", self.structure_animation_frame_width_var, 6, 0)
         self._add_entry(self.structure_form, "Frame H", self.structure_animation_frame_height_var, 6, 2)
 
-        props = ttk.LabelFrame(right, text="Properties JSON", padding=8)
-        props.grid(row=6, column=0, sticky="nsew", pady=(8, 0))
+        props = ttk.LabelFrame(self.settings_frame, text="Properties JSON", padding=8)
+        props.grid(row=6, column=0, sticky="ew", pady=(8, 0))
         props.columnconfigure(0, weight=1)
-        props.rowconfigure(0, weight=1)
-        self.properties_text = tk.Text(props, width=42, height=20, wrap="none")
+        self.properties_text = tk.Text(props, width=42, height=14, wrap="none")
         self.properties_text.grid(row=0, column=0, sticky="nsew")
+        self.specialized_forms = {
+            "enemy": (self.enemy_form, 2),
+            "tree": (self.tree_form, 3),
+            "stump": (self.stump_form, 4),
+            "structure": (self.structure_form, 5),
+        }
+        self._update_specialized_form_visibility()
         self._refresh_palette()
 
     def _add_entry(self, parent, label, variable, row, column):
@@ -501,6 +530,43 @@ class MapObjectEditor(tk.Tk):
 
     def _build_palette_tabs(self):
         self._update_palette_tab_buttons()
+
+    def _on_settings_frame_configure(self, _event=None):
+        self.settings_canvas.configure(scrollregion=self.settings_canvas.bbox("all"))
+
+    def _on_settings_canvas_configure(self, event):
+        self.settings_canvas.itemconfigure(self.settings_canvas_window, width=event.width)
+
+    def _on_settings_mousewheel(self, event):
+        widget = self.winfo_containing(event.x_root, event.y_root)
+        while widget is not None:
+            if widget == self.settings_canvas or widget == self.settings_frame:
+                step = -1 * int(event.delta / 120) if event.delta else 0
+                if step:
+                    self.settings_canvas.yview_scroll(step, "units")
+                return
+            widget = widget.master
+
+    def _on_type_changed(self, *_args):
+        self._update_specialized_form_visibility()
+
+    def _update_specialized_form_visibility(self):
+        object_type = self.type_var.get().strip()
+        visible_keys = set()
+        if self._is_enemy_type(object_type):
+            visible_keys.add("enemy")
+        if object_type == "tree_object":
+            visible_keys.add("tree")
+        if object_type == "stump_object":
+            visible_keys.add("stump")
+        if object_type == "structure_object":
+            visible_keys.add("structure")
+        for key, (frame, row) in self.specialized_forms.items():
+            if key in visible_keys:
+                frame.grid(row=row, column=0, sticky="ew", pady=(8, 0))
+            else:
+                frame.grid_remove()
+        self.after_idle(self._on_settings_frame_configure)
 
     def _update_palette_tab_buttons(self):
         for button in self.palette_tab_buttons:
@@ -880,16 +946,26 @@ class MapObjectEditor(tk.Tk):
                 continue
 
     def _apply_enemy_properties_to_form(self, object_type, properties):
-        collision_circle = properties.get("collision_circle") if isinstance(properties.get("collision_circle"), dict) else {}
         self.enemy_detection_radius_var.set("" if properties.get("detection_radius") is None else str(properties.get("detection_radius")))
         self.enemy_patrol_radius_var.set("" if properties.get("patrol_radius") is None else str(properties.get("patrol_radius")))
         attack_radius_key = self._enemy_attack_radius_property_name(object_type)
         attack_radius_value = properties.get(attack_radius_key) if attack_radius_key is not None else None
         self.enemy_attack_radius_var.set("" if attack_radius_value is None else str(attack_radius_value))
         self.enemy_stationary_var.set(bool(properties.get("stationary", False)))
+        self._apply_enemy_box_values_to_form(properties)
+        self._set_enemy_form_state(self._is_enemy_type(object_type))
+
+    def _reset_enemy_boxes_to_defaults(self):
+        defaults = self._enemy_defaults(self.type_var.get().strip())
+        if not defaults:
+            return
+        self._apply_enemy_box_values_to_form(defaults)
+
+    def _apply_enemy_box_values_to_form(self, properties):
         body = properties.get("body_hitbox") if isinstance(properties.get("body_hitbox"), dict) else {}
         hurt = properties.get("hurtbox") if isinstance(properties.get("hurtbox"), dict) else {}
         attack = properties.get("attack_hitbox") if isinstance(properties.get("attack_hitbox"), dict) else {}
+        collision_circle = properties.get("collision_circle") if isinstance(properties.get("collision_circle"), dict) else {}
         self.enemy_body_width_var.set("" if body.get("width") is None else str(body.get("width")))
         self.enemy_body_height_var.set("" if body.get("height") is None else str(body.get("height")))
         self.enemy_body_offset_x_var.set("" if body.get("offset_x") is None else str(body.get("offset_x")))
@@ -906,7 +982,6 @@ class MapObjectEditor(tk.Tk):
         self.enemy_collision_radius_var.set("" if collision_circle.get("radius") is None else str(collision_circle.get("radius")))
         self.enemy_collision_offset_x_var.set("" if collision_circle.get("offset_x") is None else str(collision_circle.get("offset_x")))
         self.enemy_collision_offset_y_var.set("" if collision_circle.get("offset_y") is None else str(collision_circle.get("offset_y")))
-        self._set_enemy_form_state(self._is_enemy_type(object_type))
 
     def _apply_tree_properties_to_form(self, object_type, properties):
         self.tree_sprite_scale_x_var.set("" if properties.get("sprite_scale_x") is None else str(properties.get("sprite_scale_x")))
@@ -1340,8 +1415,12 @@ class MapObjectEditor(tk.Tk):
         sprite_info = self._resolve_object_sprite_info(obj)
         if sprite_info is None:
             return None
+        properties = obj.get("properties", {})
+        if not isinstance(properties, dict):
+            properties = {}
         sprite_path, frame_width, frame_height = sprite_info
-        cache_key = (sprite_path, frame_width, frame_height, int(size[0]), int(size[1]), bool(fit_to_box))
+        flip_x = bool(properties.get("flip_x", False))
+        cache_key = (sprite_path, frame_width, frame_height, int(size[0]), int(size[1]), bool(fit_to_box), flip_x)
         if cache_key in self.sprite_image_cache:
             return self.sprite_image_cache[cache_key]
         image_path = ASSETS_DIR / sprite_path
@@ -1350,6 +1429,8 @@ class MapObjectEditor(tk.Tk):
         image = Image.open(image_path).convert("RGBA")
         if frame_width and frame_height:
             image = image.crop((0, 0, min(frame_width, image.width), min(frame_height, image.height)))
+        if flip_x:
+            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         target_width = max(1, int(size[0]))
         target_height = max(1, int(size[1]))
         if fit_to_box:
@@ -1397,15 +1478,16 @@ class MapObjectEditor(tk.Tk):
         object_type = str(obj.get("type", ""))
         name = str(obj.get("name", ""))
 
-        sprite_path = properties.get("sprite_path")
-        if sprite_path:
-            return str(sprite_path), None, None
-
         sprite_sheet_path = properties.get("sprite_sheet_path")
-        if sprite_sheet_path:
+        frame_count = self._safe_int(properties.get("animation_frame_count"), 0)
+        if sprite_sheet_path and frame_count > 0:
             frame_width = self._safe_int(properties.get("animation_frame_width"), 64)
             frame_height = self._safe_int(properties.get("animation_frame_height"), 64)
             return str(sprite_sheet_path), frame_width, frame_height
+
+        sprite_path = properties.get("sprite_path")
+        if sprite_path:
+            return str(sprite_path), None, None
 
         if object_type in ENEMY_PREVIEW_SPRITES:
             return ENEMY_PREVIEW_SPRITES[object_type]
@@ -1447,6 +1529,9 @@ class MapObjectEditor(tk.Tk):
 
         if object_type == "grass_hide_zone":
             return "world_objects/grass_hide_zone/big_grass.png", None, None
+
+        if object_type == "level_transition":
+            return LEVEL_TRANSITION_SPRITE, 64, 64
 
         if object_type == "pickable_object":
             item_id = str(properties.get("item_id") or name).strip().lower()
@@ -1662,6 +1747,7 @@ class MapObjectEditor(tk.Tk):
         properties = obj.get("properties", {})
         if not isinstance(properties, dict):
             properties = {}
+        self.flip_x_var.set(bool(properties.get("flip_x", False)))
         self._apply_enemy_properties_to_form(obj.get("type", ""), self._resolved_enemy_properties(obj))
         self._apply_tree_properties_to_form(obj.get("type", ""), self._resolved_tree_properties(obj))
         self._apply_stump_properties_to_form(obj.get("type", ""), self._resolved_stump_properties(obj))
@@ -1678,6 +1764,7 @@ class MapObjectEditor(tk.Tk):
         self.width_var.set("1")
         self.height_var.set("1")
         self.solid_var.set(False)
+        self.flip_x_var.set(False)
         self._clear_enemy_form()
         self._clear_tree_form()
         self._clear_stump_form()
@@ -1859,6 +1946,10 @@ class MapObjectEditor(tk.Tk):
             obj["id"] = object_id
         if self.solid_var.get():
             obj["solid"] = True
+        if self.flip_x_var.get():
+            properties["flip_x"] = True
+        else:
+            properties.pop("flip_x", None)
         self._apply_enemy_form_to_properties(object_type, properties)
         self._apply_tree_form_to_properties(object_type, properties)
         self._apply_stump_form_to_properties(object_type, properties)

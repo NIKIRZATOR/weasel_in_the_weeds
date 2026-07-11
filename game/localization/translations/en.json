@@ -332,7 +332,8 @@
     "levels": {
       "level_00": "Test Chambers",
       "level_01": "Level 01",
-      "level_02": "Forest Edge"
+      "level_02": "Forest Edge",
+      "level_03": "Forest"
     },
     "common": {
       "loading": "Loading...",
@@ -447,6 +448,14 @@
       "name": "Mushroom",
       "description": "A forest mushroom."
     },
+    "yellow_bud": {
+      "name": "Yellow Bud",
+      "description": "A fresh yellow flower bud."
+    },
+    "petals": {
+      "name": "Petals",
+      "description": "Soft yellow petals."
+    },
     "feather": {
       "name": "Feather",
       "description": "A light bird feather."
@@ -471,10 +480,6 @@
       "name": "Map",
       "description": "A magical map that remembers opened places."
     },
-    "rusty_knife": {
-      "name": "Knife",
-      "description": "A light knife for quick strikes."
-    },
     "stone_spear": {
       "name": "Spear",
       "description": "A long spear with a sharpened stone head."
@@ -485,13 +490,13 @@
     }
   },
   "recipes": {
-    "stone_knife": {
-      "name": "Stone Knife",
-      "description": "A sharpened pebble fixed to a stick. Simple but useful."
-    },
     "stone_spear": {
       "name": "Stone Spear",
       "description": "A sturdy branch tipped with sharpened stone. Reliable reach for early fights."
+    },
+    "short_bow": {
+      "name": "Short Bow",
+      "description": "A simple hunting bow bound from sticks, bark and spider webbing."
     },
     "berry_mix": {
       "name": "Berry Mix",
@@ -509,21 +514,21 @@
       "name": "Beetle Charm",
       "description": "A tiny forest talisman assembled from light monster remains."
     },
-    "temp_healing_tonic": {
+    "healing_tonic_recipe": {
       "name": "Healing Tonic",
-      "description": "TEMP: placeholder recipe; ingredients will be replaced later."
+      "description": "Crushed berries and a fresh bud brewed into a quick restorative tonic."
     },
-    "temp_healing_infusion": {
+    "healing_infusion_recipe": {
       "name": "Healing Infusion",
-      "description": "TEMP: placeholder recipe; ingredients will be replaced later."
+      "description": "A stronger healing brew steeped from berries, petals and mushroom flesh."
     },
-    "temp_stamina_tonic": {
+    "stamina_tonic_recipe": {
       "name": "Stamina Tonic",
-      "description": "TEMP: placeholder recipe; ingredients will be replaced later."
+      "description": "A brisk tonic made from mushroom and meadow herbs to keep you moving."
     },
-    "temp_stamina_infusion": {
+    "stamina_infusion_recipe": {
       "name": "Stamina Infusion",
-      "description": "TEMP: placeholder recipe; ingredients will be replaced later."
+      "description": "A concentrated field infusion that trades rarity for a longer-lasting kick."
     }
   },
   "enemy": {

@@ -5,7 +5,7 @@ import pygame
 from game.core.assets import load_image
 from game.core.vector import Vector2
 from game.entities.enemies.ai.states import CHASE
-from game.entities.enemies.ai.steering import entity_distance
+from game.entities.enemies.ai.steering import entity_distance, rects_intersect
 from game.entities.enemies.base import Enemy
 from settings import ASSETS_DIR
 
@@ -34,7 +34,13 @@ class MeleeGruntEnemy(Enemy):
         "offset_x": 8,
         "offset_y": 8,
     }
-    ATTACK_HITBOX = None
+    ATTACK_HITBOX = {
+        "width": 48,
+        "height": 64,
+        "offset_x": 8,
+        "offset_y": 16,
+        "mirror_with_facing": True,
+    }
     COLLISION_CIRCLE = {
         "radius": 10.5,
     }
@@ -111,18 +117,26 @@ class MeleeGruntEnemy(Enemy):
         distance = entity_distance(self, player)
         if distance <= self.attack_reach:
             if not self.attack_cooldown.is_active():
-                attack_direction = Vector2(
-                    player_center.x - self.get_center().x,
-                    player_center.y - self.get_center().y,
-                )
-                self._update_facing_from_direction(attack_direction)
-                self.attack_animation_timer = 0.22
-                player.take_damage(self.damage)
-                self.attack_cooldown.start()
+                self._bite(player)
             return
         previous_position = Vector2(self.position.x, self.position.y)
         self._move_towards(player_center.x, player_center.y, dt, game_scene, use_pathfinding=True)
         self._update_stuck_state(dt, previous_position, game_scene)
+
+    def _bite(self, player):
+        direction = Vector2(player.get_center().x - self.get_center().x, player.get_center().y - self.get_center().y)
+        self._update_facing_from_direction(direction)
+        self.activate_attack_hitbox(duration=0.12)
+        if self._can_hit_player(player):
+            player.take_damage(self.damage, direction=direction, force=95.0, stun_duration=0.14)
+        self.attack_cooldown.start()
+        self.attack_animation_timer = max(self.attack_animation_timer, 0.22)
+
+    def _can_hit_player(self, player):
+        attack_rect = self.get_attack_hitbox_rect()
+        if attack_rect is None:
+            return True
+        return rects_intersect(attack_rect, player.get_hitbox_rect())
 
     def _load_animation_frames(self, path, frame_count):
         sheet = load_image(path)

@@ -18,6 +18,15 @@ CONTAINER_SPRITES = {
     "large_chest": "world_objects/container_object/large_chest.png",
 }
 
+LEVEL_TRANSITION_DEFAULTS = {
+    "sprite_path": "world_objects/level_transition/portal.png",
+    "sprite_sheet_path": "world_objects/level_transition/portal.png",
+    "animation_frame_count": 8,
+    "animation_frame_width": 64,
+    "animation_frame_height": 64,
+    "animation_frame_duration": 0.18,
+}
+
 GATHERABLE_TEMPLATE_SPRITES = {
     "berry_bush_small": {
         "sprite_path": "world_objects/gatherable_object/berry_bush_full.png",
@@ -34,6 +43,18 @@ GATHERABLE_TEMPLATE_SPRITES = {
     "bug_remains_small": {
         "sprite_path": "world_objects/gatherable_object/stump_full.png",
         "depleted_sprite_path": "world_objects/gatherable_object/stump_empty.png",
+    },
+    "leaf_pile_small": {
+        "sprite_path": "world_objects/gatherable_object/bunch_of_leaves_full.png",
+        "depleted_sprite_path": "world_objects/gatherable_object/bunch_of_leaves_empty.png",
+    },
+    "yellow_flower_small": {
+        "sprite_path": "world_objects/gatherable_object/yellow_flower_full.png",
+        "depleted_sprite_path": "world_objects/gatherable_object/yellow_flower_empty.png",
+    },
+    "bone_pile_small": {
+        "sprite_path": "world_objects/gatherable_object/bunch_of_bones_full.png",
+        "depleted_sprite_path": "world_objects/gatherable_object/bunch_of_bones_empty.png",
     },
 }
 
@@ -144,6 +165,16 @@ STRUCTURE_DEFAULTS = {
         "hitbox_width_ratio": 0.45,
         "hitbox_height_ratio": 0.35,
         "hitbox_lift": 0,
+    },
+    "cave entrance": {
+        "sprite_path": "world_objects/structure_object/cave_closed_enter.png",
+        "opened_sprite_path": "world_objects/structure_object/cave_open_enter.png",
+        "sprite_scale_x": 1.0,
+        "sprite_scale_y": 1.0,
+        "hitbox_width_ratio": 0.7,
+        "hitbox_height_ratio": 0.4,
+        "hitbox_lift": 0,
+        "state": "closed",
     },
 }
 
@@ -364,6 +395,11 @@ def _assign_default_sprite_path(object_type, name, properties):
         if not defaults:
             return
         for key, value in defaults.items():
+            properties.setdefault(key, value)
+        return
+
+    if object_type == "level_transition":
+        for key, value in LEVEL_TRANSITION_DEFAULTS.items():
             properties.setdefault(key, value)
         return
 

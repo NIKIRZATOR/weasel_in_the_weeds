@@ -18,7 +18,7 @@ class CheckpointObject(WorldObject):
         "activating": 90,
         "active": 120,
     }
-    _ANIMATION_CACHE: dict[tuple[str, int, int], list[pygame.Surface]] = {}
+    _ANIMATION_CACHE: dict[tuple[str, int, int, bool], list[pygame.Surface]] = {}
 
     def __init__(self, x, y, width, height, name="checkpoint_object", properties=None):
         super().__init__(
@@ -122,7 +122,7 @@ class CheckpointObject(WorldObject):
 
     def _load_checkpoint_frames(self, state):
         sprite_path, frame_count = self.SPRITE_SHEETS[state]
-        cache_key = (state, int(self.width), int(self.height))
+        cache_key = (state, int(self.width), int(self.height), self.flip_x)
         if cache_key in self._ANIMATION_CACHE:
             return self._ANIMATION_CACHE[cache_key]
 
@@ -142,6 +142,8 @@ class CheckpointObject(WorldObject):
             frame.blit(sheet, (0, 0), source_rect)
             if (frame_width, frame_height) != (self.width, self.height):
                 frame = pygame.transform.scale(frame, (int(self.width), int(self.height)))
+            if self.flip_x:
+                frame = pygame.transform.flip(frame, True, False)
             frames.append(frame)
         self._ANIMATION_CACHE[cache_key] = frames
         return frames

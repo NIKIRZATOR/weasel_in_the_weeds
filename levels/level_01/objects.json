@@ -3,8 +3,8 @@
     {
       "type": "checkpoint_object",
       "name": "Meadow Stone",
-      "x": 18,
-      "y": 23,
+      "x": 19,
+      "y": 24,
       "width": 2,
       "height": 2,
       "properties": {
@@ -12,29 +12,16 @@
       }
     },
     {
-      "type": "npc_object",
-      "name": "Hermit Mouse",
-      "x": 12,
-      "y": 24,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "npc_id": "hermit_mouse",
-        "health": 35,
-        "dialogue_file": "hermit_mouse.json"
-      }
-    },
-    {
       "type": "level_transition",
       "name": "To Forest Edge",
-      "x": 197,
-      "y": 3,
-      "width": 1,
-      "height": 3,
+      "x": 194,
+      "y": 4,
+      "width": 4,
+      "height": 4,
       "properties": {
         "target_level": "level_02",
         "target_spawn": {
-          "x": 6,
+          "x": 10,
           "y": 6
         },
         "set_flags": [
@@ -45,8 +32,8 @@
     {
       "type": "checkpoint_object",
       "name": "Forest Edge Stone",
-      "x": 196,
-      "y": 4,
+      "x": 188,
+      "y": 8,
       "width": 1,
       "height": 1,
       "properties": {
@@ -56,305 +43,8 @@
     {
       "type": "gatherable_object",
       "name": "Berry Bush",
-      "x": 22,
-      "y": 25,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 56,
-      "y": 20,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 51,
-      "y": 20,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 32,
-      "y": 24,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 44,
-      "y": 27,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 26,
-      "y": 13,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 52,
-      "y": 16,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 47,
-      "y": 20,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 43,
-      "y": 20,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 58,
-      "y": 27,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 49,
-      "y": 26,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 42,
-      "y": 7,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 39,
-      "y": 20,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 37,
-      "y": 24,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 51,
-      "y": 31,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 68,
-      "y": 32,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 64,
-      "y": 31,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 60,
-      "y": 31,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 57,
-      "y": 46,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 24,
-      "y": 29,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 64,
-      "y": 51,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 52,
-      "y": 44,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 45,
-      "y": 31,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 45,
-      "y": 42,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
       "x": 56,
       "y": 63,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 68,
-      "y": 81,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 67,
-      "y": 89,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 61,
-      "y": 85,
       "width": 1,
       "height": 1,
       "properties": {
@@ -385,559 +75,9 @@
     },
     {
       "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 69,
-      "y": 75,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 53,
-      "y": 84,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 96,
-      "y": 53,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 84,
-      "y": 55,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 84,
-      "y": 46,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 89,
-      "y": 47,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 96,
-      "y": 57,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 80,
-      "y": 35,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 82,
-      "y": 41,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 76,
-      "y": 42,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 96,
-      "y": 49,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 89,
-      "y": 42,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 119,
-      "y": 44,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 114,
-      "y": 46,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 192,
-      "y": 9,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 188,
-      "y": 11,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 169,
-      "y": 29,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 184,
-      "y": 10,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 181,
-      "y": 15,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 178,
-      "y": 18,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 176,
-      "y": 22,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 173,
-      "y": 30,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 172,
-      "y": 21,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 153,
-      "y": 13,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 153,
-      "y": 25,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 152,
-      "y": 29,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 139,
-      "y": 40,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 149,
-      "y": 37,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 129,
-      "y": 51,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 135,
-      "y": 40,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 174,
-      "y": 58,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 163,
-      "y": 35,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 145,
-      "y": 41,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 164,
-      "y": 39,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 157,
-      "y": 37,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 151,
-      "y": 32,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 129,
-      "y": 71,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 164,
-      "y": 77,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 133,
-      "y": 80,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 129,
-      "y": 80,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 161,
-      "y": 81,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 128,
-      "y": 75,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 178,
-      "y": 87,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Berry Bush",
-      "x": 145,
-      "y": 86,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "berry_bush_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 49,
-      "y": 31,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 53,
-      "y": 31,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 70,
-      "y": 33,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 62,
-      "y": 31,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 49,
-      "y": 43,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
       "name": "Stump",
       "x": 42,
       "y": 58,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 41,
-      "y": 41,
       "width": 1,
       "height": 1,
       "properties": {
@@ -958,118 +98,8 @@
     {
       "type": "gatherable_object",
       "name": "Stump",
-      "x": 64,
-      "y": 83,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 58,
-      "y": 86,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
       "x": 53,
       "y": 61,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 51,
-      "y": 85,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 96,
-      "y": 55,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 96,
-      "y": 51,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 86,
-      "y": 47,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 87,
-      "y": 56,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 75,
-      "y": 39,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 83,
-      "y": 58,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 72,
-      "y": 86,
       "width": 1,
       "height": 1,
       "properties": {
@@ -1089,347 +119,6 @@
     },
     {
       "type": "gatherable_object",
-      "name": "Stump",
-      "x": 79,
-      "y": 75,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 96,
-      "y": 91,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 80,
-      "y": 89,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 126,
-      "y": 49,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 161,
-      "y": 40,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 160,
-      "y": 36,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 151,
-      "y": 37,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 147,
-      "y": 31,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 145,
-      "y": 35,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 141,
-      "y": 82,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 141,
-      "y": 90,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 130,
-      "y": 69,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 181,
-      "y": 88,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stump",
-      "x": 177,
-      "y": 91,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "bug_remains_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 54,
-      "y": 20,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 34,
-      "y": 24,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 20,
-      "y": 25,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 47,
-      "y": 23,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 74,
-      "y": 28,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 73,
-      "y": 22,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 80,
-      "y": 23,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 190,
-      "y": 10,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 186,
-      "y": 11,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 175,
-      "y": 25,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 171,
-      "y": 24,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 150,
-      "y": 17,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 143,
-      "y": 37,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 141,
-      "y": 44,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 139,
-      "y": 38,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Stone Pile",
-      "x": 136,
-      "y": 49,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "stone_pile_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 38,
-      "y": 40,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
       "name": "Fallen Log",
       "x": 37,
       "y": 56,
@@ -1437,149 +126,6 @@
       "height": 1,
       "properties": {
         "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 35,
-      "y": 30,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 32,
-      "y": 39,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 89,
-      "y": 45,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 116,
-      "y": 42,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 112,
-      "y": 38,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 137,
-      "y": 35,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 134,
-      "y": 52,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 133,
-      "y": 37,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 133,
-      "y": 45,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 174,
-      "y": 84,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 172,
-      "y": 88,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "gatherable_object",
-      "name": "Fallen Log",
-      "x": 170,
-      "y": 65,
-      "width": 1,
-      "height": 1,
-      "properties": {
-        "template": "fallen_log_small"
-      }
-    },
-    {
-      "type": "grass_hide_zone",
-      "name": "Tall Grass",
-      "x": 57,
-      "y": 30,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "concealment": true
       }
     },
     {
@@ -1770,261 +316,6 @@
       }
     },
     {
-      "type": "enemy_beetle",
-      "name": "Beetle",
-      "x": 30,
-      "y": 53,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_beetle",
-      "name": "Beetle",
-      "x": 70,
-      "y": 58,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_beetle",
-      "name": "Beetle",
-      "x": 42,
-      "y": 30,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "detection_radius": 150,
-        "patrol_radius": 100,
-        "charge_range": 120,
-        "stationary": false,
-        "body_hitbox": {
-          "width": 64,
-          "height": 64,
-          "offset_x": 0,
-          "offset_y": 0
-        },
-        "hurtbox": {
-          "width": 64,
-          "height": 64,
-          "offset_x": 0,
-          "offset_y": 0
-        },
-        "attack_hitbox": {
-          "width": 48,
-          "height": 48,
-          "offset_x": 8,
-          "offset_y": 8,
-          "mirror_with_facing": true
-        },
-        "collision_circle": {
-          "radius": 11
-        }
-      }
-    },
-    {
-      "type": "enemy_beetle",
-      "name": "Beetle",
-      "x": 81,
-      "y": 37,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_beetle",
-      "name": "Beetle",
-      "x": 71,
-      "y": 62,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_beetle",
-      "name": "Beetle",
-      "x": 132,
-      "y": 61,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_beetle",
-      "name": "Beetle",
-      "x": 155,
-      "y": 40,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_spider",
-      "name": "Spider",
-      "x": 79,
-      "y": 70,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_spider",
-      "name": "Spider",
-      "x": 76,
-      "y": 82,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_spider",
-      "name": "Spider",
-      "x": 120,
-      "y": 72,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_spider",
-      "name": "Spider",
-      "x": 153,
-      "y": 83,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_spider",
-      "name": "Spider",
-      "x": 166,
-      "y": 72,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_spider",
-      "name": "Spider",
-      "x": 123,
-      "y": 72,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_spider",
-      "name": "Spider",
-      "x": 152,
-      "y": 40,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_spider",
-      "name": "Spider",
-      "x": 138,
-      "y": 46,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_ranged",
-      "name": "Wasp",
-      "x": 120,
-      "y": 49,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "quest_enemy_type": "wasp"
-      }
-    },
-    {
-      "type": "enemy_ranged",
-      "name": "Wasp",
-      "x": 77,
-      "y": 32,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "quest_enemy_type": "wasp"
-      }
-    },
-    {
-      "type": "enemy_ranged",
-      "name": "Wasp",
-      "x": 149,
-      "y": 40,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "quest_enemy_type": "wasp"
-      }
-    },
-    {
-      "type": "enemy_ranged",
-      "name": "Wasp",
-      "x": 176,
-      "y": 56,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "quest_enemy_type": "wasp"
-      }
-    },
-    {
-      "type": "enemy_ranged",
-      "name": "Wasp",
-      "x": 167,
-      "y": 37,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "quest_enemy_type": "wasp"
-      }
-    },
-    {
-      "type": "enemy_melee",
-      "name": "Forest Guard",
-      "x": 153,
-      "y": 19,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_melee",
-      "name": "Forest Guard",
-      "x": 133,
-      "y": 65,
-      "width": 2,
-      "height": 2
-    },
-    {
-      "type": "enemy_beetle",
-      "name": "Beetle",
-      "x": 49,
-      "y": 40,
-      "width": 2,
-      "height": 2,
-      "properties": {
-        "detection_radius": 0,
-        "patrol_radius": 0,
-        "charge_range": 0,
-        "stationary": false,
-        "body_hitbox": {
-          "width": 64,
-          "height": 64,
-          "offset_x": 0,
-          "offset_y": 0
-        },
-        "hurtbox": {
-          "width": 64,
-          "height": 64,
-          "offset_x": 0,
-          "offset_y": 0
-        },
-        "attack_hitbox": {
-          "width": 48,
-          "height": 48,
-          "offset_x": 8,
-          "offset_y": 8,
-          "mirror_with_facing": true
-        },
-        "collision_circle": {
-          "radius": 11
-        }
-      }
-    },
-    {
       "type": "stump_object",
       "name": "Fallen Tree 3",
       "x": 55,
@@ -2049,6 +340,3291 @@
       "height": 2,
       "properties": {
         "sprite_path": "world_objects/solid_object/rocks/stone_block.png"
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 46,
+      "y": 15,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 46,
+      "y": 35,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 78,
+      "y": 6,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 92,
+      "y": 9,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 85,
+      "y": 28,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 67,
+      "y": 44,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 90,
+      "y": 64,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 74,
+      "y": 81,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 48,
+      "y": 93,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 7,
+      "y": 75,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 11,
+      "y": 54,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 31,
+      "y": 65,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 91,
+      "y": 89,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 124,
+      "y": 80,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 124,
+      "y": 54,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 104,
+      "y": 35,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 123,
+      "y": 10,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 135,
+      "y": 25,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 163,
+      "y": 31,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 148,
+      "y": 8,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 175,
+      "y": 9,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_ranged",
+      "name": "Wasp",
+      "x": 181,
+      "y": 37,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 14,
+        "speed": 60,
+        "damage": 4,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 280,
+        "patrol_radius": 160,
+        "attack_range": 260,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 141,
+      "y": 52,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 142,
+      "y": 80,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 176,
+      "y": 82,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_beetle",
+      "name": "Beetle",
+      "x": 172,
+      "y": 53,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 34,
+        "speed": 64,
+        "damage": 7,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 230,
+        "patrol_radius": 140,
+        "charge_range": 140,
+        "body_hitbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "hurtbox": {
+          "width": 64,
+          "height": 64,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "attack_hitbox": {
+          "width": 40,
+          "height": 40,
+          "offset_x": 12,
+          "offset_y": 12,
+          "mirror_with_facing": false
+        },
+        "collision_circle": {
+          "radius": 11
+        }
+      }
+    },
+    {
+      "type": "enemy_spider",
+      "name": "Spider",
+      "x": 118,
+      "y": 88,
+      "width": 2,
+      "height": 2,
+      "properties": {
+        "health": 18,
+        "speed": 92,
+        "damage": 5,
+        "sprite_scale": 1.0,
+        "stationary": false,
+        "detection_radius": 260,
+        "patrol_radius": 150,
+        "spit_range": 250,
+        "body_hitbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "hurtbox": {
+          "width": 48,
+          "height": 48,
+          "offset_x": 8,
+          "offset_y": 8
+        },
+        "attack_hitbox": {
+          "width": 32,
+          "height": 32,
+          "offset_x": 16,
+          "offset_y": 16,
+          "mirror_with_facing": true
+        },
+        "collision_circle": {
+          "radius": 10
+        }
+      }
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 73,
+      "y": 33,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 48,
+      "y": 28,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 75,
+      "y": 24,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 79,
+      "y": 11,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 90,
+      "y": 20,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 85,
+      "y": 42,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 75,
+      "y": 49,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 84,
+      "y": 71,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 73,
+      "y": 73,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 71,
+      "y": 91,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 94,
+      "y": 94,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 126,
+      "y": 90,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 136,
+      "y": 72,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 118,
+      "y": 51,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 130,
+      "y": 39,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 163,
+      "y": 43,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 144,
+      "y": 22,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "coin",
+      "x": 182,
+      "y": 16,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 27,
+      "y": 30,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 40,
+      "y": 22,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 29,
+      "y": 15,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 59,
+      "y": 24,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 64,
+      "y": 34,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 81,
+      "y": 27,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 76,
+      "y": 16,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 86,
+      "y": 9,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 90,
+      "y": 19,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 93,
+      "y": 29,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 82,
+      "y": 35,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 93,
+      "y": 40,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 75,
+      "y": 54,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 88,
+      "y": 61,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 70,
+      "y": 77,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 83,
+      "y": 83,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 69,
+      "y": 93,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 55,
+      "y": 85,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 44,
+      "y": 95,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 29,
+      "y": 73,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 39,
+      "y": 71,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 32,
+      "y": 60,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 14,
+      "y": 73,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 9,
+      "y": 66,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 21,
+      "y": 58,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 19,
+      "y": 33,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "pickable_object",
+      "name": "stick",
+      "x": 41,
+      "y": 39,
+      "width": 1,
+      "height": 1
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 67,
+      "y": 30,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 78,
+      "y": 21,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 84,
+      "y": 13,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 77,
+      "y": 37,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 82,
+      "y": 49,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 92,
+      "y": 51,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 80,
+      "y": 59,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 36,
+      "y": 29,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 27,
+      "y": 24,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 27,
+      "y": 19,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 74,
+      "y": 78,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 57,
+      "y": 88,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 61,
+      "y": 92,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 80,
+      "y": 93,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 91,
+      "y": 95,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 53,
+      "y": 29,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 75,
+      "y": 68,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 70,
+      "y": 51,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 73,
+      "y": 45,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 67,
+      "y": 37,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 51,
+      "y": 41,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 45,
+      "y": 24,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 28,
+      "y": 34,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 34,
+      "y": 21,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 36,
+      "y": 13,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 17,
+      "y": 19,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 19,
+      "y": 31,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 49,
+      "y": 8,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 65,
+      "y": 4,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 83,
+      "y": 5,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 94,
+      "y": 5,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 91,
+      "y": 14,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 88,
+      "y": 40,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 93,
+      "y": 47,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 88,
+      "y": 72,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 92,
+      "y": 73,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 86,
+      "y": 83,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 63,
+      "y": 94,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 64,
+      "y": 93,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 65,
+      "y": 94,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 66,
+      "y": 92,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 49,
+      "y": 89,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 62,
+      "y": 85,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 68,
+      "y": 79,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 73,
+      "y": 68,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 75,
+      "y": 56,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 69,
+      "y": 43,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 60,
+      "y": 40,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 60,
+      "y": 31,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 80,
+      "y": 34,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 89,
+      "y": 49,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 87,
+      "y": 58,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 70,
+      "y": 28,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 63,
+      "y": 26,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 51,
+      "y": 24,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 50,
+      "y": 11,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 70,
+      "y": 6,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 85,
+      "y": 17,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 90,
+      "y": 54,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 88,
+      "y": 83,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 83,
+      "y": 88,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 95,
+      "y": 82,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 85,
+      "y": 64,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 73,
+      "y": 61,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 68,
+      "y": 89,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 90,
+      "y": 77,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 86,
+      "y": 89,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 67,
+      "y": 50,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 102,
+      "y": 95,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 111,
+      "y": 91,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 122,
+      "y": 86,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 132,
+      "y": 84,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 137,
+      "y": 91,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 119,
+      "y": 70,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 118,
+      "y": 48,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 135,
+      "y": 44,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 126,
+      "y": 31,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 149,
+      "y": 33,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 172,
+      "y": 30,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 151,
+      "y": 13,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 181,
+      "y": 15,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 176,
+      "y": 59,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 169,
+      "y": 77,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 191,
+      "y": 10,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 184,
+      "y": 4,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 147,
+      "y": 47,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 141,
+      "y": 65,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 143,
+      "y": 75,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 165,
+      "y": 59,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 158,
+      "y": 51,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 155,
+      "y": 66,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 128,
+      "y": 42,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 119,
+      "y": 36,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 115,
+      "y": 21,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 109,
+      "y": 51,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 104,
+      "y": 62,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 124,
+      "y": 59,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 109,
+      "y": 79,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 158,
+      "y": 94,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 171,
+      "y": 89,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 180,
+      "y": 69,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 162,
+      "y": 65,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 182,
+      "y": 60,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 180,
+      "y": 49,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 177,
+      "y": 38,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 127,
+      "y": 26,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 147,
+      "y": 21,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stump",
+      "x": 112,
+      "y": 13,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bug_remains_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 125,
+      "y": 19,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 127,
+      "y": 48,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 136,
+      "y": 62,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Fallen Log",
+      "x": 129,
+      "y": 80,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "fallen_log_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 140,
+      "y": 78,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 151,
+      "y": 77,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 159,
+      "y": 71,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 139,
+      "y": 68,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 138,
+      "y": 58,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 161,
+      "y": 57,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 141,
+      "y": 47,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 149,
+      "y": 42,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 169,
+      "y": 48,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 175,
+      "y": 46,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 144,
+      "y": 32,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 138,
+      "y": 19,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 164,
+      "y": 23,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 166,
+      "y": 14,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 164,
+      "y": 87,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 147,
+      "y": 92,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Berry Bush",
+      "x": 110,
+      "y": 64,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "berry_bush_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 128,
+      "y": 72,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 129,
+      "y": 92,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 137,
+      "y": 85,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 128,
+      "y": 85,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 119,
+      "y": 17,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 152,
+      "y": 22,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 186,
+      "y": 19,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 178,
+      "y": 8,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 181,
+      "y": 4,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 192,
+      "y": 17,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 179,
+      "y": 89,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Stone Pile",
+      "x": 188,
+      "y": 89,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "stone_pile_small"
+      }
+    },
+    {
+      "type": "container_object",
+      "name": "Large Chest",
+      "x": 187,
+      "y": 91,
+      "width": 2,
+      "height": 1,
+      "id": "large_chest_01",
+      "solid": true,
+      "properties": {
+        "container_type": "large_chest",
+        "fixed_items": [
+          {
+            "item_id": "knowledge_shard",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "type": "container_object",
+      "name": "Crate",
+      "x": 185,
+      "y": 7,
+      "width": 1,
+      "height": 1,
+      "id": "crate_01",
+      "solid": true,
+      "properties": {
+        "container_type": "crate",
+        "fixed_items": [
+          {
+            "item_id": "berry",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 124,
+      "y": 78,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 163,
+      "y": 60,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 161,
+      "y": 62,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 164,
+      "y": 62,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 122,
+      "y": 75,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 119,
+      "y": 79,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 121,
+      "y": 44,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 123,
+      "y": 45,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 123,
+      "y": 43,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 129,
+      "y": 15,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 132,
+      "y": 15,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 130,
+      "y": 17,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 160,
+      "y": 10,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 158,
+      "y": 21,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 155,
+      "y": 13,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 161,
+      "y": 15,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 179,
+      "y": 22,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 185,
+      "y": 21,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 181,
+      "y": 24,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 168,
+      "y": 91,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 172,
+      "y": 93,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 169,
+      "y": 88,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    },
+    {
+      "type": "npc_object",
+      "name": "Hermit Mouse",
+      "x": 14,
+      "y": 25,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "npc_id": "hermit_mouse",
+        "health": 35,
+        "dialogue_file": "hermit_mouse.json",
+        "sprite_scale": 1.0
       }
     }
   ]

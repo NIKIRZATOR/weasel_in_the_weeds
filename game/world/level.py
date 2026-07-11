@@ -114,8 +114,11 @@ def _load_tmx_level_dir(level_dir: Path) -> LevelData:
         [collision_by_gid.get(tile_gid, 0) for tile_gid in row]
         for row in ground_layer
     ]
-    player_spawn = _parse_tmx_player_spawn(root, tile_width, tile_height)
     objects = _load_level_dir_objects(level_dir)
+    player_spawn = _resolve_level_dir_player_spawn(
+        objects,
+        _parse_tmx_player_spawn(root, tile_width, tile_height),
+    )
     generated_objects = _generate_tmx_decor_objects(
         level_name=root.attrib.get("name", level_dir.name),
         ground_layer=ground_layer,
@@ -215,6 +218,14 @@ def _load_level_dir_objects(level_dir: Path) -> list[dict]:
         return []
     raw_objects = json.loads(objects_path.read_text(encoding="utf-8"))
     return raw_objects.get("objects", [])
+
+
+def _resolve_level_dir_player_spawn(objects: list[dict], default_spawn: tuple[int, int]) -> tuple[int, int]:
+    for raw_object in objects:
+        if str(raw_object.get("type", "")).strip().lower() != "player_spawn":
+            continue
+        return int(raw_object.get("x", 0)), int(raw_object.get("y", 0))
+    return default_spawn
 
 
 def _generate_tmx_decor_objects(

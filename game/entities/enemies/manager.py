@@ -105,7 +105,8 @@ class EnemyManager:
             self.game_scene.player.emit_quest_event(f"kill:{enemy_type}")
         defeat_flag = getattr(enemy, "defeat_flag", None)
         if defeat_flag:
-            self.game_scene.player.set_flag(defeat_flag)
+            if self.game_scene.player.set_flag(defeat_flag):
+                self.game_scene.refresh_flag_controlled_world_objects()
         if not enemy.xp_awarded and enemy.xp_reward > 0:
             enemy.xp_awarded = True
             self.game_scene._award_player_xp(enemy.xp_reward, append=True)

@@ -66,16 +66,10 @@
         "chance": 1.0
       },
       {
-        "item_id": "mushroom",
+        "item_id": "stick",
         "min_quantity": 1,
         "max_quantity": 1,
         "chance": 0.45
-      },
-      {
-        "item_id": "web",
-        "min_quantity": 1,
-        "max_quantity": 1,
-        "chance": 0.25
       }
     ]
   },
@@ -92,16 +86,64 @@
         "chance": 0.85
       },
       {
-        "item_id": "bone",
+        "item_id": "mushroom",
         "min_quantity": 1,
         "max_quantity": 1,
-        "chance": 0.3
-      },
+        "chance": 0.55
+      }
+    ]
+  },
+  "leaf_pile_small": {
+    "color": [150, 120, 70],
+    "interaction_text": "Gather",
+    "depleted_text": "Only dry scraps remain.",
+    "one_time": true,
+    "loot": [
       {
         "item_id": "feather",
         "min_quantity": 1,
         "max_quantity": 1,
-        "chance": 0.2
+        "chance": 0.45
+      },
+      {
+        "item_id": "grass_blade",
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "chance": 1.0
+      }
+    ]
+  },
+  "yellow_flower_small": {
+    "color": [210, 180, 60],
+    "interaction_text": "Pick",
+    "depleted_text": "The flower has already been picked.",
+    "one_time": true,
+    "loot": [
+      {
+        "item_id": "yellow_bud",
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "chance": 1.0
+      },
+      {
+        "item_id": "petals",
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "chance": 0.8
+      }
+    ]
+  },
+  "bone_pile_small": {
+    "color": [180, 170, 150],
+    "interaction_text": "Inspect",
+    "depleted_text": "Only dust remains between the bones.",
+    "one_time": true,
+    "loot": [
+      {
+        "item_id": "bone",
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "chance": 1.0
       }
     ]
   }

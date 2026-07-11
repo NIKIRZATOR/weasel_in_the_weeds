@@ -67,14 +67,6 @@
     },
     {
       "type": "pickable_object",
-      "name": "rusty_knife",
-      "x": 6,
-      "y": 2,
-      "width": 1,
-      "height": 1
-    },
-    {
-      "type": "pickable_object",
       "name": "sword",
       "x": 7,
       "y": 2,

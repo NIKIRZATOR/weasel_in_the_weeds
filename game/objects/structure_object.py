@@ -111,5 +111,7 @@ class StructureObject(WorldObject):
             frame.blit(sheet, (0, 0), source_rect)
             if target_size != (frame_width, frame_height):
                 frame = pygame.transform.scale(frame, target_size)
+            if self.flip_x:
+                frame = pygame.transform.flip(frame, True, False)
             frames.append(frame)
         return frames

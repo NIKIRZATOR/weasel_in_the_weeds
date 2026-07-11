@@ -46,10 +46,15 @@
       "name": "To Forest Edge",
       "x": 0,
       "y": 0,
-      "width": 1,
-      "height": 3,
+      "width": 2,
+      "height": 2,
       "properties": {
-        "target_level": "level_02.json",
+        "sprite_sheet_path": "world_objects/level_transition/portal.png",
+        "animation_frame_count": 8,
+        "animation_frame_width": 64,
+        "animation_frame_height": 64,
+        "animation_frame_duration": 0.18,
+        "target_level": "level_02",
         "target_spawn": {
           "x": 2,
           "y": 2

@@ -35,6 +35,7 @@ class TileMap:
         self.tile_size = tile_size
         self.tileset = tileset
         self.tileset_surface = self._load_tileset_surface(tileset.image_path) if tileset is not None else None
+        self._minimap_surface_cache: dict[int, pygame.Surface] = {}
 
     def get_tile_type(self, x, y):
         if 0 <= x < self.width and 0 <= y < self.height:
@@ -84,6 +85,29 @@ class TileMap:
                     continue
                 self._draw_legacy_tile(screen, screen_x, screen_y, self.ground_layer[y][x], self.obstacle_layer[y][x])
 
+    def build_minimap_surface(self, tile_pixel_size: int = 2) -> pygame.Surface:
+        tile_pixel_size = max(1, int(tile_pixel_size))
+        cached = self._minimap_surface_cache.get(tile_pixel_size)
+        if cached is not None:
+            return cached
+
+        surface = pygame.Surface(
+            (self.width * tile_pixel_size, self.height * tile_pixel_size),
+            pygame.SRCALPHA,
+        )
+        for y in range(self.height):
+            for x in range(self.width):
+                preview = self._get_minimap_tile_preview(
+                    self.ground_layer[y][x],
+                    self.obstacle_layer[y][x],
+                    tile_pixel_size,
+                )
+                if preview is None:
+                    continue
+                surface.blit(preview, (x * tile_pixel_size, y * tile_pixel_size))
+        self._minimap_surface_cache[tile_pixel_size] = surface
+        return surface
+
     def _draw_legacy_tile(self, screen, screen_x, screen_y, tile_type, obstacle):
         color = self.get_tile_color(tile_type)
         pygame.draw.rect(screen, color, (screen_x, screen_y, self.tile_size, self.tile_size))
@@ -110,6 +134,34 @@ class TileMap:
 
         destination_rect = pygame.Rect(screen_x, screen_y, self.tile_size, self.tile_size)
         screen.blit(self.tileset_surface, destination_rect, source_rect)
+
+    def _get_minimap_tile_preview(self, ground_tile, obstacle_tile, tile_pixel_size):
+        if self.tileset is not None and self.tileset_surface is not None:
+            return self._get_tileset_minimap_tile_preview(ground_tile, tile_pixel_size)
+        return self._get_legacy_minimap_tile_preview(ground_tile, obstacle_tile, tile_pixel_size)
+
+    def _get_tileset_minimap_tile_preview(self, gid, tile_pixel_size):
+        if gid <= 0 or self.tileset_surface is None or self.tileset is None:
+            return None
+        local_tile_id = gid - self.tileset.firstgid
+        if local_tile_id < 0:
+            return None
+
+        source_x = (local_tile_id % self.tileset.columns) * self.tileset.tile_width
+        source_y = (local_tile_id // self.tileset.columns) * self.tileset.tile_height
+        source_rect = pygame.Rect(source_x, source_y, self.tileset.tile_width, self.tileset.tile_height)
+        if source_rect.right > self.tileset_surface.get_width() or source_rect.bottom > self.tileset_surface.get_height():
+            return None
+
+        tile_surface = pygame.Surface((self.tileset.tile_width, self.tileset.tile_height), pygame.SRCALPHA)
+        tile_surface.blit(self.tileset_surface, (0, 0), source_rect)
+        return pygame.transform.smoothscale(tile_surface, (tile_pixel_size, tile_pixel_size))
+
+    def _get_legacy_minimap_tile_preview(self, tile_type, obstacle, tile_pixel_size):
+        source_size = 32
+        tile_surface = pygame.Surface((source_size, source_size), pygame.SRCALPHA)
+        self._draw_legacy_tile(tile_surface, 0, 0, tile_type, obstacle)
+        return pygame.transform.smoothscale(tile_surface, (tile_pixel_size, tile_pixel_size))
 
     @classmethod
     def _load_tileset_surface(cls, image_path: Path):

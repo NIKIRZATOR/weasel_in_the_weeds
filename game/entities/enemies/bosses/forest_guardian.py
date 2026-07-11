@@ -74,6 +74,7 @@ class ForestGuardianBoss(BaseBossEnemy):
         charge_speed=300,
         attack_cooldown=1.0,
         detection_radius=420,
+        patrol_radius=80,
         xp_reward=90,
         **hitbox_kwargs,
     ):
@@ -91,7 +92,7 @@ class ForestGuardianBoss(BaseBossEnemy):
             damage=damage,
             attack_cooldown=attack_cooldown,
             detection_radius=detection_radius,
-            patrol_radius=80,
+            patrol_radius=patrol_radius,
             patrol_idle_min=0.2,
             patrol_idle_max=0.4,
             linger_duration=2.4,

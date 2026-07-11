@@ -54,5 +54,47 @@
         "template": "bug_remains_small"
       }
     }
+  },
+  {
+    "label": "Gatherable: Leaf Pile",
+    "object": {
+      "type": "gatherable_object",
+      "name": "Leaf Pile",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "leaf_pile_small"
+      }
+    }
+  },
+  {
+    "label": "Gatherable: Yellow Flower",
+    "object": {
+      "type": "gatherable_object",
+      "name": "Yellow Flower",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "yellow_flower_small"
+      }
+    }
+  },
+  {
+    "label": "Gatherable: Bone Pile",
+    "object": {
+      "type": "gatherable_object",
+      "name": "Bone Pile",
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "template": "bone_pile_small"
+      }
+    }
   }
 ]

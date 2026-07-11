@@ -74,8 +74,11 @@ class DialogueScene(Scene):
         self._draw_hint(panel)
 
         if self.message:
-            text = self.small_font.render(self.message, True, (255, 220, 120))
-            self.app.screen.blit(text, text.get_rect(center=(screen_width // 2, panel.y + 24)))
+            message_rect = pygame.Rect(20, panel.y + 8, screen_width - 40, 44)
+            message_lines = _wrap_text(self.message, self.small_font, message_rect.width)
+            for index, line in enumerate(message_lines[:2]):
+                text = self.small_font.render(line, True, (255, 220, 120))
+                self.app.screen.blit(text, text.get_rect(center=(screen_width // 2, message_rect.y + 10 + index * 20)))
 
     def _current_node(self):
         if self.current_node_id is None:
@@ -175,8 +178,7 @@ class DialogueScene(Scene):
                     messages.append(f"{item_stack.name} x{item_stack.quantity}")
 
         for flag in rewards.get("flags", []):
-            if self.player.set_flag(flag):
-                messages.append(str(flag))
+            self.player.set_flag(flag)
 
         self.player.mark_dialogue_reward_claimed(npc_key, self.current_node_id)
         if messages:

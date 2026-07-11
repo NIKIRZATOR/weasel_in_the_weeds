@@ -273,16 +273,20 @@ class GameScene(Scene):
 
     def _apply_level_state(self):
         level_state = self._get_level_state(create=False)
-        if not level_state:
-            return
-
-        picked_ids = level_state.get("picked_object_ids", set())
-        depleted_ids = level_state.get("depleted_object_ids", set())
-        activated_checkpoint_ids = level_state.get("activated_checkpoint_ids", set())
-        defeated_enemy_ids = level_state.get("defeated_enemy_ids", set())
+        picked_ids = set()
+        depleted_ids = set()
+        activated_checkpoint_ids = set()
+        defeated_enemy_ids = set()
+        if level_state:
+            picked_ids = level_state.get("picked_object_ids", set())
+            depleted_ids = level_state.get("depleted_object_ids", set())
+            activated_checkpoint_ids = level_state.get("activated_checkpoint_ids", set())
+            defeated_enemy_ids = level_state.get("defeated_enemy_ids", set())
 
         filtered_objects = []
         for world_object in self.world_objects:
+            if self._should_remove_world_object_for_flags(world_object):
+                continue
             persistence_id = world_object.get_persistence_id()
             if persistence_id in picked_ids and hasattr(world_object, "is_picked"):
                 continue
@@ -868,6 +872,33 @@ class GameScene(Scene):
             return
         level_state = self._get_level_state()
         level_state["defeated_enemy_ids"].add(str(persistence_id))
+
+    def refresh_flag_controlled_world_objects(self):
+        removed_any = False
+        filtered_objects = []
+        for world_object in self.world_objects:
+            if self._should_remove_world_object_for_flags(world_object):
+                removed_any = True
+                continue
+            filtered_objects.append(world_object)
+        if not removed_any:
+            return False
+        self.world_objects = filtered_objects
+        self._sync_world_objects(rebuild_static_chunks=True)
+        return True
+
+    def _should_remove_world_object_for_flags(self, world_object):
+        properties = getattr(world_object, "properties", {})
+        if not isinstance(properties, dict):
+            return False
+        raw_flags = properties.get("remove_when_flag_set")
+        if not raw_flags:
+            return False
+        if isinstance(raw_flags, str):
+            flags = [raw_flags]
+        else:
+            flags = [flag for flag in raw_flags if flag]
+        return any(self.player.has_flag(flag) for flag in flags)
 
     def _find_interaction_target(self):
         player_zone = self.player.get_interaction_rect()

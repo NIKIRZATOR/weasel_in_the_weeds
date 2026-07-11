@@ -62,6 +62,7 @@ class WorldObject(Entity):
         self.sprite_anchor = str(self.properties.get("sprite_anchor", "top_left")).strip().lower()
         self.pixel_offset_x = int(self.properties.get("pixel_offset_x", 0))
         self.pixel_offset_y = int(self.properties.get("pixel_offset_y", 0))
+        self.flip_x = bool(self.properties.get("flip_x", False))
 
     def interact(self, player, game_scene):
         return False
@@ -105,12 +106,15 @@ class WorldObject(Entity):
         if not self.sprite_path:
             return None
         draw_size = self._get_sprite_draw_size()
-        cache_key = (str(self.sprite_path), int(draw_size[0]), int(draw_size[1]))
+        cache_key = (str(self.sprite_path), int(draw_size[0]), int(draw_size[1]), self.flip_x)
         if cache_key not in self._SPRITE_CACHE:
-            self._SPRITE_CACHE[cache_key] = load_image(
+            sprite = load_image(
                 ASSETS_DIR / str(self.sprite_path),
                 size=draw_size,
             )
+            if sprite is not None and self.flip_x:
+                sprite = pygame.transform.flip(sprite, True, False)
+            self._SPRITE_CACHE[cache_key] = sprite
         return self._SPRITE_CACHE[cache_key]
 
     def _get_sprite_draw_size(self):
