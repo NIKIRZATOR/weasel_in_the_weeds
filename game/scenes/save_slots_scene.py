@@ -18,6 +18,7 @@ class SaveSlotsScene(Scene):
 
     def __init__(self, app, previous_scene, mode="continue"):
         self.app = app
+        self.app.audio.play_music("system_main_menu")
         self.previous_scene = previous_scene
         self.mode = str(mode)
         self.localizer = get_localizer()

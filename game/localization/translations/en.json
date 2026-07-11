@@ -32,6 +32,8 @@
       "language_ru": "Russian",
       "language_en": "English",
       "language_hint": "Interface language: {language}",
+      "music_volume": "Music Volume",
+      "sfx_volume": "Sound Volume",
       "mode_windowed": "Windowed",
       "mode_fullscreen": "Fullscreen",
       "mode_borderless": "Borderless"

@@ -9,6 +9,7 @@ from settings import COLORS
 class MenuScene(Scene):
     def __init__(self, app):
         self.app = app
+        self.app.audio.play_music("system_main_menu")
         self.localizer = get_localizer()
         self.title_font = pygame.font.Font(None, 72)
         self.button_font = pygame.font.Font(None, 36)

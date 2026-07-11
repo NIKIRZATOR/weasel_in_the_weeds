@@ -32,6 +32,8 @@
       "language_ru": "Русский",
       "language_en": "Английский",
       "language_hint": "Язык интерфейса: {language}",
+      "music_volume": "Громкость музыки",
+      "sfx_volume": "Громкость звуков",
       "mode_windowed": "Окно",
       "mode_fullscreen": "Полный экран",
       "mode_borderless": "Без рамок"

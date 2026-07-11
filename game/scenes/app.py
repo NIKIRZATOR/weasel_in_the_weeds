@@ -2,6 +2,7 @@ import sys
 
 import pygame
 
+from game.audio import AudioManager
 from game.core.assets import load_image
 from game.localization import get_localizer
 from game.save_system import SaveManager
@@ -21,15 +22,22 @@ class GameApp:
         self.screen = None
         self._system_background_cache = {}
         self._cursor_surface = None
+        self.save_manager = SaveManager()
+        self.app_settings = self.save_manager.load_app_settings()
+        self.audio = AudioManager(
+            music_volume=self.app_settings.get("music_volume", 0.7),
+            sfx_volume=self.app_settings.get("sfx_volume", 0.8),
+        )
         self._apply_display_mode()
         self._load_system_cursor()
         self.clock = pygame.time.Clock()
         self.current_fps = 0.0
         self.running = True
-        self.save_manager = SaveManager()
         self.scene = MenuScene(self)
 
     def set_scene(self, scene):
+        if hasattr(self, "audio") and self.audio is not None:
+            self.audio.stop_all_loops()
         self.scene = scene
 
     def set_display_mode(self, mode):
@@ -56,6 +64,18 @@ class GameApp:
     def set_show_fps(self, value):
         self.show_fps = bool(value)
         return True
+
+    def set_music_volume(self, value):
+        resolved = self.audio.set_music_volume(value)
+        self.app_settings["music_volume"] = resolved
+        self.save_manager.save_app_settings(self.app_settings)
+        return resolved
+
+    def set_sfx_volume(self, value):
+        resolved = self.audio.set_sfx_volume(value)
+        self.app_settings["sfx_volume"] = resolved
+        self.save_manager.save_app_settings(self.app_settings)
+        return resolved
 
     def _apply_display_mode(self):
         width, height = self._get_display_size_for_mode(self.display_mode)

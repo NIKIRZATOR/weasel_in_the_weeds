@@ -77,6 +77,7 @@ class GatherableObject(WorldObject):
                 reward_text = f"{reward_text} + {knowledge_shards} shards"
             else:
                 reward_text = f"{knowledge_shards} shards"
+        game_scene.app.audio.play_sound("hero_item_pickup")
         game_scene.last_interaction_message = f"Gathered: {reward_text}"
         game_scene.last_interaction_timer = 1.5
         return True

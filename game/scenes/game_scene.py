@@ -48,6 +48,7 @@ STATIC_WORLD_CHUNK_TILES = 12
 class GameScene(Scene):
     def __init__(self, app, level_path, player=None, target_spawn=None, save_data=None):
         self.app = app
+        self.app.audio.play_music("world_ambience")
         self.localizer = get_localizer()
         self.level_path = level_path
         self.level_key = Path(level_path).name
@@ -135,6 +136,7 @@ class GameScene(Scene):
         self.pending_quest_activation_ids = []
         self.quest_walk_distance_buffer = 0.0
         self.save_indicator_timer = 0.0
+        self._enemy_audio_state = {}
         self.save_progress(reason="scene_enter")
 
     @property
@@ -190,6 +192,7 @@ class GameScene(Scene):
             return
         if quest.id not in self.pending_quest_activation_ids:
             self.pending_quest_activation_ids.append(quest.id)
+            self.app.audio.play_sound("hero_quest_accepted")
 
     def _show_next_quest_activation_dialogue(self):
         if not self.pending_quest_activation_ids:
@@ -720,7 +723,9 @@ class GameScene(Scene):
 
                 target = self._mouse_world_position(event.pos)
                 attack_kind = "light" if event.button == 1 else "heavy"
-                if not self.player.attack_towards(target.x, target.y, attack_kind=attack_kind):
+                if self.player.attack_towards(target.x, target.y, attack_kind=attack_kind):
+                    self.app.audio.play_sound("hero_attack")
+                else:
                     self._handle_attack_fail()
                 self.mouse_buttons_held.discard(event.button)
                 self.mouse_hold_time = 0.0
@@ -768,6 +773,7 @@ class GameScene(Scene):
         pickable_object.is_active = True
         pickable_object.color = COLORS["PICKABLE_PICKED"]
         self.mark_object_picked(pickable_object)
+        self.app.audio.play_sound("hero_item_pickup")
 
         if item_stack is not None and item_stack.kind.value == "currency":
             if currency_wallet == "coins":
@@ -942,6 +948,7 @@ class GameScene(Scene):
                 target = self._mouse_world_position(mouse_pos)
                 if self.player.attack_towards(target.x, target.y, attack_kind="charged"):
                     self.charged_combo_fired = True
+                    self.app.audio.play_sound("hero_attack")
                 else:
                     self._handle_attack_fail()
         else:
@@ -959,7 +966,8 @@ class GameScene(Scene):
         if self.jump_requested and not self.player.is_jumping:
             direction = self._resolve_jump_direction(keys)
             if direction.length() > 0:
-                self.player.try_jump(direction, self)
+                if self.player.try_jump(direction, self):
+                    self.app.audio.play_sound("hero_jump")
         self.jump_requested = False
         self._update_world_objects(dt)
         self._update_map_reveal()
@@ -974,6 +982,7 @@ class GameScene(Scene):
         self._apply_player_attack()
         self._update_damage_numbers(dt)
         self._check_level_transitions()
+        self._update_audio()
         if self.app.scene is self:
             self._show_next_quest_activation_dialogue()
         viewport_width, viewport_height = self.app.get_world_render_size()
@@ -1155,6 +1164,15 @@ class GameScene(Scene):
             int(viewport_width + margin * 2),
             int(viewport_height + margin * 2),
         )
+
+    def _is_rect_audible(self, rect):
+        return self._camera_world_rect().colliderect(rect)
+
+    def _is_world_object_audible(self, world_object):
+        return self._is_rect_audible(world_object.get_hitbox_rect())
+
+    def _is_enemy_audible(self, enemy):
+        return self.enemy_manager._is_visible(enemy, self._camera_world_rect())
 
     def _collides_with_enemies(self, x, y, entity, ignored_enemy=None):
         hitbox = entity.get_hitbox_at(x, y)
@@ -1377,6 +1395,8 @@ class GameScene(Scene):
         result = self.player.add_experience(amount, source_key=source_key)
         if result["gained"] <= 0:
             return False
+        if result["level_ups"] > 0:
+            self.app.audio.play_sound("hero_lvlup")
 
         message = self.localizer.t("ui.progression.xp_gained", amount=result["gained"])
         if result["level_ups"] > 0:
@@ -1393,6 +1413,86 @@ class GameScene(Scene):
             self.last_interaction_message = message
         self.last_interaction_timer = max(self.last_interaction_timer, 1.8)
         return True
+
+    def _update_audio(self):
+        self._update_player_movement_audio()
+        self._update_world_ambient_audio()
+        self._update_enemy_audio()
+
+    def _update_player_movement_audio(self):
+        moved = self.player.animation_motion.length() > 0.8 and not self.player.is_jumping and not self.player.is_dashing
+        if moved and self.player.is_running:
+            self.app.audio.ensure_loop("hero_running", "player_running", volume=0.7)
+            self.app.audio.stop_loop("player_footsteps")
+            return
+        if moved:
+            self.app.audio.ensure_loop("hero_footsteps", "player_footsteps", volume=0.62)
+            self.app.audio.stop_loop("player_running")
+            return
+        self.app.audio.stop_loop("player_footsteps")
+        self.app.audio.stop_loop("player_running")
+
+    def _update_world_ambient_audio(self):
+        active_loop_ids = set()
+        for world_object in self.updatable_world_objects:
+            if str(getattr(world_object, "name", "")).strip().lower() != "campfire":
+                continue
+            if not self._is_world_object_audible(world_object):
+                continue
+            loop_id = f"campfire:{world_object.get_persistence_id()}"
+            active_loop_ids.add(loop_id)
+            self.app.audio.ensure_loop("campfire_ambience", loop_id, volume=0.55)
+
+        for loop_id in list(self.app.audio.loop_channels):
+            if loop_id.startswith("campfire:") and loop_id not in active_loop_ids:
+                self.app.audio.stop_loop(loop_id)
+
+    def _update_enemy_audio(self):
+        active_step_loops = set()
+        alive_ids = set()
+        for enemy in self.enemies:
+            enemy_id = str(getattr(enemy, "persistence_id", "")) or str(id(enemy))
+            alive_ids.add(enemy_id)
+            audible = self._is_enemy_audible(enemy)
+            state = self._enemy_audio_state.setdefault(
+                enemy_id,
+                {"last_attacking": False, "last_action_state": "", "last_dead": False},
+            )
+
+            is_boss = isinstance(enemy, ForestGuardianBoss)
+            current_animation = str(getattr(enemy, "current_animation", "")).strip().lower()
+            if audible and current_animation == "move" and not enemy.is_dead:
+                loop_id = f"enemy_steps:{enemy_id}"
+                active_step_loops.add(loop_id)
+                self.app.audio.ensure_loop(
+                    "boss_steps" if is_boss else "enemy_steps",
+                    loop_id,
+                    volume=0.5 if is_boss else 0.38,
+                )
+
+            attacking = current_animation in {"attack", "web_attack"}
+            if is_boss:
+                action_state = str(getattr(enemy, "action_state", "")).strip().lower()
+                attacking = action_state in {"melee_windup", "charge_windup", "charge", "spike_windup", "spike_volley"}
+                if audible and action_state == "shockwave_burst" and state["last_action_state"] != "shockwave_burst":
+                    self.app.audio.play_sound("boss_roar_splash", volume=0.8)
+                state["last_action_state"] = action_state
+
+            if audible and attacking and not state["last_attacking"]:
+                self.app.audio.play_sound("boss_attack" if is_boss else "enemy_attack", volume=0.72 if is_boss else 0.5)
+            state["last_attacking"] = attacking
+
+            if audible and enemy.is_dead and not state["last_dead"] and is_boss:
+                self.app.audio.play_sound("boss_die", volume=0.85)
+            state["last_dead"] = enemy.is_dead
+
+        for loop_id in list(self.app.audio.loop_channels):
+            if loop_id.startswith("enemy_steps:") and loop_id not in active_step_loops:
+                self.app.audio.stop_loop(loop_id)
+
+        for enemy_id in [value for value in self._enemy_audio_state if value not in alive_ids]:
+            self.app.audio.stop_loop(f"enemy_steps:{enemy_id}")
+            self._enemy_audio_state.pop(enemy_id, None)
 
     def _mouse_world_position(self, mouse_pos):
         zoom = max(0.1, float(self.app.get_world_zoom()))

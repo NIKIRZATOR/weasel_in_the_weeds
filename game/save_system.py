@@ -18,6 +18,7 @@ SUPPORTED_SAVE_VERSIONS = {2, SAVE_VERSION}
 SAVE_ROOT_DIR_NAME = "saves"
 INDEX_FILE_NAME = "index.json"
 SAVE_FILE_NAME = "save.json"
+APP_SETTINGS_FILE_NAME = "settings.json"
 
 
 def _utc_now_iso() -> str:
@@ -319,6 +320,31 @@ class SaveManager:
 
     def ensure_root(self) -> None:
         self.root_path.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def app_settings_path(self) -> Path:
+        return self.root_path / APP_SETTINGS_FILE_NAME
+
+    def load_app_settings(self) -> dict[str, Any]:
+        self.ensure_root()
+        if not self.app_settings_path.exists():
+            return {}
+        try:
+            raw_data = json.loads(self.app_settings_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+        return raw_data if isinstance(raw_data, dict) else {}
+
+    def save_app_settings(self, settings_data: dict[str, Any]) -> bool:
+        self.ensure_root()
+        try:
+            self.app_settings_path.write_text(
+                json.dumps(settings_data, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            return True
+        except OSError:
+            return False
 
     def list_slots(self) -> list[SaveSlotMeta]:
         self.ensure_root()
