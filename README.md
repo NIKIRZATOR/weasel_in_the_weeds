@@ -137,3 +137,7 @@ powershell -ExecutionPolicy Bypass -File .\build\windows\build_exe.ps1
 - нарастить количество NPC и уникальных событий;
 - усилить onboarding и первые подсказки для игрока;
 - подготовить отдельный публичный билд и страницу проекта.
+
+## Лицензия
+
+Код проекта распространяется по лицензии `MIT`. Полный текст находится в файле [LICENSE](C:/Users/user/Desktop/vs_code_projects/weasel_in_the_weeds/LICENSE).
