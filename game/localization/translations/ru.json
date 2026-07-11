@@ -1,13 +1,13 @@
 {
   "ui": {
     "menu": {
-      "title": "Weales in the weeds",
+      "title": "Weasel in the Weeds",
       "new_game": "Новая игра",
       "continue_game": "Продолжить игру",
       "settings": "Настройки",
       "about": "Об авторе",
       "exit": "Выход",
-      "author_message": "проект Weales in the weeds",
+      "author_message": "проект Weasel in the Weeds",
       "new_game_loading": "Новая игра..."
     },
     "pause": {
@@ -36,7 +36,35 @@
       "sfx_volume": "Громкость звуков",
       "mode_windowed": "Окно",
       "mode_fullscreen": "Полный экран",
-      "mode_borderless": "Без рамок"
+      "controls_title": "Управление",
+      "binding_move": "WASD",
+      "binding_run": "Shift",
+      "binding_jump": "Space",
+      "binding_dash": "Q",
+      "binding_attack": "ЛКМ",
+      "binding_heavy_attack": "ПКМ",
+      "binding_charged_attack": "ЛКМ + ПКМ",
+      "binding_interact": "E",
+      "binding_pause": "Esc",
+      "binding_inventory": "I",
+      "binding_crafting": "K",
+      "binding_map": "M",
+      "binding_quests": "J",
+      "binding_progression": "O",
+      "control_move": "Движение",
+      "control_run": "Бег",
+      "control_jump": "Прыжок",
+      "control_dash": "Рывок",
+      "control_attack": "Атака",
+      "control_heavy_attack": "Сильная атака",
+      "control_charged_attack": "Заряженная атака",
+      "control_interact": "Взаимодействие",
+      "control_pause": "Пауза / Назад",
+      "control_inventory": "Инвентарь",
+      "control_crafting": "Крафт",
+      "control_map": "Карта",
+      "control_quests": "Задания",
+      "control_progression": "Прокачка навыков"
     },
     "inventory": {
       "title": "Инвентарь",
@@ -355,7 +383,7 @@
       "cannot_use": "Выбранный предмет нельзя использовать"
     },
     "window": {
-      "game_title": "Weales in the weeds RPG - {level}"
+      "game_title": "Weasel in the Weeds - {level}"
     },
     "levels": {
       "level_00": "Тестовые комнаты",

@@ -9,6 +9,9 @@ from settings import COLORS
 class SettingsScene(Scene):
     ROW_HEIGHT = 56
     ROW_GAP = 26
+    CONTROLS_HEADER_HEIGHT = 36
+    CONTROLS_LINE_HEIGHT = 28
+    CONTROLS_GAP = 10
 
     def __init__(self, app, previous_scene, overlay_scene=None):
         self.app = app
@@ -21,6 +24,7 @@ class SettingsScene(Scene):
         self.section_font = pygame.font.Font(None, 34)
         self.button_font = pygame.font.Font(None, 30)
         self.info_font = pygame.font.Font(None, 24)
+        self.controls_font = pygame.font.Font(None, 26)
         self._layout_size = None
         self.background = AnimatedMenuBackground(pan_seconds=20.0, blur_divisor=8, overlay_color=(10, 12, 18, 132))
         self.scroll_offset = 0
@@ -34,7 +38,6 @@ class SettingsScene(Scene):
         mode_options = [
             (self.localizer.t("ui.settings.mode_windowed"), "windowed"),
             (self.localizer.t("ui.settings.mode_fullscreen"), "fullscreen"),
-            (self.localizer.t("ui.settings.mode_borderless"), "borderless"),
         ]
         language_options = [
             (self.localizer.t("ui.settings.language_ru"), "ru"),
@@ -99,6 +102,15 @@ class SettingsScene(Scene):
         row_y += self.ROW_HEIGHT + self.ROW_GAP
         self.sfx_volume_row_rect = pygame.Rect(0, row_y, self.content_viewport_rect.width, self.ROW_HEIGHT)
         row_y += self.ROW_HEIGHT
+        row_y += self.ROW_GAP
+
+        self.controls_header_rect = pygame.Rect(0, row_y, self.content_viewport_rect.width, self.CONTROLS_HEADER_HEIGHT)
+        row_y += self.CONTROLS_HEADER_HEIGHT + self.CONTROLS_GAP
+        self.controls_line_rects = []
+        for _ in self._control_entries():
+            line_rect = pygame.Rect(0, row_y, self.content_viewport_rect.width, self.CONTROLS_LINE_HEIGHT)
+            self.controls_line_rects.append(line_rect)
+            row_y += self.CONTROLS_LINE_HEIGHT
         self.content_height = row_y
 
         self.mode_buttons = self._build_option_row(
@@ -387,6 +399,7 @@ class SettingsScene(Scene):
 
         self._draw_row_label(content_surface, self.sfx_volume_row_rect, self.localizer.t("ui.settings.sfx_volume"))
         self._draw_slider(content_surface, self.sfx_slider, self.app.audio.sfx_volume)
+        self._draw_controls_help(content_surface)
 
         previous_clip = self.app.screen.get_clip()
         self.app.screen.set_clip(self.content_viewport_rect)
@@ -407,7 +420,6 @@ class SettingsScene(Scene):
         titles = {
             "windowed": self.localizer.t("ui.settings.mode_windowed"),
             "fullscreen": self.localizer.t("ui.settings.mode_fullscreen"),
-            "borderless": self.localizer.t("ui.settings.mode_borderless"),
         }
         return titles.get(mode, mode)
 
@@ -445,6 +457,38 @@ class SettingsScene(Scene):
         pygame.draw.circle(surface, COLORS["UI_SLOT_SELECTED"], (handle_x, track_rect.centery), 9, width=2)
         percent = self.info_font.render(f"{int(round(float(value) * 100))}%", True, COLORS["WHITE"])
         surface.blit(percent, percent.get_rect(center=value_rect.center))
+
+    def _draw_controls_help(self, surface):
+        header = self.section_font.render(self.localizer.t("ui.settings.controls_title"), True, COLORS["WHITE"])
+        header_rect = header.get_rect()
+        header_rect.midleft = (self.controls_header_rect.x + 4, self.controls_header_rect.centery)
+        surface.blit(header, header_rect)
+
+        for rect, (action_key, binding_key) in zip(self.controls_line_rects, self._control_entries()):
+            binding = self.localizer.t(binding_key)
+            action = self.localizer.t(action_key)
+            line = self.controls_font.render(f"{binding} - {action}", True, COLORS["UI_TEXT_DIM"])
+            line_rect = line.get_rect()
+            line_rect.midleft = (rect.x + 12, rect.centery)
+            surface.blit(line, line_rect)
+
+    def _control_entries(self):
+        return [
+            ("ui.settings.control_move", "ui.settings.binding_move"),
+            ("ui.settings.control_run", "ui.settings.binding_run"),
+            ("ui.settings.control_jump", "ui.settings.binding_jump"),
+            ("ui.settings.control_dash", "ui.settings.binding_dash"),
+            ("ui.settings.control_attack", "ui.settings.binding_attack"),
+            ("ui.settings.control_heavy_attack", "ui.settings.binding_heavy_attack"),
+            ("ui.settings.control_charged_attack", "ui.settings.binding_charged_attack"),
+            ("ui.settings.control_interact", "ui.settings.binding_interact"),
+            ("ui.settings.control_pause", "ui.settings.binding_pause"),
+            ("ui.settings.control_inventory", "ui.settings.binding_inventory"),
+            ("ui.settings.control_crafting", "ui.settings.binding_crafting"),
+            ("ui.settings.control_map", "ui.settings.binding_map"),
+            ("ui.settings.control_quests", "ui.settings.binding_quests"),
+            ("ui.settings.control_progression", "ui.settings.binding_progression"),
+        ]
 
     def _update_slider_value(self, slider_name, mouse_x):
         slider = self.music_slider if slider_name == "music" else self.sfx_slider

@@ -1,13 +1,13 @@
 {
   "ui": {
     "menu": {
-      "title": "Weales in the weeds",
+      "title": "Weasel in the Weeds",
       "new_game": "New Game",
       "continue_game": "Continue",
       "settings": "Settings",
       "about": "About",
       "exit": "Exit",
-      "author_message": "Weales in the weeds project",
+      "author_message": "Weasel in the Weeds project",
       "new_game_loading": "New Game..."
     },
     "pause": {
@@ -36,7 +36,35 @@
       "sfx_volume": "Sound Volume",
       "mode_windowed": "Windowed",
       "mode_fullscreen": "Fullscreen",
-      "mode_borderless": "Borderless"
+      "controls_title": "Controls",
+      "binding_move": "WASD",
+      "binding_run": "Shift",
+      "binding_jump": "Space",
+      "binding_dash": "Q",
+      "binding_attack": "LMB",
+      "binding_heavy_attack": "RMB",
+      "binding_charged_attack": "LMB + RMB",
+      "binding_interact": "E",
+      "binding_pause": "Esc",
+      "binding_inventory": "I",
+      "binding_crafting": "K",
+      "binding_map": "M",
+      "binding_quests": "J",
+      "binding_progression": "O",
+      "control_move": "Move",
+      "control_run": "Run",
+      "control_jump": "Jump",
+      "control_dash": "Dash",
+      "control_attack": "Attack",
+      "control_heavy_attack": "Heavy Attack",
+      "control_charged_attack": "Charged Attack",
+      "control_interact": "Interact",
+      "control_pause": "Pause / Back",
+      "control_inventory": "Inventory",
+      "control_crafting": "Crafting",
+      "control_map": "Map",
+      "control_quests": "Quests",
+      "control_progression": "Skill Progression"
     },
     "inventory": {
       "title": "Inventory",
@@ -355,7 +383,7 @@
       "cannot_use": "The selected item cannot be used"
     },
     "window": {
-      "game_title": "Weales in the weeds RPG - {level}"
+      "game_title": "Weasel in the Weeds - {level}"
     },
     "levels": {
       "level_00": "Test Chambers",

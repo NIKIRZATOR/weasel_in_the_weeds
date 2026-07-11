@@ -41,7 +41,7 @@ class GameApp:
         self.scene = scene
 
     def set_display_mode(self, mode):
-        if mode not in {"windowed", "fullscreen", "borderless"}:
+        if mode not in {"windowed", "fullscreen"}:
             return False
         if self.display_mode == mode:
             return True
@@ -82,10 +82,7 @@ class GameApp:
         flags = 0
         if self.display_mode == "fullscreen":
             flags = pygame.FULLSCREEN
-        elif self.display_mode == "borderless":
-            flags = pygame.NOFRAME
-
-        pygame.display.set_caption("Weales in the weeds RPG")
+        pygame.display.set_caption("Weasel in the Weeds")
         self.screen = pygame.display.set_mode((width, height), flags)
         pygame.mouse.set_visible(self._cursor_surface is None)
 

@@ -277,7 +277,8 @@ class HUD:
 
     def draw_fps(self, screen, fps):
         screen_width, _ = screen.get_size()
-        text = self.small_font.render(f"FPS: {int(round(max(0.0, float(fps))))}", True, COLORS["WHITE"])
+        #text = self.small_font.render(f"FPS: {int(round(max(0.0, float(fps))))}", True, COLORS["WHITE"])
+        text = self.small_font.render(f"", True, COLORS["WHITE"])
         screen.blit(text, (screen_width - text.get_width() - 16, 130))
 
     def draw_hotbar(self, screen, player, combat_state=None):

@@ -109,11 +109,9 @@ class NpcObject(WorldObject):
         if self.animation_frames:
             sprite = self.animation_frames[self.animation_frame_index % len(self.animation_frames)]
             screen.blit(sprite, self._get_sprite_draw_position(rect, sprite))
-            self.draw_name_label(screen, rect)
             self.draw_debug(screen, camera)
             return
         if self._draw_sprite_if_available(screen, rect):
-            self.draw_name_label(screen, rect)
             self.draw_debug(screen, camera)
             return
 
@@ -133,5 +131,4 @@ class NpcObject(WorldObject):
             (bar_rect.x, bar_rect.y, bar_rect.width * health_ratio, bar_rect.height),
             border_radius=2,
         )
-        self.draw_name_label(screen, rect)
         self.draw_debug(screen, camera)

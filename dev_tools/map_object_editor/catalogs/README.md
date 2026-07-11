@@ -1,6 +1,8 @@
-Map object palette catalogs live here.
+# Каталоги палитры объектов
 
-Each `*.json` file contains a list of entries with this shape:
+В этой папке лежат JSON-файлы, из которых `map_object_editor` собирает вкладки палитры.
+
+## Формат записи
 
 ```json
 {
@@ -17,4 +19,8 @@ Each `*.json` file contains a list of entries with this shape:
 }
 ```
 
-The editor loads every JSON file from this directory and builds palette tabs from those entries.
+## Правила
+
+- один файл может содержать список нескольких объектов;
+- при запуске редактор загружает все `*.json` из этой директории;
+- `label` используется в интерфейсе палитры, а `object` - как шаблон для постановки на карту.

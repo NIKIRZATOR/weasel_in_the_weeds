@@ -1,28 +1,29 @@
-Place progression node icons here.
+# Иконки узлов прогрессии
 
-Recommended:
-- PNG with transparent background
-- square aspect ratio
-- size around 64x64 or 128x128
+В этой папке лежат изображения для дерева развития героя.
 
-Current node ids:
-- vitality_1
-- vitality_2
-- iron_skin
-- endurance_1
-- endurance_2
-- bow_focus
-- edge_1
-- edge_2
-- light_hands
-- heavy_form
-- footwork
-- battle_flow
-- hunter_draw
-- relentless
+## Рекомендации
 
-Suggested naming:
-- `vitality_1.png`
-- `vitality_2.png`
-- `iron_skin.png`
-- etc.
+- используйте `png` с прозрачным фоном;
+- лучше держать квадратное соотношение сторон;
+- удобные размеры: `64x64` или `128x128`.
+
+## Текущие идентификаторы узлов
+
+- `vitality_1`
+- `vitality_2`
+- `iron_skin`
+- `endurance_1`
+- `endurance_2`
+- `bow_focus`
+- `bow_edge_1`
+- `bow_edge_2`
+- `light_hands`
+- `heavy_form`
+- `footwork`
+- `battle_flow`
+- `hunter_draw`
+- `relentless_1`
+- `relentless_2`
+
+Имя файла должно совпадать с идентификатором узла.
