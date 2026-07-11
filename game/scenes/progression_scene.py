@@ -16,7 +16,7 @@ class ProgressionScene(Scene):
         self.game_scene = game_scene
         self.player = game_scene.player
         self.localizer = get_localizer()
-        self.title_font = pygame.font.Font(None, 52)
+        self.title_font = pygame.font.Font(None, 47)
         self.section_font = pygame.font.Font(None, 26)
         self.text_font = pygame.font.Font(None, 21)
         self.small_font = pygame.font.Font(None, 17)
@@ -110,12 +110,14 @@ class ProgressionScene(Scene):
         overlay.fill((0, 0, 0, 170))
         self.app.screen.blit(overlay, (0, 0))
 
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=14)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.panel_rect, width=2, border_radius=14)
+        if not self.app.draw_system_background("progression_background", self.panel_rect, border_radius=14, dim_alpha=84):
+            pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=14)
+        else:
+            self.app.draw_translucent_panel(self.panel_rect, (24, 26, 34), alpha=72, border_radius=14)
 
         title = self.title_font.render(self.localizer.t("ui.progression.title"), True, COLORS["WHITE"])
         hint = self.text_font.render(self.localizer.t("ui.progression.close_hint"), True, COLORS["UI_TEXT_DIM"])
-        self.app.screen.blit(title, (self.panel_rect.x + 20, self.panel_rect.y + 10))
+        self.app.screen.blit(title, title.get_rect(center=(self.panel_rect.centerx, self.panel_rect.y + 30)))
         self.app.screen.blit(hint, (self.panel_rect.right - hint.get_width() - 20, self.panel_rect.y + 20))
 
         self._draw_info_panel()
@@ -126,8 +128,7 @@ class ProgressionScene(Scene):
             self.app.screen.blit(message, message.get_rect(center=(screen_width // 2, screen_height - 22)))
 
     def _draw_info_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.left_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.left_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.left_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
 
         lines = [
             self.localizer.t("ui.progression.level", level=self.player.level),
@@ -186,8 +187,7 @@ class ProgressionScene(Scene):
         self._draw_centered_lines(button_lines, self.small_font, COLORS["WHITE"], self.unlock_button_rect, line_height=14)
 
     def _draw_tree_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.tree_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.tree_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.tree_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
 
         clip_previous = self.app.screen.get_clip()
         self.app.screen.set_clip(self.tree_panel.inflate(-4, -4))

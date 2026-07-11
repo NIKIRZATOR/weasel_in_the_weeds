@@ -13,7 +13,7 @@ class MapScene(Scene):
         self.game_scene = game_scene
         self.player = game_scene.player
         self.localizer = get_localizer()
-        self.title_font = pygame.font.Font(None, 44)
+        self.title_font = pygame.font.Font(None, 40)
         self.text_font = pygame.font.Font(None, 24)
         self.small_font = pygame.font.Font(None, 20)
 
@@ -56,11 +56,13 @@ class MapScene(Scene):
             panel_width,
             panel_height,
         )
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], panel_rect, border_radius=16)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], panel_rect, width=2, border_radius=16)
+        if not self.app.draw_system_background("map_background", panel_rect, border_radius=16, dim_alpha=84):
+            pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], panel_rect, border_radius=16)
+        else:
+            self.app.draw_translucent_panel(panel_rect, (24, 26, 34), alpha=72, border_radius=16)
 
         title = self.title_font.render(self.localizer.t("ui.map.title"), True, COLORS["WHITE"])
-        self.app.screen.blit(title, (panel_rect.x + 24, panel_rect.y + 18))
+        self.app.screen.blit(title, title.get_rect(center=(panel_rect.centerx, panel_rect.y + 36)))
 
         hint = self.text_font.render(self.localizer.t("ui.map.close_hint"), True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(hint, (panel_rect.right - hint.get_width() - 24, panel_rect.y + 24))
@@ -71,8 +73,7 @@ class MapScene(Scene):
             draw_width,
             draw_height,
         )
-        pygame.draw.rect(self.app.screen, (18, 22, 28), map_rect, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], map_rect, width=1, border_radius=12)
+        self.app.draw_translucent_panel(map_rect, (18, 22, 28), alpha=128, border_radius=12)
         self._draw_level_map(map_rect, raw_map_surface)
 
     def on_language_changed(self):

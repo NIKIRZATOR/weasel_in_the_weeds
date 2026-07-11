@@ -19,7 +19,7 @@ class InventoryScene(Scene):
         self.game_scene = game_scene
         self.player = game_scene.player
         self.localizer = get_localizer()
-        self.title_font = pygame.font.Font(None, 62)
+        self.title_font = pygame.font.Font(None, 56)
         self.section_font = pygame.font.Font(None, 30)
         self.panel_title_font = pygame.font.Font(None, 24)
         self.text_font = pygame.font.Font(None, 24)
@@ -292,11 +292,13 @@ class InventoryScene(Scene):
         overlay.fill((0, 0, 0, 165))
         self.app.screen.blit(overlay, (0, 0))
 
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=14)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.panel_rect, width=2, border_radius=14)
+        if not self.app.draw_system_background("inventory_background", self.panel_rect, border_radius=14, dim_alpha=84):
+            pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=14)
+        else:
+            self.app.draw_translucent_panel(self.panel_rect, (24, 26, 34), alpha=72, border_radius=14)
 
         title = self.title_font.render(self.localizer.t("ui.inventory.title"), True, COLORS["WHITE"])
-        self.app.screen.blit(title, (self.panel_rect.x + 28, self.panel_rect.y + 12))
+        self.app.screen.blit(title, title.get_rect(center=(self.panel_rect.centerx, self.panel_rect.y + 32)))
 
         self._draw_header_currencies()
 
@@ -371,8 +373,7 @@ class InventoryScene(Scene):
         self.app.screen.blit(text, (tooltip_rect.x + padding_x, tooltip_rect.y + padding_y))
 
     def _draw_character_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.left_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.left_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.left_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
         self._draw_panel_title(self.left_panel, self.localizer.t("ui.inventory.character"))
 
         body_rect = pygame.Rect(self.left_panel.centerx - 30, self.left_panel.y + 72, 60, 90)
@@ -427,8 +428,7 @@ class InventoryScene(Scene):
         return result
 
     def _draw_hotbar_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.hotbar_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.hotbar_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.hotbar_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
         label = self.small_font.render(self.localizer.t("ui.inventory.hotbar"), True, COLORS["UI_TEXT_DIM"])
         self.app.screen.blit(label, (self.hotbar_panel.x + 12, self.hotbar_panel.y + 10))
 
@@ -452,8 +452,7 @@ class InventoryScene(Scene):
                 self._draw_stack_label(stack, rect)
 
     def _draw_inventory_grid(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.center_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.center_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.center_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
         self._draw_panel_title(self.center_panel, self.localizer.t("ui.inventory.backpack"))
 
         for row in range(self.inventory_rows):
@@ -478,8 +477,7 @@ class InventoryScene(Scene):
                     self._draw_stack_label(stack, rect)
 
     def _draw_equipment_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.equipment_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.equipment_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.equipment_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
         self._draw_panel_title(self.equipment_panel, self.localizer.t("ui.inventory.equipment"))
 
         for slot, rect in self.equipment_slots:
@@ -495,8 +493,7 @@ class InventoryScene(Scene):
                 self._draw_stack_label(stack, rect)
 
     def _draw_quest_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.quest_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.quest_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.quest_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
         self._draw_panel_title(self.quest_panel, self.localizer.t("ui.inventory.quest_items"))
 
         for row in range(self.QUEST_ROWS):
@@ -518,8 +515,7 @@ class InventoryScene(Scene):
                     self._draw_stack_label(stack, rect)
 
     def _draw_details_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.details_panel, border_radius=10)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.details_panel, width=1, border_radius=10)
+        self.app.draw_translucent_panel(self.details_panel, COLORS["UI_PANEL"], alpha=128, border_radius=10)
 
         stack = self._get_selected_stack()
         if stack is None:

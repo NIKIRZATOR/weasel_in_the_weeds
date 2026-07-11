@@ -16,7 +16,7 @@ class CraftingScene(Scene):
         self.player = game_scene.player
         self.player.emit_quest_event("ui:crafting_opened")
         self.localizer = get_localizer()
-        self.title_font = pygame.font.Font(None, 56)
+        self.title_font = pygame.font.Font(None, 50)
         self.section_font = pygame.font.Font(None, 30)
         self.text_font = pygame.font.Font(None, 24)
         self.small_font = pygame.font.Font(None, 20)
@@ -115,11 +115,13 @@ class CraftingScene(Scene):
         overlay.fill((0, 0, 0, 170))
         self.app.screen.blit(overlay, (0, 0))
 
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=16)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.panel_rect, width=2, border_radius=16)
+        if not self.app.draw_system_background("craft_background", self.panel_rect, border_radius=16, dim_alpha=84):
+            pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=16)
+        else:
+            self.app.draw_translucent_panel(self.panel_rect, (24, 26, 34), alpha=72, border_radius=16)
 
         title = self.title_font.render(self.localizer.t("ui.crafting.title"), True, COLORS["WHITE"])
-        self.app.screen.blit(title, (self.panel_rect.x + 24, self.panel_rect.y + 14))
+        self.app.screen.blit(title, title.get_rect(center=(self.panel_rect.centerx, self.panel_rect.y + 34)))
         self._draw_header_currency()
 
         self._draw_left_panel()
@@ -177,8 +179,7 @@ class CraftingScene(Scene):
         self.app.screen.blit(text, (tooltip_rect.x + padding_x, tooltip_rect.y + padding_y))
 
     def _draw_left_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.left_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.left_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.left_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
 
         self.category_buttons = []
         self.category_content_width = 0
@@ -329,8 +330,7 @@ class CraftingScene(Scene):
         pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_SELECTED"], thumb_rect, border_radius=4)
 
     def _draw_right_panel(self):
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.right_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.right_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.right_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
 
         recipe = self._selected_recipe()
         if recipe is None:

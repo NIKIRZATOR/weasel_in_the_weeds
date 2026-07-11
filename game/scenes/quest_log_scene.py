@@ -11,7 +11,7 @@ class QuestLogScene(Scene):
         self.game_scene = game_scene
         self.player = game_scene.player
         self.localizer = get_localizer()
-        self.title_font = pygame.font.Font(None, 52)
+        self.title_font = pygame.font.Font(None, 47)
         self.section_font = pygame.font.Font(None, 28)
         self.text_font = pygame.font.Font(None, 24)
         self.small_font = pygame.font.Font(None, 20)
@@ -73,18 +73,18 @@ class QuestLogScene(Scene):
         overlay.fill((0, 0, 0, 175))
         self.app.screen.blit(overlay, (0, 0))
 
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=14)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.panel_rect, width=2, border_radius=14)
+        if not self.app.draw_system_background("quests_background", self.panel_rect, border_radius=14, dim_alpha=84):
+            pygame.draw.rect(self.app.screen, COLORS["UI_PANEL"], self.panel_rect, border_radius=14)
+        else:
+            self.app.draw_translucent_panel(self.panel_rect, (24, 26, 34), alpha=72, border_radius=14)
 
         title = self.title_font.render(self.localizer.t("ui.quests.title"), True, COLORS["WHITE"])
         hint = self.text_font.render(self.localizer.t("ui.quests.close_hint"), True, COLORS["UI_TEXT_DIM"])
-        self.app.screen.blit(title, (self.panel_rect.x + 18, self.panel_rect.y + 14))
+        self.app.screen.blit(title, title.get_rect(center=(self.panel_rect.centerx, self.panel_rect.y + 30)))
         self.app.screen.blit(hint, (self.panel_rect.right - hint.get_width() - 18, self.panel_rect.y + 24))
 
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.list_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.list_panel, width=2, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_PANEL_ALT"], self.details_panel, border_radius=12)
-        pygame.draw.rect(self.app.screen, COLORS["UI_SLOT_BORDER"], self.details_panel, width=2, border_radius=12)
+        self.app.draw_translucent_panel(self.list_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
+        self.app.draw_translucent_panel(self.details_panel, COLORS["UI_PANEL_ALT"], alpha=128, border_radius=12)
 
         self.entries = self.game_scene.quest_manager.get_quest_log_entries(category="main")
         if self.entries:
