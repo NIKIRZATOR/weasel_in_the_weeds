@@ -348,6 +348,8 @@ class ForestGuardianBoss(BaseBossEnemy):
             return
         self.volley_shots_remaining = 3
         self.volley_burst_timer = 0.0
+        if game_scene is not None:
+            game_scene.app.audio.play_sound("boss_range_attack", volume=0.74)
         self.set_action("spike_volley", 0.9)
 
     def _update_spike_volley(self, dt, game_scene, player):
@@ -382,8 +384,6 @@ class ForestGuardianBoss(BaseBossEnemy):
         if direction.length() == 0:
             direction = Vector2(-1 if self.facing_left else 1, 0)
         direction = direction.normalize()
-        if hasattr(self, "game_scene") and self.game_scene is not None and self.game_scene._is_enemy_audible(self):
-            self.game_scene.app.audio.play_sound("boss_range_attack", volume=0.74)
         for angle_degrees in (0.0, -self.volley_spread_degrees, self.volley_spread_degrees):
             projectile_direction = self._rotate(direction, math.radians(angle_degrees))
             self.projectiles.append(

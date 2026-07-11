@@ -1,0 +1,16 @@
+{
+  "id": "guardian_victory",
+  "start": "player_1",
+  "nodes": {
+    "player_1": {
+      "speaker": "player",
+      "text": "Каменная стена исчезла... Проход свободен.",
+      "next": "player_2"
+    },
+    "player_2": {
+      "speaker": "player",
+      "text": "Значит, теперь я могу идти дальше. Нужно найти свою семью.",
+      "next": null
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import pygame
 
+from game.entities.enemies.bosses.forest_guardian import ForestGuardianBoss
 from game.objects import PickableObject
 from settings import (
     ENEMY_BACKGROUND_UPDATE_INTERVAL,
@@ -97,6 +98,9 @@ class EnemyManager:
         return False
 
     def _handle_enemy_death(self, enemy):
+        if getattr(enemy, "death_handled", False):
+            return
+        enemy.death_handled = True
         self.game_scene.mark_enemy_defeated(enemy)
         self._spawn_drops(enemy)
         self.game_scene.player.emit_quest_event("kill:any")
@@ -107,6 +111,8 @@ class EnemyManager:
         if defeat_flag:
             if self.game_scene.player.set_flag(defeat_flag):
                 self.game_scene.refresh_flag_controlled_world_objects()
+        if isinstance(enemy, ForestGuardianBoss):
+            self.game_scene.handle_guardian_boss_defeat(enemy)
         if not enemy.xp_awarded and enemy.xp_reward > 0:
             enemy.xp_awarded = True
             self.game_scene._award_player_xp(enemy.xp_reward, append=True)

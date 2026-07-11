@@ -11,6 +11,7 @@ class AudioManager:
     MUSIC_TRACKS = {
         "system_main_menu": ASSETS_DIR / "audio" / "system_audio" / "system_main_menu.mp3",
         "world_ambience": ASSETS_DIR / "audio" / "world_audio" / "world_ambience.mp3",
+        "boss_fight_ambience": ASSETS_DIR / "audio" / "boss_audio" / "boss_fight_ambience.wav",
     }
     SOUND_EFFECTS = {
         "hero_footsteps": ASSETS_DIR / "audio" / "hero_audio" / "hero_footsteps.mp3",

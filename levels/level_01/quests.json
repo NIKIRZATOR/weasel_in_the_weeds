@@ -115,8 +115,8 @@
     ]
   },
   "reach_forest_edge": {
-    "title_key": "ui.quests.main.reach_forest_edge.title",
-    "description_key": "ui.quests.main.reach_forest_edge.description",
+    "title_key": "ui.quests.main.strange_wells.title",
+    "description_key": "ui.quests.main.strange_wells.description",
     "category": "main",
     "sort_order": 60,
     "required_flags": [],
@@ -124,7 +124,7 @@
       {
         "id": "enter_forest_edge",
         "kind": "event",
-        "text_key": "ui.quests.main.reach_forest_edge.objective",
+        "text_key": "ui.quests.main.strange_wells.objective",
         "target": "flag:entered_forest_edge",
         "required": 1,
         "legacy_flag": "entered_forest_edge"

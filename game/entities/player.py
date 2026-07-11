@@ -334,22 +334,29 @@ class Player(Entity):
     def add_experience(self, amount, source_key=None):
         amount = max(0, int(amount))
         if amount <= 0:
-            return {"gained": 0, "level_ups": 0}
+            return {"gained": 0, "level_ups": 0, "knowledge_shards_gained": 0}
         if source_key is not None:
             source_key = str(source_key)
             if source_key in self.awarded_xp_sources:
-                return {"gained": 0, "level_ups": 0}
+                return {"gained": 0, "level_ups": 0, "knowledge_shards_gained": 0}
             self.awarded_xp_sources.add(source_key)
 
         self.xp += amount
         level_ups = 0
+        knowledge_shards_gained = 0
         while self.xp >= self.get_xp_to_next_level():
             self.xp -= self.get_xp_to_next_level()
             self.level += 1
             self.skill_points += 1
+            self.knowledge_shards += 1
             level_ups += 1
+            knowledge_shards_gained += 1
         self._sync_resource_limits()
-        return {"gained": amount, "level_ups": level_ups}
+        return {
+            "gained": amount,
+            "level_ups": level_ups,
+            "knowledge_shards_gained": knowledge_shards_gained,
+        }
 
     def get_attack_profile(self, attack_kind):
         attack_kind = str(attack_kind)

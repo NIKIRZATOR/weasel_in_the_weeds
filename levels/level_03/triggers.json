@@ -1,0 +1,28 @@
+{
+  "triggers": [
+    {
+      "id": "level_03_guardian_detect_intro",
+      "event": "boss_detect",
+      "conditions": {
+        "once": true,
+        "blocked_flags": [
+          "boss_intro_seen"
+        ],
+        "match": {
+          "boss_type": "guardian"
+        }
+      },
+      "actions": [
+        {
+          "type": "set_flag",
+          "flag": "boss_intro_seen"
+        },
+        {
+          "type": "dialogue",
+          "dialogue_file": "guardian_intro.json",
+          "speaker_name": "Лесной страж"
+        }
+      ]
+    }
+  ]
+}

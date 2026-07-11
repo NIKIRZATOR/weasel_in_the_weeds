@@ -1,0 +1,21 @@
+{
+  "speak_with_guardian": {
+    "title_key": "ui.quests.main.speak_with_guardian.title",
+    "description_key": "ui.quests.main.speak_with_guardian.description",
+    "category": "main",
+    "sort_order": 10,
+    "required_flags": [
+      "entered_dart_forest"
+    ],
+    "objectives": [
+      {
+        "id": "guardian_intro_seen",
+        "kind": "event",
+        "text_key": "ui.quests.main.speak_with_guardian.objective",
+        "target": "flag:boss_intro_seen",
+        "required": 1,
+        "legacy_flag": "boss_intro_seen"
+      }
+    ]
+  }
+}

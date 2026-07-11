@@ -57,7 +57,7 @@ class SpiderEnemy(Enemy):
         "radius": 10,
     }
     LOOT_TABLE = (
-        {"item_id": "web_wrap", "min_quantity": 1, "max_quantity": 2, "chance": 0.75},
+        {"item_id": "web", "min_quantity": 1, "max_quantity": 2, "chance": 0.75},
         {"item_id": "knowledge_shard", "min_quantity": 1, "max_quantity": 1, "chance": 0.18},
         {"coins": 4, "chance": 0.45},
     )

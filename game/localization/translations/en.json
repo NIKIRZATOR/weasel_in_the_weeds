@@ -189,6 +189,31 @@
           "title": "Move On to the Forest Edge",
           "description": "Once you are ready, leave the meadow behind and step into the next area.",
           "objective": "Enter the forest edge: {current}/{required}"
+        },
+        "strange_wells": {
+          "title": "Study the Strange Wells",
+          "description": "The old stone wells hum with unfamiliar power. Find the one that carries you onward.",
+          "objective": "Step into the strange well and follow its pull: {current}/{required}"
+        },
+        "spider_den": {
+          "title": "Thin the Spider Den",
+          "description": "Clear enough of the spider nest to gather silk for a proper bowstring.",
+          "objective": "Gather spider webbing: {current}/{required}"
+        },
+        "craft_bow": {
+          "title": "Craft a Bow",
+          "description": "Use the silk you gathered and assemble a bow fit for the deeper forest.",
+          "objective": "Craft a short bow: {current}/{required}"
+        },
+        "find_magic_well": {
+          "title": "Find the Magic Well",
+          "description": "Somewhere in the forest edge there is a well that leads deeper into the woods.",
+          "objective": "Find the magic well and enter the deep forest: {current}/{required}"
+        },
+        "speak_with_guardian": {
+          "title": "Find the Forest Guardian",
+          "description": "Track down the guardian of the forest and confront him face to face.",
+          "objective": "Reach the Forest Guardian and speak with him: {current}/{required}"
         }
       }
     },
@@ -244,6 +269,7 @@
       "node_unlocked": "Unlocked: {name}",
       "xp_gained": "+{amount} XP",
       "level_up": "Level up: {level} | Skill points: {points}",
+      "shards_gained": "+{amount} knowledge shards",
       "effect_health": "+{value} max health",
       "effect_stamina": "+{value} max stamina",
       "effect_attack": "+{value} attack",

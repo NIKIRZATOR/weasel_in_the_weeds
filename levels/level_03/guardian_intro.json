@@ -1,0 +1,28 @@
+{
+  "id": "guardian_intro",
+  "start": "start_1",
+  "nodes": {
+    "start_1": {
+      "speaker": "player",
+      "text": "Наконец-то... Ты хранитель этого леса? Я ищу свою семью. Пропусти меня.",
+      "next": "guardian_1"
+    },
+    "guardian_1": {
+      "speaker": "npc",
+      "portrait_path": "bosses/forest_guardian/forest_guardian_portrait.png",
+      "text": "Я Лесной страж. Никто не пройдет дальше, пока лес не признает его.",
+      "next": "player_2"
+    },
+    "player_2": {
+      "speaker": "player",
+      "text": "У меня нет времени на твои испытания. Я должен идти дальше.",
+      "next": "guardian_2"
+    },
+    "guardian_2": {
+      "speaker": "npc",
+      "portrait_path": "bosses/forest_guardian/forest_guardian_portrait.png",
+      "text": "Тогда докажи свою волю силой. Только победив меня, ты откроешь путь вперед.",
+      "next": null
+    }
+  }
+}

@@ -27,7 +27,10 @@
         "target_spawn": {
           "x": 11,
           "y": 189
-        }
+        },
+        "set_flags": [
+          "entered_dart_forest"
+        ]
       }
     },
     {

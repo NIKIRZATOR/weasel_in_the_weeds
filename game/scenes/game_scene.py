@@ -44,12 +44,15 @@ PLAYER_DEATH_MAX_OVERLAY_ALPHA = 210
 CHECKPOINT_XP_REWARD = 12
 TRANSITION_XP_REWARD = 18
 STATIC_WORLD_CHUNK_TILES = 12
+BOSS_FIGHT_MUSIC_TRIGGER_TILES = 40
+POST_BOSS_DIALOGUE_DELAY = 5.0
+FINAL_CREDITS_CHECKPOINT_TILE = (193, 5)
+FINAL_CREDITS_FADE_DURATION = 1.35
 
 
 class GameScene(Scene):
     def __init__(self, app, level_path, player=None, target_spawn=None, save_data=None):
         self.app = app
-        self.app.audio.play_music("world_ambience")
         self.localizer = get_localizer()
         self.level_path = level_path
         self.level_key = Path(level_path).name
@@ -138,7 +141,12 @@ class GameScene(Scene):
         self.quest_walk_distance_buffer = 0.0
         self.save_indicator_timer = 0.0
         self._enemy_audio_state = {}
+        self.pending_boss_victory_dialogue_timer = None
+        self.final_credits_transition_active = False
+        self.final_credits_transition_timer = 0.0
         self.trigger_manager = TriggerManager(self)
+        self._prime_level_script_state()
+        self._update_background_music()
         self.save_progress(reason="scene_enter")
 
     @property
@@ -195,6 +203,12 @@ class GameScene(Scene):
         if quest.id not in self.pending_quest_activation_ids:
             self.pending_quest_activation_ids.append(quest.id)
             self.app.audio.play_sound("hero_quest_accepted")
+
+    def _prime_level_script_state(self):
+        if self.level_key != "level_03":
+            return
+        if self.player.has_flag("boss_defeated") and not self.player.has_flag("boss_victory_dialogue_seen"):
+            self.pending_boss_victory_dialogue_timer = POST_BOSS_DIALOGUE_DELAY
 
     def _show_next_quest_activation_dialogue(self):
         if not self.pending_quest_activation_ids:
@@ -944,6 +958,10 @@ class GameScene(Scene):
             self._update_level_transition(dt)
             return
 
+        if self.final_credits_transition_active:
+            self._update_final_credits_transition(dt)
+            return
+
         if self.player_death_sequence_active:
             self._update_player_death_sequence(dt)
             return
@@ -993,6 +1011,8 @@ class GameScene(Scene):
         self._update_grass_hide_zones()
         self._update_checkpoints()
         self.enemy_manager.update(dt)
+        if self._check_boss_detect_triggers():
+            return
         self._update_auto_pickups()
         self._update_player_projectiles(dt)
         self._resolve_player_enemy_overlaps()
@@ -1002,6 +1022,8 @@ class GameScene(Scene):
         self._update_damage_numbers(dt)
         self._check_level_transitions()
         self._update_audio()
+        if self._update_delayed_story_events(dt):
+            return
         if self.app.scene is self:
             self._show_next_quest_activation_dialogue()
         viewport_width, viewport_height = self.app.get_world_render_size()
@@ -1074,7 +1096,43 @@ class GameScene(Scene):
                 message_key = "ui.saves.checkpoint_saved" if save_success else "ui.saves.checkpoint_failed"
                 self.last_interaction_message = self.localizer.t(message_key, name=world_object.name)
                 self.last_interaction_timer = 1.5
+                self._handle_special_checkpoint_activation(world_object)
         self.active_checkpoint_contacts = checkpoint_contacts
+
+    def _handle_special_checkpoint_activation(self, world_object):
+        if not self._is_final_credits_checkpoint(world_object):
+            return
+        if not self.player.has_flag("boss_defeated") or self.player.has_flag("final_credits_seen"):
+            return
+        self.player.set_flag("final_credits_seen")
+        self.save_progress(reason="final_credits")
+        self.final_credits_transition_active = True
+        self.final_credits_transition_timer = 0.0
+        self.current_interaction_target = None
+        self.last_interaction_message = ""
+        self.last_interaction_timer = 0.0
+        self.mouse_buttons_held.clear()
+        self.mouse_hold_time = 0.0
+        self.charged_combo_fired = False
+        self.jump_requested = False
+
+    def _is_final_credits_checkpoint(self, world_object):
+        if self.level_key != "level_03" or not getattr(world_object, "is_checkpoint", False):
+            return False
+        tile_size = max(1, int(self.level.tile_size))
+        tile_x = int(round(world_object.position.x / tile_size))
+        tile_y = int(round(world_object.position.y / tile_size))
+        return (tile_x, tile_y) == FINAL_CREDITS_CHECKPOINT_TILE
+
+    def _update_final_credits_transition(self, dt):
+        self.final_credits_transition_timer += dt
+        if self.final_credits_transition_timer < FINAL_CREDITS_FADE_DURATION:
+            return
+
+        from game.scenes.credits_scene import CreditsScene
+
+        self.final_credits_transition_active = False
+        self.app.set_scene(CreditsScene(self.app))
 
     def _update_world_objects(self, dt):
         update_rect = self._camera_world_rect(RENDER_CULL_MARGIN + self.level.tile_size * 2)
@@ -1176,6 +1234,29 @@ class GameScene(Scene):
                 background=(10, 10, 16),
             )
         )
+
+    def _check_boss_detect_triggers(self):
+        if self.app.scene is not self:
+            return False
+        if self.has_trigger_fired("level_03_guardian_detect_intro"):
+            return False
+        player_center = self.player.get_center()
+        for enemy in self.enemies:
+            if not isinstance(enemy, ForestGuardianBoss) or enemy.is_dead:
+                continue
+            enemy_center = enemy.get_center()
+            detection_radius = float(getattr(enemy, "detection_radius", 0.0))
+            if _distance_squared(player_center, enemy_center) > detection_radius * detection_radius:
+                continue
+            self.trigger_manager.emit(
+                "boss_detect",
+                level_key=self.level_key,
+                boss_type="guardian",
+                boss_name=str(enemy.name),
+                boss_persistence_id=str(getattr(enemy, "persistence_id", "")),
+            )
+            return self.app.scene is not self
+        return False
 
     def _camera_world_rect(self, margin=0):
         viewport_width, viewport_height = self.app.get_world_render_size()
@@ -1426,7 +1507,11 @@ class GameScene(Scene):
                 level=self.player.level,
                 points=self.player.skill_points,
             )
-            message = f"{message} | {level_message}"
+            shards_message = self.localizer.t(
+                "ui.progression.shards_gained",
+                amount=result["knowledge_shards_gained"],
+            )
+            message = f"{message} | {level_message} | {shards_message}"
 
         if append and self.last_interaction_message:
             self.last_interaction_message = f"{self.last_interaction_message} | {message}"
@@ -1436,9 +1521,77 @@ class GameScene(Scene):
         return True
 
     def _update_audio(self):
+        self._update_background_music()
         self._update_player_movement_audio()
         self._update_world_ambient_audio()
         self._update_enemy_audio()
+
+    def _update_background_music(self):
+        target_music = "world_ambience"
+        if self._should_play_guardian_boss_music():
+            target_music = "boss_fight_ambience"
+        self.app.audio.play_music(target_music)
+
+    def _should_play_guardian_boss_music(self):
+        if self.level_key != "level_03":
+            return False
+        if not self.player.has_flag("boss_intro_seen") or self.player.has_flag("boss_defeated"):
+            return False
+        boss = self._find_guardian_boss()
+        if boss is None or boss.is_dead:
+            return False
+        trigger_distance = self.level.tile_size * BOSS_FIGHT_MUSIC_TRIGGER_TILES
+        player_center = self.player.get_center()
+        return _distance_squared(player_center, boss.get_center()) <= trigger_distance * trigger_distance
+
+    def _find_guardian_boss(self):
+        for enemy in self.enemies:
+            if isinstance(enemy, ForestGuardianBoss):
+                return enemy
+        return None
+
+    def handle_guardian_boss_defeat(self, enemy):
+        if not isinstance(enemy, ForestGuardianBoss):
+            return
+        flag_was_new = self.player.set_flag("boss_defeated")
+        if flag_was_new:
+            self.refresh_flag_controlled_world_objects()
+            self.save_progress(reason="boss_defeated")
+        self.pending_boss_victory_dialogue_timer = None
+        if not self.player.has_flag("boss_victory_dialogue_seen"):
+            self.pending_boss_victory_dialogue_timer = POST_BOSS_DIALOGUE_DELAY
+        self._update_background_music()
+
+    def _update_delayed_story_events(self, dt):
+        if self.pending_boss_victory_dialogue_timer is not None:
+            self.pending_boss_victory_dialogue_timer = max(0.0, self.pending_boss_victory_dialogue_timer - dt)
+            if self.pending_boss_victory_dialogue_timer == 0.0:
+                self.pending_boss_victory_dialogue_timer = None
+                if self._show_guardian_victory_dialogue():
+                    return True
+        return False
+
+    def _show_guardian_victory_dialogue(self):
+        if self.level_key != "level_03" or self.player.has_flag("boss_victory_dialogue_seen"):
+            return False
+        try:
+            dialogue = load_dialogue("guardian_victory.json", base_dir=LEVELS_DIR / self.level_key)
+        except (OSError, ValueError) as error:
+            print(f"Guardian victory dialogue load failed: {error}")
+            return False
+
+        from game.scenes.dialogue_scene import DialogueScene
+
+        self.player.set_flag("boss_victory_dialogue_seen")
+        self.save_progress(reason="boss_victory_dialogue")
+        self.app.set_scene(
+            DialogueScene(
+                self.app,
+                self,
+                dialogue=dialogue,
+            )
+        )
+        return True
 
     def _update_player_movement_audio(self):
         moved = self.player.animation_motion.length() > 0.8 and not self.player.is_jumping and not self.player.is_dashing
@@ -1626,6 +1779,7 @@ class GameScene(Scene):
                 message,
                 message.get_rect(center=(screen_width // 2, 24)),
             )
+        self._draw_final_credits_overlay(target_screen)
 
     def _save_indicator_alpha(self):
         if self.save_indicator_timer <= 0:
@@ -1658,6 +1812,14 @@ class GameScene(Scene):
             return
         overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, alpha))
+        screen.blit(overlay, (0, 0))
+
+    def _draw_final_credits_overlay(self, screen):
+        if not self.final_credits_transition_active:
+            return
+        progress = min(1.0, self.final_credits_transition_timer / max(0.001, FINAL_CREDITS_FADE_DURATION))
+        overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, int(255 * progress)))
         screen.blit(overlay, (0, 0))
 
     def _player_death_overlay_alpha(self):

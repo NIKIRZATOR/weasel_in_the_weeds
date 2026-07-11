@@ -16,9 +16,9 @@
       }
     ]
   },
-  "enter_forest_edge": {
-    "title_key": "ui.quests.main.enter_forest_edge.title",
-    "description_key": "ui.quests.main.enter_forest_edge.description",
+  "spider_den": {
+    "title_key": "ui.quests.main.spider_den.title",
+    "description_key": "ui.quests.main.spider_den.description",
     "category": "main",
     "sort_order": 20,
     "required_flags": [
@@ -26,50 +26,44 @@
     ],
     "objectives": [
       {
-        "id": "reach_forest_edge",
-        "kind": "event",
-        "text_key": "ui.quests.main.enter_forest_edge.objective",
-        "target": "flag:entered_forest_edge",
-        "required": 1,
-        "legacy_flag": "entered_forest_edge"
+        "id": "collect_web",
+        "kind": "item",
+        "text_key": "ui.quests.main.spider_den.objective",
+        "target": "web",
+        "required": 6
       }
     ]
   },
-  "enter_deep_forest": {
-    "title_key": "ui.quests.main.enter_deep_forest.title",
-    "description_key": "ui.quests.main.enter_deep_forest.description",
+  "craft_bow": {
+    "title_key": "ui.quests.main.craft_bow.title",
+    "description_key": "ui.quests.main.craft_bow.description",
     "category": "main",
     "sort_order": 30,
-    "required_flags": [
-      "entered_forest_edge"
-    ],
+    "required_flags": [],
+    "objectives": [
+      {
+        "id": "craft_short_bow",
+        "kind": "event",
+        "text_key": "ui.quests.main.craft_bow.objective",
+        "target": "craft:short_bow",
+        "required": 1
+      }
+    ]
+  },
+  "find_magic_well": {
+    "title_key": "ui.quests.main.find_magic_well.title",
+    "description_key": "ui.quests.main.find_magic_well.description",
+    "category": "main",
+    "sort_order": 40,
+    "required_flags": [],
     "objectives": [
       {
         "id": "enter_deep_forest",
         "kind": "event",
-        "text_key": "ui.quests.main.enter_deep_forest.objective",
+        "text_key": "ui.quests.main.find_magic_well.objective",
         "target": "flag:entered_dart_forest",
         "required": 1,
         "legacy_flag": "entered_dart_forest"
-      }
-    ]
-  },
-  "defeat_guardian": {
-    "title_key": "ui.quests.main.defeat_guardian.title",
-    "description_key": "ui.quests.main.defeat_guardian.description",
-    "category": "main",
-    "sort_order": 40,
-    "required_flags": [
-      "entered_dart_forest"
-    ],
-    "objectives": [
-      {
-        "id": "defeat_guardian",
-        "kind": "event",
-        "text_key": "ui.quests.main.defeat_guardian.objective",
-        "target": "flag:boss_defeated",
-        "required": 1,
-        "legacy_flag": "boss_defeated"
       }
     ]
   }
