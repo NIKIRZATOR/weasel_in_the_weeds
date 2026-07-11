@@ -1,0 +1,16 @@
+{
+  "id": "level_01_intro_first_step",
+  "start": "intro_1",
+  "nodes": {
+    "intro_1": {
+      "speaker": "player",
+      "text": "Как я тут оказался? Помню только ураган... и реку.",
+      "next": "intro_2"
+    },
+    "intro_2": {
+      "speaker": "player",
+      "text": "А моя семья?.. Нужно найти их.",
+      "next": null
+    }
+  }
+}

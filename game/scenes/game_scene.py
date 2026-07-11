@@ -20,6 +20,7 @@ from game.objects.world_object import WorldObject
 from game.quests import QuestManager
 from game.save_system import SAVE_VERSION, load_player_state, serialize_player_state
 from game.scenes.base import Scene
+from game.triggers import TriggerManager
 from game.ui.hud import HUD
 from game.world.collision import CollisionSystem
 from game.world.level import load_level
@@ -137,6 +138,7 @@ class GameScene(Scene):
         self.quest_walk_distance_buffer = 0.0
         self.save_indicator_timer = 0.0
         self._enemy_audio_state = {}
+        self.trigger_manager = TriggerManager(self)
         self.save_progress(reason="scene_enter")
 
     @property
@@ -264,6 +266,7 @@ class GameScene(Scene):
                 "depleted_object_ids": set(),
                 "activated_checkpoint_ids": set(),
                 "defeated_enemy_ids": set(),
+                "fired_trigger_ids": set(),
                 "active_checkpoint_id": None,
             },
         )
@@ -271,8 +274,20 @@ class GameScene(Scene):
         state.setdefault("depleted_object_ids", set())
         state.setdefault("activated_checkpoint_ids", set())
         state.setdefault("defeated_enemy_ids", set())
+        state.setdefault("fired_trigger_ids", set())
         state.setdefault("active_checkpoint_id", None)
         return state
+
+    def has_trigger_fired(self, trigger_id):
+        if not trigger_id:
+            return False
+        return str(trigger_id) in self._get_level_state().get("fired_trigger_ids", set())
+
+    def mark_trigger_fired(self, trigger_id):
+        if not trigger_id:
+            return False
+        self._get_level_state()["fired_trigger_ids"].add(str(trigger_id))
+        return True
 
     def _apply_level_state(self):
         level_state = self._get_level_state(create=False)
@@ -702,7 +717,8 @@ class GameScene(Scene):
                     self.jump_requested = True
                 elif event.key == pygame.K_LALT:
                     keys = pygame.key.get_pressed()
-                    self.player.try_dash(self._read_movement_direction(keys))
+                    if self.player.try_dash(self._read_movement_direction(keys)):
+                        self.app.audio.play_sound("hero_dash", volume=0.72)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 3):
                 self.mouse_buttons_held.add(event.button)
                 if self.mouse_buttons_held == {1, 3}:
@@ -921,6 +937,9 @@ class GameScene(Scene):
         return min(candidates, key=lambda obj: _distance_squared(player_center, obj.get_center()))
 
     def update(self, dt):
+        if self.trigger_manager.process_pending_events():
+            return
+
         if self.transition_target_level is not None:
             self._update_level_transition(dt)
             return
@@ -1051,6 +1070,7 @@ class GameScene(Scene):
             self._award_player_xp(CHECKPOINT_XP_REWARD, checkpoint_key, append=True)
             save_success = self.save_progress(reason="checkpoint", checkpoint_name=world_object.name)
             if is_new_activation:
+                self.app.audio.play_sound("checkpoint_activation", volume=0.82)
                 message_key = "ui.saves.checkpoint_saved" if save_success else "ui.saves.checkpoint_failed"
                 self.last_interaction_message = self.localizer.t(message_key, name=world_object.name)
                 self.last_interaction_timer = 1.5
@@ -1121,6 +1141,7 @@ class GameScene(Scene):
             self.transition_target_level = LEVELS_DIR / target_level
             self.transition_target_spawn = world_object.get_target_spawn()
             self.transition_timer = 0.0
+            self.app.audio.play_sound("teleport_sound", volume=0.84)
             transition_key = (
                 f"transition:{self.level_key}:{int(world_object.position.x)}:{int(world_object.position.y)}:{target_level}"
             )
@@ -1514,6 +1535,11 @@ class GameScene(Scene):
             return
         self.quest_walk_distance_buffer -= traversed_tiles * self.level.tile_size
         self.player.emit_quest_event("move:tiles_walked", traversed_tiles)
+        self.trigger_manager.queue_event(
+            "player_first_step",
+            level_key=self.level_key,
+            steps=traversed_tiles,
+        )
 
     def _read_movement_direction(self, keys):
         dx = 0

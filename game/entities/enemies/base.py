@@ -249,6 +249,7 @@ class Enemy(Entity):
         self.current_frame_index = 0
         self.animation_frame_timer = 0.0
         self.current_sprite = None
+        self.game_scene = None
         self._initialize_sprite_animations()
 
     def _build_resistances(self, overrides=None):
@@ -369,6 +370,7 @@ class Enemy(Entity):
     def update(self, dt, game_scene):
         if self.is_dead:
             return
+        self.game_scene = game_scene
         self.attack_cooldown.update(dt)
         if self.attack_hitbox_timer.update(dt):
             self.attack_hitbox_active = False

@@ -4,50 +4,50 @@
   "nodes": {
     "greeting": {
       "speaker": "npc",
-      "text": "Easy there, traveler. The grass is friendly, but the forest is not.",
+      "text": "Осторожнее, путник. Трава может укрыть, а вот лес совсем не дружелюбен.",
       "choices": [
         {
-          "text": "Who are you?",
+          "text": "Кто вы?",
           "next": "who_are_you"
         },
         {
-          "text": "I need to cross the forest.",
+          "text": "Мне нужно пройти через лес.",
           "next": "need_crossing"
         },
         {
-          "text": "I should go.",
+          "text": "Мне пора.",
           "next": null
         }
       ]
     },
     "who_are_you": {
       "speaker": "player",
-      "text": "Who are you, and why are you waiting out here?",
+      "text": "Кто вы и почему стоите здесь один?",
       "next": "mouse_intro"
     },
     "mouse_intro": {
       "speaker": "npc",
-      "text": "A mouse with an old sword and older mistakes. I keep watch so smaller paws can pass alive.",
+      "text": "Просто мышь со старым мечом и еще более старыми ошибками. Я слежу за дорогой, чтобы те, кто слабее, могли пройти живыми.",
       "next": "need_crossing"
     },
     "need_crossing": {
       "speaker": "player",
-      "text": "I am looking for my family. If the trail goes through the forest, I have to follow it.",
+      "text": "Я ищу свою семью. Если след ведет через лес, значит, мне придется идти туда.",
       "next": "forest_warning"
     },
     "forest_warning": {
       "speaker": "npc",
-      "text": "Then listen closely. Do not fight every shadow. Hide when the grass allows it, and spend your strength only when it matters.",
+      "text": "Тогда слушай внимательно. Не сражайся с каждой тенью. Прячься в траве, когда можешь, и береги силы для действительно важного.",
       "next": "gift_offer"
     },
     "gift_offer": {
       "speaker": "npc",
-      "text": "Take this little pack and this map. The pack will carry what your paws cannot, and the map will remember places you forget.",
+      "text": "Возьми этот рюкзак и карту. Рюкзак поможет унести то, что не удержат лапы, а карта запомнит места, которые ты сам забудешь.",
       "next": "gift_result"
     },
     "gift_result": {
       "speaker": "player",
-      "text": "Thank you. I will come back if I find anything about the forest.",
+      "text": "Спасибо. Я вернусь, если узнаю что-нибудь об этом лесе.",
       "rewards": {
         "items": [
           "small_backpack",

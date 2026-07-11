@@ -152,6 +152,8 @@ class ArcherEnemy(Enemy):
     def _shoot(self, target_x, target_y):
         origin = self.get_center()
         self.attack_animation_timer = 0.16
+        if hasattr(self, "game_scene") and self.game_scene is not None and self.game_scene._is_enemy_audible(self):
+            self.game_scene.app.audio.play_sound("wasp_range_attack", volume=0.58)
         self.projectiles.append(
             WaspProjectile(
                 origin.x,

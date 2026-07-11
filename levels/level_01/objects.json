@@ -3626,6 +3626,20 @@
         "dialogue_file": "hermit_mouse.json",
         "sprite_scale": 1.0
       }
+    },
+    {
+      "type": "npc_object",
+      "name": "Hermit Mouse",
+      "x": 18,
+      "y": 16,
+      "width": 1,
+      "height": 1,
+      "properties": {
+        "npc_id": "hermit_mouse",
+        "health": 35,
+        "dialogue_file": "hermit_mouse.json",
+        "sprite_scale": 1.0
+      }
     }
   ]
 }

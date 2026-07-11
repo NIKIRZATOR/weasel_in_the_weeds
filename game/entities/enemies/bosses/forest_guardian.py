@@ -292,6 +292,8 @@ class ForestGuardianBoss(BaseBossEnemy):
         self.charge_time_left = self.charge_duration
         self.charge_hit_player = False
         self.activate_attack_hitbox(self.charge_duration)
+        if game_scene._is_enemy_audible(self):
+            game_scene.app.audio.play_sound("boss_leap", volume=0.78)
         self.set_action("charge", self.charge_duration)
 
     def _update_charge(self, dt, game_scene, player):
@@ -380,6 +382,8 @@ class ForestGuardianBoss(BaseBossEnemy):
         if direction.length() == 0:
             direction = Vector2(-1 if self.facing_left else 1, 0)
         direction = direction.normalize()
+        if hasattr(self, "game_scene") and self.game_scene is not None and self.game_scene._is_enemy_audible(self):
+            self.game_scene.app.audio.play_sound("boss_range_attack", volume=0.74)
         for angle_degrees in (0.0, -self.volley_spread_degrees, self.volley_spread_degrees):
             projectile_direction = self._rotate(direction, math.radians(angle_degrees))
             self.projectiles.append(

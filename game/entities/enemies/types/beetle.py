@@ -174,6 +174,8 @@ class BeetleEnemy(Enemy):
         self.shell_cooldown.start()
         self.stun_timer = max(self.stun_timer, self.shell_duration)
         self.attack_cooldown.start(max(self.attack_cooldown.duration, self.shell_duration + 0.25))
+        if hasattr(self, "game_scene") and self.game_scene is not None and self.game_scene._is_enemy_audible(self):
+            self.game_scene.app.audio.play_sound("beetle_healing", volume=0.62)
 
     def _update_shell(self, dt):
         self.health = min(self.max_health, self.health + self.shell_regen_per_second * dt)

@@ -1,0 +1,24 @@
+{
+  "triggers": [
+    {
+      "id": "level_01_intro_first_step",
+      "event": "player_first_step",
+      "conditions": {
+        "once": true,
+        "blocked_flags": [
+          "level_01_intro_seen"
+        ]
+      },
+      "actions": [
+        {
+          "type": "set_flag",
+          "flag": "level_01_intro_seen"
+        },
+        {
+          "type": "dialogue",
+          "dialogue_file": "intro_scene_enter.json"
+        }
+      ]
+    }
+  ]
+}

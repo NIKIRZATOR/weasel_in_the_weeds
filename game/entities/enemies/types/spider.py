@@ -172,6 +172,8 @@ class SpiderEnemy(Enemy):
 
     def _spit(self, target_x, target_y):
         origin = self.get_center()
+        if hasattr(self, "game_scene") and self.game_scene is not None and self.game_scene._is_enemy_audible(self):
+            self.game_scene.app.audio.play_sound("spider_web_attack", volume=0.56)
         self.projectiles.append(
             WebProjectile(
                 origin.x,

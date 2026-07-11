@@ -121,6 +121,7 @@ def _serialize_level_states(level_states: dict[str, dict[str, Any]]) -> dict[str
             "depleted_object_ids": sorted(str(value) for value in state.get("depleted_object_ids", set())),
             "activated_checkpoint_ids": sorted(str(value) for value in state.get("activated_checkpoint_ids", set())),
             "defeated_enemy_ids": sorted(str(value) for value in state.get("defeated_enemy_ids", set())),
+            "fired_trigger_ids": sorted(str(value) for value in state.get("fired_trigger_ids", set())),
             "active_checkpoint_id": state.get("active_checkpoint_id"),
         }
     return serialized
@@ -134,6 +135,7 @@ def _deserialize_level_states(raw_level_states: dict[str, dict[str, Any]]) -> di
             "depleted_object_ids": set(str(value) for value in state.get("depleted_object_ids", [])),
             "activated_checkpoint_ids": set(str(value) for value in state.get("activated_checkpoint_ids", [])),
             "defeated_enemy_ids": set(str(value) for value in state.get("defeated_enemy_ids", [])),
+            "fired_trigger_ids": set(str(value) for value in state.get("fired_trigger_ids", [])),
             "active_checkpoint_id": state.get("active_checkpoint_id"),
         }
     return level_states
